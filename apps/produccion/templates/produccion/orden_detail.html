@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Detalle de Lote: {{ orden.lote_numero }}</h2>
+        <a href="{% url 'produccion:orden_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-4 border-0">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Prenda / Producto:</strong> {{ orden.producto.nombre }}</p>
+                <p><strong>Tipo:</strong> {{ orden.producto.get_tipo_prenda_display|default:orden.producto.categoria }}
+                </p>
+                <p><strong>Cantidad Solicitada:</strong> {{ orden.cantidad_a_producir }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Estado Actual:</strong> <span class="badge bg-primary">{{ orden.get_estado_display }}</span>
+                </p>
+                <p><strong>Piezas Producidas (OK):</strong> {{ orden.piezas_producidas_ok|default:0 }}</p>
+                <p><strong>Piezas Rechazadas:</strong> <span class="text-danger">{{ orden.piezas_rechazadas|default:0
+                        }}</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fases Operativas y Departamentos -->
+    <h4 class="mb-3">Fases Operativas y Departamentos</h4>
+    <div class="list-group mb-4 shadow-sm">
+        <a href="{% url 'produccion:gestionar_udp' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>1. UDP:</strong> Diseños, Uniformes e Impresión</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar UDP</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_corte' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>2. Corte:</strong> Tendido de tela, corte y piezas respectivas</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar Corte</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_bordado' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>3. Bordados:</strong> Nombres, logos y escudos</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar Bordados</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_produccion' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>4. Producción / Confección:</strong> Unión de piezas y costura requerida</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar Confección</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_despacho' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>5. Despacho:</strong> Revisión de costuras finas, planchado y empaquetado</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar Despacho</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_calidad' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>6. Calidad:</strong> Auditoría y Notificación de Control</span>
+            <span class="btn btn-sm btn-success">Auditoría Calidad</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

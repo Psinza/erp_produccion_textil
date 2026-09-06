@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard y Control Gerencial{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4">Dashboard y Control Gerencial - Producción Textil</h2>
+
+    <!-- Tarjetas de Estadísticas Directivas -->
+    <div class="row text-white mb-4 g-3">
+        <div class="col-md-3">
+            <div class="card bg-primary p-3 shadow border-0">
+                <h6>Órdenes Activas</h6>
+                <h3 class="mb-0">{{ stats.activas }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success p-3 shadow border-0">
+                <h6>Total Piezas Producidas (OK)</h6>
+                <h3 class="mb-0">{{ stats.total_producidas }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger p-3 shadow border-0">
+                <h6>Total Piezas Rechazadas</h6>
+                <h3 class="mb-0">{{ stats.total_rechazadas }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info p-3 shadow border-0">
+                <h6>Total Órdenes Registradas</h6>
+                <h3 class="mb-0">{{ stats.total_ordenes }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departamentos Activos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm p-3 border-0">
+                <h5 class="text-secondary mb-3">Flujo Operativo por Departamentos</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-secondary p-2 fs-6">UDP (Diseño / Pronted): {{ stats.udp_count }}</span>
+                    <span class="badge bg-warning text-dark p-2 fs-6">Corte: {{ stats.corte_count }}</span>
+                    <span class="badge bg-info p-2 fs-6">Bordados: {{ stats.bordado_count }}</span>
+                    <span class="badge bg-primary p-2 fs-6">Confección: {{ stats.produccion_count }}</span>
+                    <span class="badge bg-dark p-2 fs-6">Despacho: {{ stats.despacho_count }}</span>
+                    <span class="badge bg-success p-2 fs-6">Calidad ISO 9001: {{ stats.calidad_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Reciente -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold">Monitoreo de Órdenes Recientes</h5>
+            <a href="{% url 'produccion:orden_create' %}" class="btn btn-sm btn-primary">Nueva Orden de Producción</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Lote</th>
+                            <th>Prenda / Tipo</th>
+                            <th>Cantidad Solicitada</th>
+                            <th>Estado Actual</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in ordenes_recientes %}
+                        <tr>
+                            <td class="fw-bold">{{ o.lote_numero }}</td>
+                            <td>{{ o.producto.nombre }}</td>
+                            <td>{{ o.cantidad_a_producir }}</td>
+                            <td><span class="badge bg-secondary">{{ o.get_estado_display }}</span></td>
+                            <td>
+                                <a href="{% url 'produccion:orden_detail' o.pk %}"
+                                    class="btn btn-sm btn-outline-primary">
+                                    Ver Detalle / Flujo
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No hay órdenes registradas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

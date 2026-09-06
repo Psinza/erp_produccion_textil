@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ titulo }}</h1>
+        <a href="{% url 'transportes:mantenimiento_create' %}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-tools fa-sm text-white-50"></i> Programar Mantenimiento
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Control de Servicios y Reparaciones</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Vehículo</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Fecha Prog.</th>
+                            <th>Estado</th>
+                            <th>Costo</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in mantenimientos %}
+                        <tr>
+                            <td><strong>{{ m.vehiculo.placa }}</strong></td>
+                            <td>{{ m.get_tipo_display }}</td>
+                            <td>{{ m.descripcion }}</td>
+                            <td>{{ m.fecha_programada|date:"d/m/Y" }}</td>
+                            <td>
+                                <span class="badge {% if m.estado == 'completado' %}bg-success{% elif m.estado == 'en_proceso' %}bg-warning{% elif m.estado == 'cancelado' %}bg-secondary{% else %}bg-primary{% endif %}">
+                                    {{ m.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>${{ m.costo|floatformat:2 }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'transportes:mantenimiento_detail' m.pk %}" class="btn btn-sm btn-primary btn-circle" title="Ver Detalle">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'transportes:mantenimiento_update' m.pk %}" class="btn btn-sm btn-info btn-circle" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No se han registrado mantenimientos aún.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

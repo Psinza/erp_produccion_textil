@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'produccion:orden_list' %}">Órdenes</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'produccion:orden_detail' orden.pk %}">OP-{{ orden.id }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i> Confirmar Liberación de
+                        Lote</h5>
+                </div>
+                <div class="card-body p-4">
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Error al procesar la liberación:</strong>
+                        {{ form.errors }}
+                    </div>
+                    {% endif %}
+
+                    <p class="lead fs-6">¿Estás seguro de que deseas liberar el lote <strong>{{ lote.numero_lote
+                            }}</strong> al almacén?</p>
+                    <p class="text-muted small">Esta acción actualizará el stock del producto terminado de forma
+                        irreversible en el inventario.</p>
+
+                    <div class="bg-light p-3 rounded mb-4 border">
+                        <p class="mb-2"><strong>Producto:</strong> {{ lote.orden.formula.producto.nombre }}</p>
+                        <p class="mb-0"><strong>Cantidad Final:</strong> {{ lote.cantidad_final }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning flex-grow-1 py-2 fw-semibold">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Confirmar Liberación
+                            </button>
+                            <a href="{% url 'produccion:orden_detail' orden.pk %}"
+                                class="btn btn-outline-secondary px-4">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

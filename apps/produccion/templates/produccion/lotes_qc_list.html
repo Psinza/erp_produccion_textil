@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Control de Calidad (QC){% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-0"><i class="bi bi-shield-check text-warning"></i> Lotes en Control de Calidad</h2>
+      <p class="text-muted small mb-0">Inspección de lotes pendientes por aprobación de calidad.</p>
+    </div>
+    <a href="{% url 'produccion:dashboard_produccion' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Volver al Dashboard
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-3">Lote</th>
+              <th>Orden Origen</th>
+              <th>Producto</th>
+              <th>Fecha Prod.</th>
+              <th>Cantidad</th>
+              <th>Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in lotes %}
+            <tr>
+              <td class="ps-3 fw-bold">
+                <a href="{% url 'produccion:lote_detail' l.pk %}" class="text-decoration-none">{{ l.numero_lote }}</a>
+              </td>
+              <td>OP-{{ l.orden.numero }}</td>
+              <td>{{ l.orden.formula.producto.nombre }}</td>
+              <td>{{ l.fecha_produccion|date:"d/m/Y" }}</td>
+              <td class="fw-semibold">{{ l.cantidad_producida }}</td>
+              <td><span class="badge bg-warning text-dark">{{ l.get_estado_display }}</span></td>
+              <td class="text-center">
+                <a href="{% url 'produccion:lote_detail' l.pk %}" class="btn btn-sm btn-outline-success">
+                  <i class="bi bi-clipboard2-pulse"></i> Inspeccionar
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-5">No hay lotes pendientes de inspección.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

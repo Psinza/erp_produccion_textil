@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ formula.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-0 fw-bold"><i class="bi bi-flask"></i> {{ formula.nombre }}</h3>
+      <small class="text-muted">
+        <code>{{ formula.codigo }}</code> | Versión {{ formula.version }} |
+        Producto: <span class="fw-bold text-primary">{{ formula.producto.nombre }}</span>
+      </small>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'produccion:formula_edit' formula.pk %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-pencil"></i> Editar Fórmula
+      </a>
+      <a href="{% url 'produccion:formula_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Info general -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white"><i class="bi bi-info-circle me-1"></i> Datos Generales</div>
+        <div class="card-body">
+          <dl class="row mb-0 small">
+            <dt class="col-6">Estado</dt>
+            <dd class="col-6">
+              <span
+                class="badge {% if formula.estado == 'activa' %}bg-success{% elif formula.estado == 'obsoleta' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">
+                {{ formula.get_estado_display }}
+              </span>
+            </dd>
+            <dt class="col-6">Rendimiento Estimado</dt>
+            <dd class="col-6 fw-bold">{{ formula.rendimiento }} {{ formula.unidad_rendimiento }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      {% if formula.procedimiento %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-info text-dark fw-bold"><i class="bi bi-card-checklist me-1"></i> Procedimiento
+          (COVENIN)</div>
+        <div class="card-body small">
+          {{ formula.procedimiento|linebreaks }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Ingredientes / Formulación -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-list-check text-primary me-1"></i> Formulación Técnica (Ingredientes)</span>
+          <span class="badge bg-light text-dark border">Base: {{ formula.rendimiento }} {{ formula.unidad_rendimiento
+            }}</span>
+        </div>
+
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Insumo / Materia Prima</th>
+                  <th>Categoría</th>
+                  <th class="text-end">Cantidad</th>
+                  <th>Unidad</th>
+                  <th class="text-center">Es Empaque</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for l in ingredientes %}
+                <tr>
+                  <td class="ps-3 fw-semibold text-primary">{{ l.materia_prima.nombre }}</td>
+                  <td class="text-muted small">{{ l.materia_prima.categoria|default:"—" }}</td>
+                  <td class="text-end fw-bold">{{ l.cantidad }}</td>
+                  <td>{{ l.materia_prima.unidad_medida }}</td>
+                  <td class="text-center">
+                    {% if l.es_empaque %}
+                    <span class="badge bg-secondary">Sí</span>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-5">
+                    No se han definido ingredientes para esta fórmula.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-warning mt-3 small">
+        <i class="bi bi-shield-exclamation me-1"></i> <strong>Aviso de Seguridad:</strong> El manejo de materias primas
+        debe seguir las fichas de seguridad MSDS y la normativa COVENIN de protección personal (EPI).
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

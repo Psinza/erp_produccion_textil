@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+{% block title %}Contabilidad Fiscal | ERP{% endblock %}
+{% block page_title %}Contabilidad (VEN-NIF){% endblock %}
+{% block breadcrumb %}Módulos / Contabilidad{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e8f0fe;color:#1a73e8;">
+                <i class="bi bi-journal-check"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_asientos|default:"0" }}</div>
+                <div class="stat-label">Asientos del Período</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fef7e0;color:#f9a825;">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ asientos_pend|default:"0" }}</div>
+                <div class="stat-label">Asientos en Borrador</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e6f4ea;color:#1e8e3e;">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ ejercicio_activo.nombre|default:"2024" }}</div>
+                <div class="stat-label">Ejercicio Económico</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fce8e6;color:#d93025;">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <div>
+                <div class="stat-value">Cerrado</div>
+                <div class="stat-label">Mes Anterior</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Libros y Plan de Cuentas -->
+    <div class="col-lg-4">
+        <div class="erp-card">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-book me-2"></i>Libros Reglamentarios</span>
+            </div>
+            <div class="erp-card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'contabilidad:plan_cuentas' %}" class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-diagram-3 me-2 text-primary"></i>Plan de Cuentas (Catálogo)
+                    </a>
+                    <a href="{% url 'contabilidad:libro_diario' %}" class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-journal-text me-2 text-primary"></i>Libro Diario Fiscal
+                    </a>
+                    <a href="{% url 'contabilidad:asiento_list' %}" class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-plus-square me-2 text-primary"></i>Registro de Asientos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="erp-card mt-3">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-file-earmark-bar-graph me-2"></i>Estados Financieros</span>
+            </div>
+            <div class="erp-card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'contabilidad:balance_comprobacion' %}" class="btn-erp btn-erp-outline text-start">
+                        <i class="bi bi-check2-square me-2"></i>Balance de Comprobación
+                    </a>
+                    <a href="{% url 'contabilidad:balance_general' %}" class="btn-erp btn-erp-outline text-start">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>Balance General
+                    </a>
+                    <a href="{% url 'contabilidad:estado_resultados' %}" class="btn-erp btn-erp-outline text-start">
+                        <i class="bi bi-graph-up me-2"></i>Estado de Resultados
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de Actividad -->
+    <div class="col-lg-8">
+        <div class="erp-card">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-activity me-2"></i>Movimientos Recientes</span>
+            </div>
+            <div class="erp-card-body p-0">
+                <div class="table-responsive">
+                    <table class="erp-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Nro. Asiento</th>
+                                <th>Concepto / Referencia</th>
+                                <th class="text-end">Monto (Bs.)</th>
+                                <th class="text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asiento in ultimos_asientos %}
+                            <tr>
+                                <td>{{ asiento.fecha|date:"d/m/Y" }}</td>
+                                <td><strong>#{{ asiento.numero }}</strong></td>
+                                <td class="small">{{ asiento.glosa|truncatechars:40 }}</td>
+                                <td class="text-end fw-bold">{{ asiento.total_debe|floatformat:2 }}</td>
+                                <td class="text-center">
+                                    {% if asiento.estado == 'POSTEADO' %}
+                                        <span class="badge bg-success" style="font-size:10px;">Posteado</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark" style="font-size:10px;">Borrador</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-5 text-muted">No hay asientos contables registrados recientemente.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info mt-3 border-0 small shadow-sm">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Este módulo cumple con los principios de contabilidad generalmente aceptados en Venezuela (<strong>VEN-NIF</strong>).
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "core/base.html" %}
+{% block title %}Administración ERP | ERP{% endblock %}
+{% block page_title %}Panel de Control Administrativo{% endblock %}
+{% block breadcrumb %}Configuración / Administración{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card shadow-sm border-0">
+            <div class="stat-icon bg-primary-subtle text-primary">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value text-dark">{{ total_usuarios }}</div>
+                <div class="stat-label">Usuarios Totales</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card shadow-sm border-0">
+            <div class="stat-icon bg-success-subtle text-success">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value text-dark">{{ usuarios_activos }}</div>
+                <div class="stat-label">Usuarios Activos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card shadow-sm border-0">
+            <div class="stat-icon bg-info-subtle text-info">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value text-dark">{{ total_grupos }}</div>
+                <div class="stat-label">Roles definidos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Gestión de Acceso -->
+    <div class="col-md-6">
+        <div class="erp-card shadow-sm border-0">
+            <div class="erp-card-header bg-white border-bottom">
+                <span class="erp-card-title text-primary fw-bold"><i class="bi bi-person-gear me-2"></i>Gestión de Acceso</span>
+            </div>
+            <div class="erp-card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'administracion:usuario_list' %}" class="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center">
+                        <div class="rounded-circle bg-light p-2 me-3"><i class="bi bi-people text-primary"></i></div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold">Directorio de Usuarios</h6>
+                            <p class="text-muted small mb-0">Gestione identidades, suspensiones y eliminaciones.</p>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    <a href="{% url 'administracion:rol_list' %}" class="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center">
+                        <div class="rounded-circle bg-light p-2 me-3"><i class="bi bi-shield-check text-success"></i></div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold">Roles y Permisos</h6>
+                            <p class="text-muted small mb-0">Defina niveles de acceso por departamentos.</p>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="erp-card shadow-sm border-0 mt-4">
+            <div class="erp-card-header bg-white border-bottom">
+                <span class="erp-card-title text-dark fw-bold"><i class="bi bi-info-circle me-2"></i>Información del Sistema</span>
+            </div>
+            <div class="erp-card-body">
+                <div class="d-flex justify-content-between mb-2 small">
+                    <span class="text-muted">Versión del ERP:</span>
+                    <span class="fw-bold">v1.2.0-stable</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small">
+                    <span class="text-muted">Último Backup:</span>
+                    <span class="fw-bold text-success">Hace 2 horas</span>
+                </div>
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Estado del Servidor:</span>
+                    <span class="badge bg-success">Operativo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Seguridad y Sistema -->
+    <div class="col-md-6">
+        <div class="erp-card shadow-sm border-0 h-100 bg-dark text-white overflow-hidden" style="background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%) !important;">
+            <div class="erp-card-body p-5 d-flex flex-column justify-content-center position-relative">
+                <i class="bi bi-hdd-network opacity-10 position-absolute" style="font-size: 15rem; right: -20px; bottom: -50px; color: #fff;"></i>
+                <h3 class="fw-bold mb-3">Mantenimiento de Datos</h3>
+                <p class="opacity-75 mb-4">Realice respaldos de seguridad preventivos, consulte logs de errores y optimice la base de datos para mantener el rendimiento óptimo del sistema.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'administracion:mantenimiento' %}" class="btn btn-primary px-4 py-2 fw-bold">
+                        <i class="bi bi-tools me-2"></i>Entrar a Sistema
+                    </a>
+                    <a href="{% url 'administracion:lista_respaldos' %}" class="btn btn-outline-light px-4 py-2">
+                        <i class="bi bi-database-check me-2"></i>Ver Respaldos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

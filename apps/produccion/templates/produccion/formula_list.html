@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Fórmulas Maestras{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 fw-bold"><i class="bi bi-flask text-primary me-2"></i>Fórmulas Maestras</h1>
+            <p class="text-muted">Directorio de formulaciones y concentraciones químicas.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{% url 'produccion:formula_create' %}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Nueva Fórmula
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% for formula in formulas %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 formula-card">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-light text-primary border">{{ formula.codigo }}</span>
+                        <span
+                            class="badge {% if formula.estado == 'activa' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ formula.get_estado_display|upper }}
+                        </span>
+                    </div>
+                    <h5 class="card-title fw-bold text-dark">{{ formula.nombre }}</h5>
+                    <p class="card-text text-muted small mb-3">
+                        <i class="bi bi-box me-1"></i> {{ formula.producto.nombre }}<br>
+                        <i class="bi bi-gear me-1"></i> Versión: {{ formula.version }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-auto">
+                        <div class="small">
+                            <span class="text-muted">Rendimiento:</span><br>
+                            <span class="fw-bold text-dark">{{ formula.rendimiento }} {{ formula.unidad_rendimiento
+                                }}</span>
+                        </div>
+                        <a href="{% url 'produccion:formula_detail' formula.pk %}"
+                            class="btn btn-sm btn-outline-primary">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-journal-x h1 text-muted opacity-25"></i>
+            <p class="text-muted mt-3">No hay fórmulas registradas.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .formula-card {
+        transition: all 0.3s ease;
+    }
+
+    .formula-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    }
+</style>
+{% endblock %}

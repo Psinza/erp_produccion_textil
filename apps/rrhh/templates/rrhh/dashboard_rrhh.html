@@ -1,0 +1,155 @@
+{% extends 'core/base.html' %}
+{% block title %}Recursos Humanos | ERP{% endblock %}
+{% block page_title %}Gestión de Talento Humano{% endblock %}
+{% block breadcrumb %}Módulos / RRHH{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e8f0fe;color:#1a73e8;">
+        <i class="bi bi-people"></i>
+      </div>
+      <div>
+        <div class="stat-value">{{ total_empleados }}</div>
+        <div class="stat-label">Empleados Activos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e6f4ea;color:#1e8e3e;">
+        <i class="bi bi-building"></i>
+      </div>
+      <div>
+        <div class="stat-value">{{ total_departamentos }}</div>
+        <div class="stat-label">Departamentos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef7e0;color:#f9a825;">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+      </div>
+      <div>
+        <div class="stat-value">{{ nominas_mes|default:"0" }}</div>
+        <div class="stat-label">Nóminas Procesadas</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fce8e6;color:#d93025;">
+        <i class="bi bi-umbrella"></i>
+      </div>
+      <div>
+        <div class="stat-value">{{ vacaciones_pendientes|default:"0" }}</div>
+        <div class="stat-label">Vacaciones Activas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+    <!-- Acciones de Personal -->
+    <div class="col-lg-4">
+        <div class="erp-card">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-gear-fill me-2"></i>Gestión Administrativa</span>
+            </div>
+            <div class="erp-card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'rrhh:empleado_list' %}" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
+                        <i class="bi bi-person-badge me-3 text-primary" style="font-size:1.2rem;"></i>
+                        <div>
+                            <div class="fw-bold small">Expedientes de Personal</div>
+                            <div class="text-muted" style="font-size:11px;">Fichas, datos legales y LOTTT</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'rrhh:nomina_list' %}" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
+                        <i class="bi bi-bank me-3 text-primary" style="font-size:1.2rem;"></i>
+                        <div>
+                            <div class="fw-bold small">Cálculo de Nómina</div>
+                            <div class="text-muted" style="font-size:11px;">Quincenas, IVSS, FAOV y SPF</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'rrhh:vacacion_list' %}" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
+                        <i class="bi bi-calendar-check me-3 text-primary" style="font-size:1.2rem;"></i>
+                        <div>
+                            <div class="fw-bold small">Vacaciones y Permisos</div>
+                            <div class="text-muted" style="font-size:11px;">Art. 190 LOTTT - Disfrute y Bono</div>
+                        </div>
+                    </a>
+                    <a href="{% url 'rrhh:departamento_list' %}" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
+                        <i class="bi bi-diagram-3 me-3 text-primary" style="font-size:1.2rem;"></i>
+                        <div>
+                            <div class="fw-bold small">Estructura Organizativa</div>
+                            <div class="text-muted" style="font-size:11px;">Departamentos y Cargos</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="erp-card mt-3">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-info-circle me-2"></i>Cumplimiento Legal</span>
+            </div>
+            <div class="erp-card-body">
+                <div class="alert alert-primary border-0 small mb-0">
+                    <i class="bi bi-shield-check me-2"></i>Módulo configurado según la <strong>LOTTT</strong> y normativas del <strong>IVSS / BANAVIH</strong>.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Empleados -->
+    <div class="col-lg-8">
+        <div class="erp-card">
+            <div class="erp-card-header d-flex justify-content-between align-items-center">
+                <span class="erp-card-title"><i class="bi bi-person-lines-fill me-2"></i>Ingresos Recientes</span>
+                <a href="{% url 'rrhh:empleado_list' %}" class="btn-erp btn-erp-primary btn-sm">Ver Todos</a>
+            </div>
+            <div class="erp-card-body p-0">
+                <div class="table-responsive">
+                    <table class="erp-table">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Cargo / Departamento</th>
+                                <th>Fecha Ingreso</th>
+                                <th class="text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in empleados_recientes %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold small">{{ emp.nombres }} {{ emp.apellidos }}</div>
+                                    <div class="text-muted small">{{ emp.cedula }}</div>
+                                </td>
+                                <td>
+                                    <div class="small">{{ emp.cargo.nombre|default:"—" }}</div>
+                                    <div class="text-muted small">{{ emp.departamento.nombre|default:"—" }}</div>
+                                </td>
+                                <td class="small">{{ emp.fecha_ingreso|date:"d/m/Y" }}</td>
+                                <td class="text-center">
+                                    {% if emp.activo %}
+                                        <span class="badge bg-success" style="font-size:10px;">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary" style="font-size:10px;">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center py-5 text-muted">No hay empleados registrados recientemente.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

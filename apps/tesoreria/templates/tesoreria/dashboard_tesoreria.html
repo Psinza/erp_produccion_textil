@@ -1,0 +1,183 @@
+{% extends "core/base.html" %}
+
+{% block title %}Tesorería y Finanzas | ERP{% endblock %}
+{% block page_title %}Módulo de Tesorería{% endblock %}
+{% block breadcrumb %}Finanzas / Tesorería{% endblock %}
+
+{% block content %}
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e8f0fe;color:#1a73e8;">
+        <i class="bi bi-bank2"></i>
+      </div>
+      <div>
+        <div class="stat-value" style="font-size:20px;">${{ total_bancos|floatformat:2 }}</div>
+        <div class="stat-label">Saldo Total Bancos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e6f4ea;color:#1e8e3e;">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div>
+        <div class="stat-value" style="font-size:20px;">${{ total_cajas|floatformat:2 }}</div>
+        <div class="stat-label">Saldo Total Cajas</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef7e0;color:#f9a825;">
+        <i class="bi bi-file-earmark-arrow-up"></i>
+      </div>
+      <div>
+        <div class="stat-value" style="font-size:20px;">${{ cxc_pendientes|floatformat:2 }}</div>
+        <div class="stat-label">C×C Pendientes</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fce8e6;color:#d93025;">
+        <i class="bi bi-file-earmark-arrow-down"></i>
+      </div>
+      <div>
+        <div class="stat-value" style="font-size:20px;">${{ cxp_pendientes|floatformat:2 }}</div>
+        <div class="stat-label">C×P Pendientes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Acciones Principales -->
+  <div class="col-lg-4">
+    <div class="erp-card mb-4">
+      <div class="erp-card-header">
+        <span class="erp-card-title"><i class="bi bi-lightning me-2"></i>Operaciones</span>
+      </div>
+      <div class="erp-card-body pt-0">
+        <div class="d-grid gap-2 mt-3">
+          <a href="{% url 'tesoreria:movimiento_banco_create' %}" class="btn-erp btn-erp-primary">
+            <i class="bi bi-bank"></i> Movimiento Bancario
+          </a>
+          <a href="{% url 'tesoreria:caja_list' %}" class="btn-erp btn-erp-outline">
+            <i class="bi bi-cash-stack"></i> Gestión de Cajas
+          </a>
+          <a href="{% url 'tesoreria:cxc_create' %}" class="btn-erp btn-erp-outline">
+            <i class="bi bi-file-earmark-plus"></i> Nueva C×C
+          </a>
+          <a href="{% url 'tesoreria:cxp_create' %}" class="btn-erp btn-erp-outline">
+            <i class="bi bi-file-earmark-minus"></i> Nueva C×P
+          </a>
+          <a href="{% url 'tesoreria:transferencia_create' %}" class="btn-erp btn-erp-outline">
+            <i class="bi bi-arrow-left-right"></i> Transferencia
+          </a>
+          <a href="{% url 'tesoreria:flujo_caja' %}" class="btn-erp btn-erp-outline">
+            <i class="bi bi-graph-up-arrow"></i> Flujo de Caja
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bancos -->
+    <div class="erp-card">
+      <div class="erp-card-header">
+        <span class="erp-card-title"><i class="bi bi-building me-2"></i>Cuentas Bancarias</span>
+        <a href="{% url 'tesoreria:cuenta_list' %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:2px 8px;">Ver</a>
+      </div>
+      <div class="erp-card-body p-0">
+        <div class="list-group list-group-flush">
+          <a href="{% url 'tesoreria:cuenta_list' %}" class="list-group-item list-group-item-action border-0 py-3 d-flex justify-content-between align-items-center">
+            <span class="small fw-bold"><i class="bi bi-credit-card-2-front me-2 text-primary"></i>Ver Cuentas</span>
+            <i class="bi bi-chevron-right text-muted" style="font-size:11px;"></i>
+          </a>
+          <a href="{% url 'tesoreria:banco_list' %}" class="list-group-item list-group-item-action border-0 py-3 d-flex justify-content-between align-items-center">
+            <span class="small fw-bold"><i class="bi bi-bank me-2 text-primary"></i>Bancos Registrados</span>
+            <i class="bi bi-chevron-right text-muted" style="font-size:11px;"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CxC y CxP Pendientes -->
+  <div class="col-lg-8">
+    <div class="erp-card mb-4">
+      <div class="erp-card-header">
+        <span class="erp-card-title text-warning"><i class="bi bi-arrow-up-circle me-2"></i>Cuentas por Cobrar Pendientes</span>
+        <a href="{% url 'tesoreria:cxc_list' %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:2px 8px;">Ver Todas</a>
+      </div>
+      <div class="erp-card-body p-0">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>Documento / Cliente</th>
+              <th>Vencimiento</th>
+              <th class="text-end">Monto</th>
+              <th class="text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cxc in cxc_pendientes_list %}
+            <tr>
+              <td>
+                <div style="font-weight:600;font-size:13px;">{{ cxc.numero }}</div>
+                <div class="text-muted" style="font-size:11px;">{{ cxc.cliente.nombre|default:"—" }}</div>
+              </td>
+              <td class="small text-muted">{{ cxc.fecha_vencimiento|date:"d/m/Y" }}</td>
+              <td class="text-end fw-bold text-success">${{ cxc.monto|floatformat:2 }}</td>
+              <td class="text-center">
+                <span class="badge bg-warning text-dark" style="font-size:10px;">Pendiente</span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4 text-muted">Sin cuentas por cobrar pendientes.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="erp-card">
+      <div class="erp-card-header">
+        <span class="erp-card-title text-danger"><i class="bi bi-arrow-down-circle me-2"></i>Cuentas por Pagar Pendientes</span>
+        <a href="{% url 'tesoreria:cxp_list' %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:2px 8px;">Ver Todas</a>
+      </div>
+      <div class="erp-card-body p-0">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>Documento / Proveedor</th>
+              <th>Vencimiento</th>
+              <th class="text-end">Monto</th>
+              <th class="text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cxp in cxp_pendientes_list %}
+            <tr>
+              <td>
+                <div style="font-weight:600;font-size:13px;">{{ cxp.numero }}</div>
+                <div class="text-muted" style="font-size:11px;">{{ cxp.proveedor.nombre|default:"—" }}</div>
+              </td>
+              <td class="small text-muted">{{ cxp.fecha_vencimiento|date:"d/m/Y" }}</td>
+              <td class="text-end fw-bold text-danger">${{ cxp.monto|floatformat:2 }}</td>
+              <td class="text-center">
+                <span class="badge bg-danger" style="font-size:10px;">Pendiente</span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4 text-muted">Sin cuentas por pagar pendientes.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

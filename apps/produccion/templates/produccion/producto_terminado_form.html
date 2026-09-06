@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:850px">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-box-seam text-success"></i> {{ titulo }}</h3>
+    <a href="{% url 'produccion:producto_terminado_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Volver
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="card-header bg-success text-white py-3">
+      <h6 class="mb-0 fw-bold">Especificaciones Industriales y Registro Sanitario</h6>
+    </div>
+    <div class="card-body p-4">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          {% for field in form %}
+          <div
+            class="col-md-{% if field.name == 'nombre' %}9{% elif field.name == 'categoria' or field.name == 'presentacion' or field.name == 'registro_sanitario' or field.name == 'normativa_covenin' %}6{% elif field.name == 'activo' %}4 d-flex align-items-end ps-4{% else %}3{% endif %}">
+            {% if field.name == 'activo' %}
+            <div class="form-check form-switch mb-2">
+              {{ field }}
+              <label class="form-check-label fw-bold ms-2">{{ field.label }}</label>
+            </div>
+            {% else %}
+            <label class="form-label fw-bold">{{ field.label }}</label>
+            {{ field }}
+            {% endif %}
+
+            {% if field.help_text %}<small class="text-muted d-block mt-1">{{ field.help_text }}</small>{% endif %}
+            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mt-4">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="d-flex gap-2 mt-5 pt-3 border-top">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="bi bi-save me-1"></i> Guardar Producto
+          </button>
+          <a href="{% url 'produccion:producto_terminado_list' %}" class="btn btn-light border">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

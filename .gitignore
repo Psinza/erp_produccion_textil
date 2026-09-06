@@ -1,0 +1,38 @@
+# Entornos virtuales
+env/
+venv/
+.venv/
+ENV/
+
+# Python cache y compilados
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Base de datos local (NO subir a GitHub)
+*.sqlite3
+db.sqlite3
+
+# Archivos estáticos y subidos por usuarios
+staticfiles/
+media/
+*.log
+logs/
+
+# Variables de entorno secretas (NO subir a GitHub)
+.env
+.env.local
+.env.production
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Archivos y carpetas temporales de diagnóstico
+scratch/
+resultado_migraciones.txt

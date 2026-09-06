@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="topbar-title fs-3 mb-0">{{ titulo }}</h2>
+            <p class="text-muted small mb-0">Gestión de proveedores y acreedores</p>
+        </div>
+        <a href="{% url 'compras:proveedor_create' %}" class="btn btn-erp btn-erp-primary">
+            <i class="bi bi-person-plus"></i> Nuevo Proveedor
+        </a>
+    </div>
+
+    <div class="erp-card">
+        <div class="erp-card-body p-0">
+            <div class="table-responsive">
+                <table class="erp-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>RIF</th>
+                            <th>Razón Social</th>
+                            <th>Contacto</th>
+                            <th>Dirección</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in proveedores %}
+                        <tr>
+                            <td><span class="fw-medium text-primary">{{ p.rif }}</span></td>
+                            <td><div class="fw-semibold">{{ p.razon_social }}</div></td>
+                            <td>
+                                <div class="small"><i class="bi bi-telephone me-1"></i> {{ p.telefono }}</div>
+                                <div class="small"><i class="bi bi-envelope me-1"></i> {{ p.email }}</div>
+                            </td>
+                            <td><div class="small text-muted">{{ p.direccion|truncatechars:50 }}</div></td>
+                            <td class="text-end">
+                                <a href="{% url 'compras:proveedor_update' p.pk %}" class="btn-erp btn-erp-outline btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-shop fs-1 text-muted d-block mb-2"></i>
+                                <p class="text-muted">No hay proveedores registrados.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

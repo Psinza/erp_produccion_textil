@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4 text-primary"><i class="bi bi-speedometer2"></i> Panel de Control</h2>
+
+    {% for categoria, modulos in modulos_agrupados.items %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-secondary border-bottom pb-2">{{ categoria }}</h4>
+        </div>
+        {% for m in modulos %}
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card h-100 border-{{ m.color }} shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi {{ m.icono }} display-5 text-{{ m.color }}"></i>
+                    <h5 class="card-title mt-3">{{ m.nombre }}</h5>
+                    <p class="card-text text-muted small">{{ m.desc }}</p>
+                    {% if m.activo %}
+                    <a href="{{ m.url_actual }}" class="btn btn-{{ m.color }} stretched-link">Acceder</a>
+                    {% else %}
+                    <span class="badge bg-secondary">Mantenimiento</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
