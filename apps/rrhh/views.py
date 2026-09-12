@@ -222,3 +222,12 @@ def cargo_create(request):
         form.save()
         return redirect('rrhh:cargo_list')
     return render(request, 'rrhh/cargo_form.html', {'titulo': 'Nuevo Cargo', 'form': form})
+
+@login_required
+def cargo_update(request, pk):
+    cargo = get_object_or_404(Cargo, pk=pk)
+    form = CargoForm(request.POST or None, instance=cargo)
+    if form.is_valid():
+        form.save()
+        return redirect('rrhh:cargo_list')
+    return render(request, 'rrhh/cargo_form.html', {'titulo': 'Editar Cargo', 'form': form})

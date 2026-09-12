@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.db import transaction
 from django.db.models import F
 
-from apps.logistica.models import MovimientoInventario, ExistenciaAlmacen
+from apps.logistica.models import MovimientoInventario, ExistenciaAlmacen, RepuestoMaquina
 from apps.produccion.models import MateriaPrima, ProductoTerminado
 
 
@@ -25,6 +25,9 @@ def update_inventory_on_movement_save(sender, instance, created, **kwargs):
     elif instance.producto_pt:
         item = instance.producto_pt
         item_model = ProductoTerminado
+    elif instance.repuesto:
+        item = instance.repuesto
+        item_model = RepuestoMaquina
     else:
         # Este caso idealmente debería ser prevenido por la validación del modelo
         # o un diseño más específico donde un movimiento *debe* estar relacionado con un ítem.
@@ -34,7 +37,7 @@ def update_inventory_on_movement_save(sender, instance, created, **kwargs):
     with transaction.atomic():
         # Obtenemos el objeto del ítem de la base de datos y lo bloqueamos para actualización
         # para asegurar que obtenemos el stock_actual más reciente y evitar condiciones de carrera.
-        item_obj = item_model.objects.select_for_update().get(pk=item.pk)
+        item_obj = item_model.objects.select_for_update().get(pk=item.pk) if item_model else None
 
         # 1. Actualización de Stock Global
         stock_change = 0
@@ -43,12 +46,17 @@ def update_inventory_on_movement_save(sender, instance, created, **kwargs):
         elif instance.tipo == 'S':  # Salida
             stock_change = -instance.cantidad
 
-        if stock_change != 0:
+        if stock_change != 0 and item_obj:
             item_obj.stock_actual = F('stock_actual') + stock_change
             item_obj.save(update_fields=['stock_actual'])
         
         # 2. Actualización de Stock por Almacén (ExistenciaAlmacen)
-        item_query = {'materia_prima': instance.materia_prima} if instance.materia_prima else {'producto_pt': instance.producto_pt}
+        if instance.materia_prima:
+            item_query = {'materia_prima': instance.materia_prima}
+        elif instance.producto_pt:
+            item_query = {'producto_pt': instance.producto_pt}
+        else:
+            item_query = {'repuesto': instance.repuesto}
 
         # Descontar de Origen (Salidas y Transferencias)
         if instance.tipo in ['S', 'T'] and instance.almacen_origen:
@@ -69,6 +77,7 @@ def update_inventory_on_movement_save(sender, instance, created, **kwargs):
             ExistenciaAlmacen.objects.filter(pk=exis_destino.pk).update(stock=F('stock') + instance.cantidad)
 
         # Finalización: Actualizar saldo_stock en el movimiento para el Kardex Global
-        item_obj.refresh_from_db()
-        instance.saldo_stock = item_obj.stock_actual
+        if item_obj:
+            item_obj.refresh_from_db()
+            instance.saldo_stock = item_obj.stock_actual
         instance.save(update_fields=['saldo_stock'])

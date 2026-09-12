@@ -21,6 +21,10 @@ class InformacionComercial(models.Model):
     ficha_tecnica = models.FileField(upload_to='comercial/fichas/', null=True, blank=True)
     en_oferta = models.BooleanField(default=False)
     destacado = models.BooleanField(default=False)
+    composicion = models.CharField(max_length=150, blank=True)
+    colores_disponibles = models.CharField(max_length=255, blank=True)
+    tallas_disponibles = models.CharField(max_length=150, blank=True)
+    unidad_venta = models.CharField(max_length=30, default='unidad')
 
     def __str__(self):
         return self.nombre_comercial
@@ -30,7 +34,12 @@ class ListaPrecio(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
     activa = models.BooleanField(default=True)
-    moneda = models.CharField(max_length=10, default='USD')
+    moneda = models.CharField(
+        max_length=3,
+        choices=[('VES', 'Bolívares (VES)'), ('USD', 'Dólares (USD)'), ('EUR', 'Euros (EUR)')],
+        default='USD',
+        verbose_name='Moneda',
+    )
     factor_ajuste = models.DecimalField(max_digits=5, decimal_places=2, default=1.00, help_text="Factor multiplicador global (opcional)")
 
     def __str__(self):

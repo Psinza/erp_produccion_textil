@@ -54,6 +54,38 @@
 </div>
 
 <div class="row g-4">
+    <div class="col-12">
+        <div class="erp-card">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-diagram-3 me-2"></i>Submódulos de Logística</span>
+            </div>
+            <div class="erp-card-body">
+                <div class="row g-2">
+                    <div class="col-md-3"><a href="{% url 'logistica:almacen_list' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-building me-1"></i> Almacenes</a></div>
+                    <div class="col-md-3"><a href="{% url 'logistica:movimiento_list' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-arrow-left-right me-1"></i> Movimientos</a></div>
+                    <div class="col-md-3"><a href="{% url 'logistica:reporte_stock' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-boxes me-1"></i> Existencias</a></div>
+                    <div class="col-md-3"><a href="{% url 'logistica:reporte_kardex' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-journal-text me-1"></i> Kardex</a></div>
+                    <div class="col-md-6"><a href="{% url 'logistica:repuesto_list' %}" class="btn btn-erp btn-erp-primary w-100"><i class="bi bi-gear-wide-connected me-1"></i> Almacén de piezas de máquinas</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="erp-card">
+            <div class="erp-card-header">
+                <span class="erp-card-title"><i class="bi bi-box-seam me-2"></i>Catálogo e ingresos de artículos</span>
+            </div>
+            <div class="erp-card-body">
+                <div class="row g-2">
+                    <div class="col-md-3"><a href="{% url 'compras:materia_prima_list' %}" class="btn btn-erp btn-erp-outline w-100">Materias primas textiles</a></div>
+                    <div class="col-md-3"><a href="{% url 'compras:materia_prima_create' %}" class="btn btn-erp btn-erp-primary w-100">Agregar materia prima</a></div>
+                    <div class="col-md-3"><a href="{% url 'ventas:producto_list' %}" class="btn btn-erp btn-erp-outline w-100">Productos terminados</a></div>
+                    <div class="col-md-3"><a href="{% url 'compras:recepcion_create' %}" class="btn btn-erp btn-erp-primary w-100">Recibir compra</a></div>
+                    <div class="col-md-3"><a href="{% url 'logistica:repuesto_create' %}" class="btn btn-erp btn-erp-primary w-100">Nueva pieza de máquina</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Kardex Reciente -->
     <div class="col-lg-8">
         <div class="erp-card">
@@ -82,7 +114,7 @@
                         <tr>
                             <td class="text-muted small">{{ mov.fecha|date:"d/m/y H:i" }}</td>
                             <td>
-                                <div style="font-weight:600;">{{ mov.materia_prima.nombre|default:mov.producto_pt.nombre }}</div>
+                                <div style="font-weight:600;">{% if mov.materia_prima %}{{ mov.materia_prima.nombre }}{% elif mov.producto_pt %}{{ mov.producto_pt.nombre }}{% else %}{{ mov.repuesto.nombre }}{% endif %}</div>
                                 <div class="text-muted" style="font-size:11px;">{{ mov.referencia|default:"—" }}</div>
                             </td>
                             <td>
@@ -115,7 +147,10 @@
         <div class="erp-card mb-4">
             <div class="erp-card-header">
                 <span class="erp-card-title"><i class="bi bi-house-door me-2"></i>Almacenes</span>
-                <a href="{% url 'logistica:almacen_list' %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:2px 8px;">Ver todos</a>
+                <div class="d-flex gap-1">
+                    <a href="{% url 'logistica:almacen_create' %}" class="btn-erp btn-erp-primary" style="font-size:11px;padding:2px 8px;">Nuevo</a>
+                    <a href="{% url 'logistica:almacen_list' %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:2px 8px;">Ver todos</a>
+                </div>
             </div>
             <div class="erp-card-body p-0">
                 <div class="list-group list-group-flush">
@@ -146,11 +181,19 @@
                         <span class="badge bg-danger" style="font-size:10px;">{{ item.stock_actual }} / {{ item.stock_minimo }}</span>
                     </li>
                     {% empty %}
+                    {% endfor %}
+                    {% for item in repuestos_alerta %}
+                    <li class="mb-3 d-flex justify-content-between align-items-center">
+                        <span class="small" style="font-weight:600;"><i class="bi bi-gear me-1"></i>{{ item.codigo }} - {{ item.nombre }}</span>
+                        <span class="badge bg-danger" style="font-size:10px;">{{ item.stock_actual }} / {{ item.stock_minimo }}</span>
+                    </li>
+                    {% endfor %}
+                    {% if not materias_primas_alerta and not repuestos_alerta %}
                     <div class="text-center py-2">
                         <i class="bi bi-check-circle text-success h4"></i>
-                        <p class="text-muted small mb-0">Niveles óptimos.</p>
+                        <p class="text-muted small mb-0">Niveles óptimos en materias primas y repuestos.</p>
                     </div>
-                    {% endfor %}
+                    {% endif %}
                 </ul>
             </div>
         </div>

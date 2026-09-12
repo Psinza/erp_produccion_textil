@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (
     TipoVehiculo, Vehiculo, Conductor,
     Zona, Ruta, PuntoEntrega,
-    Despacho, EntregaDespacho, Mantenimiento,
+    Despacho, EntregaDespacho, Mantenimiento, ViaticoTransporte,
 )
 
 
@@ -61,7 +61,7 @@ class EntregaDespachoInline(admin.TabularInline):
 @admin.register(Despacho)
 class DespachoAdmin(admin.ModelAdmin):
     list_display    = ["numero", "ruta", "vehiculo", "conductor",
-                       "fecha_salida", "estado", "km_recorridos"]
+                       "pedido", "fecha_salida", "estado", "km_recorridos"]
     list_filter     = ["estado"]
     search_fields   = ["numero", "vehiculo__placa", "conductor__apellidos"]
     readonly_fields = ["numero", "km_recorridos", "creado_en", "modificado_en"]
@@ -74,3 +74,9 @@ class MantenimientoAdmin(admin.ModelAdmin):
                     "fecha_programada", "estado", "costo"]
     list_filter  = ["estado", "tipo"]
     search_fields= ["vehiculo__placa", "descripcion"]
+
+
+@admin.register(ViaticoTransporte)
+class ViaticoTransporteAdmin(admin.ModelAdmin):
+    list_display = ['despacho', 'beneficiario', 'concepto', 'monto', 'fecha', 'estado']
+    list_filter = ['estado', 'fecha']

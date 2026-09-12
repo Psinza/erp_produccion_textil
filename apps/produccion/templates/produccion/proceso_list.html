@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo }}</h2>
+        <a class="btn btn-primary" href="{% url 'produccion:orden_list' %}">Ver órdenes</a>
+    </div>
+    <div class="table-responsive card shadow-sm">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Orden</th><th>Departamento</th><th>Objetivo</th><th>ISO</th><th>Norma venezolana</th><th>Estado</th></tr></thead>
+            <tbody>
+            {% for proceso in procesos %}
+            <tr>
+                <td><a href="{% url 'produccion:orden_detail' proceso.orden.pk %}">{{ proceso.orden.lote_numero }}</a></td>
+                <td>{{ proceso.get_departamento_display }}</td>
+                <td>{{ proceso.objetivo }}</td>
+                <td>{{ proceso.clausula_iso }}</td>
+                <td>{{ proceso.norma_venezolana|default:'No definida' }}</td>
+                <td>{% if proceso.aprobado %}<span class="badge bg-success">Aprobado</span>{% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}</td>
+            </tr>
+            {% empty %}<tr><td colspan="6" class="text-center py-4">No hay planes de proceso registrados.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

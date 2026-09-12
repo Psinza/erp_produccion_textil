@@ -7,7 +7,7 @@
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
       <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-3"><label class="form-label small fw-semibold">Ejercicio *</label>{{ form.ejercicio }}</div>
+        <div class="col-md-3"><label class="form-label small fw-semibold">Ejercicio fiscal *</label>{{ form.ejercicio }}<a href="{% url 'contabilidad:ejercicio_create' %}" target="_blank" class="small text-success"><i class="bi bi-plus-circle"></i> Crear ejercicio fiscal</a></div>
         <div class="col-md-2"><label class="form-label small fw-semibold">Desde</label>{{ form.fecha_inicio }}</div>
         <div class="col-md-2"><label class="form-label small fw-semibold">Hasta</label>{{ form.fecha_fin }}</div>
         <div class="col-md-2">
@@ -51,9 +51,9 @@
             <tbody>
               {% for c in activos %}
               <tr>
-                <td><code class="small">{{ c.cuenta__codigo }}</code></td>
-                <td>{{ c.cuenta__nombre }}</td>
-                <td class="text-end fw-bold text-primary">${{ c.saldo|floatformat:2 }}</td>
+                <td><code class="small">{{ c.codigo }}</code></td>
+                <td>{{ c.nombre }}</td>
+                <td class="text-end fw-bold text-primary">${{ c.saldo_actual|floatformat:2 }}</td>
               </tr>
               {% empty %}
               <tr><td colspan="3" class="text-muted text-center py-3">Sin cuentas de activo.</td></tr>
@@ -85,9 +85,9 @@
             <tbody>
               {% for c in pasivos %}
               <tr>
-                <td><code class="small">{{ c.cuenta__codigo }}</code></td>
-                <td>{{ c.cuenta__nombre }}</td>
-                <td class="text-end fw-bold text-danger">${{ c.saldo|floatformat:2 }}</td>
+                <td><code class="small">{{ c.codigo }}</code></td>
+                <td>{{ c.nombre }}</td>
+                <td class="text-end fw-bold text-danger">${{ c.saldo_actual|floatformat:2 }}</td>
               </tr>
               {% empty %}
               <tr><td colspan="3" class="text-muted text-center py-3">Sin cuentas de pasivo.</td></tr>
@@ -116,9 +116,9 @@
             <tbody>
               {% for c in patrimonio %}
               <tr>
-                <td><code class="small">{{ c.cuenta__codigo }}</code></td>
-                <td>{{ c.cuenta__nombre }}</td>
-                <td class="text-end fw-bold text-warning">${{ c.saldo|floatformat:2 }}</td>
+                <td><code class="small">{{ c.codigo }}</code></td>
+                <td>{{ c.nombre }}</td>
+                <td class="text-end fw-bold text-warning">${{ c.saldo_actual|floatformat:2 }}</td>
               </tr>
               {% empty %}
               <tr><td colspan="3" class="text-muted text-center py-3">Sin cuentas de patrimonio.</td></tr>

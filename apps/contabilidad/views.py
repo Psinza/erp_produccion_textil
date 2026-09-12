@@ -114,7 +114,26 @@ def asiento_eliminar_linea(request, pk, linea_pk):
     return redirect('contabilidad:asiento_detail', pk=pk)
 
 
-from .forms import AsientoContableForm, LineaAsientoFormSet, CuentaContableForm, EjercicioContableForm
+from .forms import (
+    AsientoContableForm, LineaAsientoFormSet, CuentaContableForm,
+    EjercicioContableForm, ReporteContableForm,
+)
+
+
+def _period_lines(form):
+    """Return approved journal lines for the selected report period."""
+    _, AsientoContable, _, LineaAsiento = _get_models()
+    if not form.is_valid():
+        return None, LineaAsiento.objects.none()
+    ejercicio = form.cleaned_data['ejercicio']
+    asientos = AsientoContable.objects.filter(ejercicio=ejercicio, estado='aprobado')
+    inicio = form.cleaned_data.get('fecha_inicio')
+    fin = form.cleaned_data.get('fecha_fin')
+    if inicio:
+        asientos = asientos.filter(fecha__gte=inicio)
+    if fin:
+        asientos = asientos.filter(fecha__lte=fin)
+    return ejercicio, LineaAsiento.objects.filter(asiento__in=asientos)
 from django.contrib import messages
 from django.shortcuts import redirect
 
@@ -206,12 +225,22 @@ def ejercicio_cerrar(request, pk):
 
 @login_required
 def libro_diario(request):
-    try:
-        _, AsientoContable, _, _ = _get_models()
-        asientos = AsientoContable.objects.filter(estado='aprobado').order_by('fecha')
-    except Exception:
-        asientos = []
-    return render(request, 'contabilidad/libro_diario.html', {'titulo': 'Libro Diario', 'asientos': asientos})
+    _, AsientoContable, _, _ = _get_models()
+    form = ReporteContableForm(request.GET or None)
+    asientos = AsientoContable.objects.none()
+    ejercicio = None
+    if form.is_valid():
+        ejercicio = form.cleaned_data['ejercicio']
+        asientos = AsientoContable.objects.filter(
+            ejercicio=ejercicio, estado='aprobado'
+        ).prefetch_related('lineas__cuenta').order_by('fecha', 'numero')
+        if form.cleaned_data.get('fecha_inicio'):
+            asientos = asientos.filter(fecha__gte=form.cleaned_data['fecha_inicio'])
+        if form.cleaned_data.get('fecha_fin'):
+            asientos = asientos.filter(fecha__lte=form.cleaned_data['fecha_fin'])
+    return render(request, 'contabilidad/libro_diario.html', {
+        'titulo': 'Libro Diario', 'form': form, 'asientos': asientos, 'ejercicio': ejercicio,
+    })
 
 
 @login_required
@@ -221,51 +250,73 @@ def libro_ventas(request):
 
 @login_required
 def balance_general(request):
-    try:
-        _, _, CuentaContable, _ = _get_models()
-        activos = CuentaContable.objects.filter(tipo='activo', activo=True)
-        pasivos = CuentaContable.objects.filter(tipo='pasivo', activo=True)
-        patrimonio = CuentaContable.objects.filter(tipo='patrimonio', activo=True)
-        total_activo = activos.aggregate(t=Sum('saldo_actual'))['t'] or 0
-        total_pasivo = pasivos.aggregate(t=Sum('saldo_actual'))['t'] or 0
-        total_patrimonio = patrimonio.aggregate(t=Sum('saldo_actual'))['t'] or 0
-    except Exception:
-        activos = pasivos = patrimonio = []
-        total_activo = total_pasivo = total_patrimonio = 0
+    _, _, CuentaContable, _ = _get_models()
+    form = ReporteContableForm(request.GET or None)
+    ejercicio, lines = _period_lines(form)
+    activos = CuentaContable.objects.filter(tipo='activo', activo=True).order_by('codigo')
+    pasivos = CuentaContable.objects.filter(tipo='pasivo', activo=True).order_by('codigo')
+    patrimonio = CuentaContable.objects.filter(tipo='patrimonio', activo=True).order_by('codigo')
+    balances = {
+        row['cuenta_id']: (row['debe'] or 0) - (row['haber'] or 0)
+        for row in lines.values('cuenta_id').annotate(debe=Sum('debe'), haber=Sum('haber'))
+    }
+    for cuenta in list(activos) + list(pasivos) + list(patrimonio):
+        cuenta.saldo_actual = balances.get(cuenta.pk, 0)
+    total_activo = sum(c.saldo_actual for c in activos)
+    total_pasivo = sum(c.saldo_actual for c in pasivos)
+    total_patrimonio = sum(c.saldo_actual for c in patrimonio)
     return render(request, 'contabilidad/balance_general.html', {
         'titulo': 'Balance General',
+        'form': form, 'ejercicio': ejercicio,
         'activos': activos, 'pasivos': pasivos, 'patrimonio': patrimonio,
         'total_activo': total_activo, 'total_pasivo': total_pasivo, 'total_patrimonio': total_patrimonio,
+        'total_pasivo_patrimonio': total_pasivo + total_patrimonio,
     })
 
 
 @login_required
 def estado_resultados(request):
-    try:
-        _, _, CuentaContable, _ = _get_models()
-        ingresos = CuentaContable.objects.filter(tipo='ingreso', activo=True)
-        gastos = CuentaContable.objects.filter(tipo='gasto', activo=True)
-        total_ingresos = ingresos.aggregate(t=Sum('saldo_actual'))['t'] or 0
-        total_gastos = gastos.aggregate(t=Sum('saldo_actual'))['t'] or 0
-    except Exception:
-        ingresos = gastos = []
-        total_ingresos = total_gastos = 0
+    _, _, CuentaContable, _ = _get_models()
+    form = ReporteContableForm(request.GET or None)
+    ejercicio, lines = _period_lines(form)
+    ingresos = CuentaContable.objects.filter(tipo='ingreso', activo=True).order_by('codigo')
+    gastos = CuentaContable.objects.filter(tipo='gasto', activo=True).order_by('codigo')
+    balances = {
+        row['cuenta_id']: (row['haber'] or 0) - (row['debe'] or 0)
+        for row in lines.values('cuenta_id').annotate(debe=Sum('debe'), haber=Sum('haber'))
+    }
+    for cuenta in list(ingresos) + list(gastos):
+        cuenta.saldo_actual = balances.get(cuenta.pk, 0)
+    total_ingresos = sum(c.saldo_actual for c in ingresos)
+    total_gastos = sum(c.saldo_actual for c in gastos)
+    utilidad = total_ingresos - total_gastos
     return render(request, 'contabilidad/estado_resultados.html', {
+        'form': form, 'ejercicio': ejercicio,
         'titulo': 'Estado de Resultados',
-        'ingresos': ingresos, 'gastos': gastos,
-        'total_ingresos': total_ingresos, 'total_gastos': total_gastos,
-        'utilidad_neta': float(total_ingresos) - float(total_gastos),
+        'ingresos': ingresos, 'gastos': gastos, 'costos': [],
+        'total_ing': total_ingresos, 'total_costo': 0, 'total_gasto': total_gastos,
+        'utilidad_bruta': total_ingresos, 'utilidad': utilidad,
     })
 
 
 @login_required
 def balance_comprobacion(request):
-    try:
-        _, _, CuentaContable, _ = _get_models()
-        cuentas = CuentaContable.objects.filter(activo=True, es_cuenta_mayor=False).order_by('codigo')
-    except Exception:
-        cuentas = []
-    return render(request, 'contabilidad/balance_comprobacion.html', {'titulo': 'Balance de Comprobación', 'cuentas': cuentas})
+    _, _, CuentaContable, _ = _get_models()
+    form = ReporteContableForm(request.GET or None)
+    ejercicio, lines = _period_lines(form)
+    cuentas = CuentaContable.objects.filter(activo=True, es_cuenta_mayor=False).order_by('codigo')
+    for cuenta in cuentas:
+        totals = lines.filter(cuenta=cuenta).aggregate(debe=Sum('debe'), haber=Sum('haber'))
+        cuenta.debe = totals['debe'] or 0
+        cuenta.haber = totals['haber'] or 0
+        cuenta.saldo_d = max(cuenta.debe - cuenta.haber, 0)
+        cuenta.saldo_h = max(cuenta.haber - cuenta.debe, 0)
+    return render(request, 'contabilidad/balance_comprobacion.html', {
+        'titulo': 'Balance de Comprobación', 'form': form, 'ejercicio': ejercicio,
+        'cuentas': cuentas,
+        'totales': {'debe': sum(c.debe for c in cuentas), 'haber': sum(c.haber for c in cuentas),
+                    'saldo_d': sum(c.saldo_d for c in cuentas), 'saldo_h': sum(c.saldo_h for c in cuentas)},
+    })
 
 
 @login_required

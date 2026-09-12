@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% block title %}Clasificaciones SUDEBIP | ERP{% endblock %}
+{% block page_title %}Clasificaciones SUDEBIP{% endblock %}
+{% block breadcrumb %}Activos Fijos / Clasificaciones{% endblock %}
+{% block content %}
+<div class="erp-card">
+  <div class="erp-card-header">
+    <span class="erp-card-title"><i class="bi bi-tags me-2"></i>Catálogo editable de clasificaciones</span>
+    <a href="{% url 'activos_fijos:categoria_create' %}" class="btn-erp btn-erp-primary"><i class="bi bi-plus-lg me-1"></i>Nueva clasificación</a>
+  </div>
+  <div class="erp-card-body p-0">
+    <div class="table-responsive">
+      <table class="erp-table">
+        <thead><tr><th>Clasificación</th><th>Prefijo</th><th>Vida útil predeterminada</th><th class="text-end">Acciones</th></tr></thead>
+        <tbody>
+          {% for categoria in categorias %}
+          <tr>
+            <td class="fw-semibold">{{ categoria.nombre }}</td>
+            <td><span class="badge-area">{{ categoria.prefijo_codigo }}</span></td>
+            <td>{{ categoria.vida_util_defecto }} años</td>
+            <td class="text-end"><a href="{% url 'activos_fijos:categoria_edit' categoria.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i> Editar</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-4">No hay clasificaciones registradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

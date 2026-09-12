@@ -7,7 +7,7 @@
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
       <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-3"><label class="form-label small fw-semibold">Ejercicio *</label>{{ form.ejercicio }}</div>
+        <div class="col-md-3"><label class="form-label small fw-semibold">Ejercicio fiscal *</label>{{ form.ejercicio }}<a href="{% url 'contabilidad:ejercicio_create' %}" target="_blank" class="small text-success"><i class="bi bi-plus-circle"></i> Crear ejercicio fiscal</a></div>
         <div class="col-md-2"><label class="form-label small fw-semibold">Desde</label>{{ form.fecha_inicio }}</div>
         <div class="col-md-2"><label class="form-label small fw-semibold">Hasta</label>{{ form.fecha_fin }}</div>
         <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Generar</button></div>
@@ -28,7 +28,7 @@
         <a href="{% url 'contabilidad:asiento_detail' a.pk %}">AST-{{ a.numero }}</a>
         — {{ a.fecha|date:"d/m/Y" }} — {{ a.get_tipo_display }}
       </span>
-      <span class="text-muted small">{{ a.concepto|truncatechars:60 }}</span>
+      <span class="text-muted small">{{ a.descripcion|truncatechars:60 }}</span>
     </div>
     <div class="card-body p-0">
       <table class="table table-sm mb-0">
@@ -42,8 +42,8 @@
           <tr>
             <td><code class="small">{{ l.cuenta.codigo }}</code> {{ l.cuenta.nombre }}</td>
             <td class="small text-muted">{{ l.descripcion|default:"—" }}</td>
-            <td class="text-end text-primary">{% if l.tipo == "debe" %}${{ l.monto|floatformat:2 }}{% endif %}</td>
-            <td class="text-end text-danger">{% if l.tipo == "haber" %}${{ l.monto|floatformat:2 }}{% endif %}</td>
+            <td class="text-end text-primary">${{ l.debe|floatformat:2 }}</td>
+            <td class="text-end text-danger">${{ l.haber|floatformat:2 }}</td>
           </tr>
           {% endfor %}
         </tbody>

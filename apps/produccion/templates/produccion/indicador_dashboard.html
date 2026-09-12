@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo }}</h2>
+        <a class="btn btn-primary" href="{% url 'produccion:indicador_medicion_create' %}">Registrar medición</a>
+    </div>
+    <div class="row g-3">
+    {% for indicador in indicadores %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between"><h5>{{ indicador.nombre }}</h5><span class="badge bg-secondary">{{ indicador.codigo }}</span></div>
+                    <p class="text-muted mb-2">{{ indicador.get_departamento_display }} · Objetivo: {{ indicador.objetivo }} {{ indicador.unidad }}</p>
+                    {% with medicion=indicador.mediciones.first %}
+                    {% if medicion %}<p class="display-6 mb-0">{{ medicion.valor }} <small class="fs-6">{{ indicador.unidad }}</small></p><small>Última medición: {{ medicion.periodo }}</small>
+                    {% else %}<p class="text-muted">Sin mediciones registradas.</p>{% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    {% empty %}<div class="col-12"><p>No hay indicadores activos configurados.</p></div>{% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,8 +1,7 @@
-{% extends 'base.html' %} {# Asume que tienes un template base.html #}
-{% load crispy_forms_tags %} {# Para un renderizado más limpio de los formularios #}
+{% extends 'core/base.html' %}
 
 {% block content %}
-<div class="container">
+<div class="container py-4">
   <h2 class="my-4">{{ titulo }}</h2>
 
   <form method="post" novalidate>
@@ -13,31 +12,36 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-6">
-            {{ form.cliente|as_crispy_field }}
+            <label class="form-label">Comprador *</label>
+            <div class="input-group">
+              {{ form.cliente }}
+              <a href="{% url 'ventas:cliente_create' %}" class="btn btn-outline-success" target="_blank" title="Agregar comprador"><i class="bi bi-person-plus"></i></a>
+            </div>
+            {{ form.cliente.errors }}
           </div>
           <div class="col-md-3">
-            {{ form.fecha_emision|as_crispy_field }}
+            {{ form.fecha_pedido }}
           </div>
           <div class="col-md-3">
-            {{ form.dias_credito|as_crispy_field }}
+            {{ form.dias_credito }}
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
-            {{ form.direccion_despacho|as_crispy_field }}
+            {{ form.direccion_despacho }}
           </div>
         </div>
         <div class="row">
           <div class="col-md-6">
-            {{ form.iva_porcentaje|as_crispy_field }}
+            {{ form.iva_porcentaje }}
           </div>
           <div class="col-md-6">
-            {{ form.descuento_global_porcentaje|as_crispy_field }}
+            {{ form.descuento_global_porcentaje }}
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
-            {{ form.observaciones|as_crispy_field }}
+            {{ form.observaciones }}
           </div>
         </div>
       </div>
@@ -61,10 +65,16 @@
           <tbody>
             {% for item_form in formset %}
             <tr class="formset-row">
-              <td>{{ item_form.producto|as_crispy_field }}</td>
-              <td>{{ item_form.cantidad|as_crispy_field }}</td>
-              <td>{{ item_form.precio_unitario|as_crispy_field }}</td>
-              <td>{{ item_form.observaciones|as_crispy_field }}</td>
+              <td>
+                <div class="input-group">
+                  {{ item_form.producto }}
+                  <a href="{% url 'ventas:producto_create' %}" class="btn btn-outline-success" target="_blank" title="Agregar producto"><i class="bi bi-plus-lg"></i></a>
+                </div>
+                {{ item_form.producto.errors }}
+              </td>
+              <td>{{ item_form.cantidad }}</td>
+              <td>{{ item_form.precio_unitario }}</td>
+              <td>{{ item_form.observaciones }}</td>
               <td>
                 <span class="subtotal-linea">
                   {% if item_form.instance.pk %}
@@ -75,16 +85,21 @@
                 </span>
               </td>
               <td>
-                {% if item_form.instance.pk %}
-                {{ item_form.DELETE }}
-                <label for="{{ item_form.DELETE.id_for_label }}">Eliminar</label>
-                {% endif %}
+                {% if item_form.DELETE %}{{ item_form.DELETE }} <label for="{{ item_form.DELETE.id_for_label }}">Eliminar</label>{% endif %}
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
-        <button type="button" class="btn btn-sm btn-info" id="add-item-button">Agregar Producto</button>
+        <table class="d-none"><tbody><tr id="empty-detail-row" class="formset-row">
+          <td><div class="input-group">{{ formset.empty_form.producto }}<a href="{% url 'ventas:producto_create' %}" class="btn btn-outline-success" target="_blank"><i class="bi bi-plus-lg"></i></a></div></td>
+          <td>{{ formset.empty_form.cantidad }}</td>
+          <td>{{ formset.empty_form.precio_unitario }}</td>
+          <td>{{ formset.empty_form.observaciones }}</td>
+          <td><span class="subtotal-linea">Bs. 0.00</span></td>
+          <td>{{ formset.empty_form.DELETE }} <label>Eliminar</label></td>
+        </tr></tbody></table>
+        <button type="button" class="btn btn-sm btn-outline-success" id="add-item-button"><i class="bi bi-plus-lg"></i> Agregar línea</button>
       </div>
     </div>
 
@@ -103,7 +118,7 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Guardar Pedido</button>
+    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar Pedido</button>
     <a href="{% url 'ventas:pedido_list' %}" class="btn btn-secondary">Cancelar</a>
   </form>
 </div>
@@ -111,9 +126,20 @@
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  // JavaScript para añadir filas dinámicamente y recalcular totales
-  // (El código completo para esta funcionalidad se proporcionó en la respuesta anterior)
-  // Asegúrate de incluirlo aquí o en un archivo JS separado.
+  const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+  const tableBody = document.querySelector('#detalle-pedido-table tbody');
+  const addButton = document.getElementById('add-item-button');
+  const emptyRow = document.getElementById('empty-detail-row').cloneNode(true);
+  addButton.addEventListener('click', () => {
+    const index = Number(totalForms.value);
+    const row = emptyRow.cloneNode(true);
+    row.innerHTML = row.innerHTML.replaceAll('__prefix__', index);
+    row.querySelectorAll('input, select, textarea').forEach((field) => {
+      if (field.type !== 'hidden') field.value = '';
+    });
+    tableBody.appendChild(row);
+    totalForms.value = index + 1;
+  });
 </script>
 {% endblock %}
 {% endblock %}

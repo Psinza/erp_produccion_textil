@@ -19,7 +19,7 @@
                 <div class="erp-card-body">
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <label class="form-label">Nombre del Insumo / Químico</label>
+                            <label class="form-label">Nombre del insumo textil</label>
                             {{ form.nombre }}
                         </div>
                         <div class="col-md-4">
@@ -28,8 +28,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Categoría</label>
-                            {{ form.categoria }}
+                            <label class="form-label">Categoría textil</label>
+                            <div class="input-group">
+                                {{ form.categoria }}
+                                <a href="/admin/produccion/categoriamateriaprima/add/" target="_blank" class="btn btn-outline-secondary" title="Crear categoría">
+                                    <i class="bi bi-plus-lg"></i>
+                                </a>
+                            </div>
+                            <div class="form-text">Si no existe, créela en una pestaña nueva y luego recargue este formulario.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Unidad de Medida</label>

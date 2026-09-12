@@ -32,5 +32,19 @@
             presupuestos y pedidos.
         </p>
     </div>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5>Operaciones comerciales textiles</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'ventas:cliente_list' %}" class="btn btn-outline-secondary">Clientes</a>
+                <a href="{% url 'ventas:producto_list' %}" class="btn btn-outline-primary">Productos terminados</a>
+                <a href="{% url 'ventas:producto_create' %}" class="btn btn-primary">Nuevo producto</a>
+                <a href="{% url 'ventas:pedido_list' %}" class="btn btn-outline-success">Pedidos</a>
+                <a href="{% url 'ventas:pedido_create' %}" class="btn btn-success">Nuevo pedido</a>
+                <a href="{% url 'ventas:cotizacion_list' %}" class="btn btn-outline-info">Cotizaciones</a>
+                <a href="{% url 'ventas:cotizacion_create' %}" class="btn btn-info">Nueva cotización</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

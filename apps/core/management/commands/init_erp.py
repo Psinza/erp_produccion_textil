@@ -91,10 +91,10 @@ ROLES_INICIALES = [
     },
     {
         'nombre': 'Transportista',
-        'nivel': 'SOLO_LECTURA',
-        'descripcion': 'Consulta de rutas y despachos',
+        'nivel': 'LECTURA_ESCRITURA',
+        'descripcion': 'Gestión de transporte, rutas y despachos',
         'areas': ['TRANSPORTE', 'ALMACEN_PT'],
-        'permisos': ['ver'],
+        'permisos': ['ver', 'crear', 'editar', 'eliminar', 'aprobar', 'reportar'],
     },
 ]
 
@@ -108,7 +108,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write(self.style.MIGRATE_HEADING('\n=== Iniciando ERP Limpieza Industrial ===\n'))
+        self.stdout.write(self.style.MIGRATE_HEADING('\n=== Iniciando ERP Producción Textil ===\n'))
 
         # 1. Áreas
         self.stdout.write('  Creando áreas...')

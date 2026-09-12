@@ -1,6 +1,5 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
 from .models import OrdenProduccion
 from apps.logistica.models import MovimientoInventario, Almacen
 
@@ -25,25 +24,10 @@ def actualizar_stock_produccion_completada(sender, instance, created, **kwargs):
 
             # 1. Entrada de Producto Terminado
             MovimientoInventario.objects.create(
-                producto_pt=instance.formula.producto,
+                producto_pt=instance.producto,
                 tipo='E', # Entrada
                 motivo='produccion',
                 almacen_destino=almacen_defecto,
-                cantidad=instance.cantidad_a_producir * instance.formula.rendimiento,
+                cantidad=instance.piezas_producidas_ok,
                 referencia=referencia_lote,
-                fecha=timezone.now()
             )
-
-            # 2. Salida Automática de Materias Primas según la fórmula
-            for ingrediente in instance.formula.ingredientes.all():
-                cantidad_total = ingrediente.cantidad * instance.cantidad_a_producir
-                
-                MovimientoInventario.objects.create(
-                    materia_prima=ingrediente.materia_prima,
-                    tipo='S', # Salida
-                    motivo='consumo',
-                    almacen_origen=almacen_defecto,
-                    cantidad=cantidad_total,
-                    referencia=f"Consumo Lote: {instance.lote_numero}",
-                    fecha=timezone.now()
-                )

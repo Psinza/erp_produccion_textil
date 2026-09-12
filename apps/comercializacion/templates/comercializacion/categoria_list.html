@@ -1,0 +1,34 @@
+{% extends "core/base.html" %}
+{% block title %}Categorías Comerciales | ERP{% endblock %}
+{% block page_title %}Categorías Comerciales{% endblock %}
+{% block breadcrumb %}Comercialización / Categorías{% endblock %}
+{% block content %}
+<div class="erp-card">
+  <div class="erp-card-header">
+    <span class="erp-card-title"><i class="bi bi-tags me-2"></i>Catálogo de categorías comerciales</span>
+    <a href="{% url 'comercializacion:categoria_create' %}" class="btn-erp btn-erp-primary"><i class="bi bi-plus-lg me-1"></i>Nueva categoría</a>
+  </div>
+  <div class="erp-card-body p-0">
+    <div class="table-responsive">
+      <table class="erp-table">
+        <thead><tr><th>Nombre</th><th>Descripción</th><th>Archivo / imagen</th><th class="text-end">Acciones</th></tr></thead>
+        <tbody>
+          {% for categoria in categorias %}
+          <tr>
+            <td class="fw-semibold">{{ categoria.nombre }}</td>
+            <td class="text-muted">{{ categoria.descripcion|default:"—"|truncatechars:80 }}</td>
+            <td>{% if categoria.imagen %}<a href="{{ categoria.imagen.url }}" target="_blank">Ver archivo</a>{% else %}—{% endif %}</td>
+            <td class="text-end">
+              <a href="{% url 'comercializacion:categoria_update' categoria.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i> Editar</a>
+              <a href="{% url 'comercializacion:categoria_delete' categoria.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-4">No hay categorías comerciales. Cree la primera para usarla en el catálogo.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

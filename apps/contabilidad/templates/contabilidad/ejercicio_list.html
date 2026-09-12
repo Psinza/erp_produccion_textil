@@ -19,7 +19,7 @@
           {% for ej in ejercicios %}
           <tr>
             <td class="fw-semibold">{{ ej.nombre }}</td>
-            <td>{{ ej.año }}</td>
+            <td>{{ ej.ano }}</td>
             <td>{{ ej.fecha_inicio|date:"d/m/Y" }}</td>
             <td>{{ ej.fecha_fin|date:"d/m/Y" }}</td>
             <td><span class="badge bg-secondary">{{ ej.asientos.count }}</span></td>

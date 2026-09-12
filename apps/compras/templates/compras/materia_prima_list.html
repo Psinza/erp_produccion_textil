@@ -5,10 +5,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="topbar-title fs-3 mb-0">{{ titulo }}</h2>
-            <p class="text-muted small mb-0">Inventario de insumos y materias primas químicas</p>
+            <p class="text-muted small mb-0">Catálogo de telas, hilos y avíos para producción textil</p>
         </div>
         <a href="{% url 'compras:materia_prima_create' %}" class="btn btn-erp btn-erp-primary">
-            <i class="bi bi-flask"></i> Nueva Materia Prima
+            <i class="bi bi-plus-lg"></i> Nueva Materia Prima Textil
         </a>
     </div>
 
@@ -34,7 +34,7 @@
                             <td><code class="text-primary fw-bold">{{ m.sku|default:"---" }}</code></td>
                             <td>
                                 <div class="fw-semibold">{{ m.nombre }}</div>
-                                <div class="small text-muted">{{ m.categoria.nombre|default:"Químico" }}</div>
+                                <div class="small text-muted">{{ m.categoria.nombre|default:"Sin categoría" }}</div>
                             </td>
                             <td><span class="badge-rol">{{ m.get_unidad_medida_display }}</span></td>
                             <td>

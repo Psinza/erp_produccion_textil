@@ -1,6 +1,6 @@
 # apps/rrhh/forms.py
 from django import forms
-from .models import Empleado, Departamento, Nomina, Vacacion, Cargo
+from .models import Empleado, Departamento, Nomina, Vacacion, Cargo, DocumentoEmpleado
 
 class DepartamentoForm(forms.ModelForm):
     class Meta:
@@ -29,8 +29,10 @@ class EmpleadoForm(forms.ModelForm):
         model = Empleado
         fields = [
             'nacionalidad', 'cedula', 'nombres', 'apellidos', 'departamento', 'cargo', 
-            'tipo_contrato', 'salario_base', 'bono_alimentacion', 'bono_divisas',
-            'fecha_ingreso', 'cargas_familiares', 'cuenta_bancaria', 'activo',
+            'tipo_contrato', 'salario_base', 'salario_moneda', 'bono_alimentacion', 'bono_alimentacion_moneda',
+            'bono_guerra', 'bono_guerra_moneda', 'bono_produccion', 'bono_produccion_moneda',
+            'bono_divisas', 'bono_divisas_moneda',
+            'fecha_ingreso', 'cargas_familiares', 'cuenta_bancaria', 'banco_pago', 'tipo_cuenta_pago', 'activo',
             'fecha_nacimiento', 'direccion', 'telefono', 'grado_instruccion',
             'tipo_sangre', 'peso', 'estatura', 'enfermedades', 'discapacidad',
             'talla_camisa', 'talla_pantalon', 'talla_calzado'
@@ -44,8 +46,15 @@ class EmpleadoForm(forms.ModelForm):
             'cargo': forms.Select(attrs={'class': 'form-select'}),
             'tipo_contrato': forms.Select(attrs={'class': 'form-select'}),
             'salario_base': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'salario_moneda': forms.Select(attrs={'class': 'form-select'}),
             'bono_alimentacion': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'bono_alimentacion_moneda': forms.Select(attrs={'class': 'form-select'}),
+            'bono_guerra': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'bono_guerra_moneda': forms.Select(attrs={'class': 'form-select'}),
+            'bono_produccion': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'bono_produccion_moneda': forms.Select(attrs={'class': 'form-select'}),
             'bono_divisas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'bono_divisas_moneda': forms.Select(attrs={'class': 'form-select'}),
             'fecha_ingreso': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'cargas_familiares': forms.NumberInput(attrs={'class': 'form-control'}),
             'cuenta_bancaria': forms.TextInput(attrs={'class': 'form-control'}),
@@ -88,3 +97,10 @@ class VacacionForm(forms.ModelForm):
             'bono_vacacional_dias': forms.NumberInput(attrs={'class': 'form-control'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+
+class DocumentoEmpleadoForm(forms.ModelForm):
+    class Meta:
+        model = DocumentoEmpleado
+        fields = ['empleado', 'tipo', 'archivo', 'numero', 'fecha_vencimiento', 'validado', 'observaciones']
+        widgets = {'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), 'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2})}

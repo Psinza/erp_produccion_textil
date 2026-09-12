@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Roles — ERP Industrial{% endblock %}
+{% block title %}Roles — ERP Producción Textil{% endblock %}
 {% block page_title %}Roles y Permisos{% endblock %}
 {% block breadcrumb %}Administración / Roles{% endblock %}
 
@@ -19,6 +19,7 @@
           <th>Rol</th>
           <th>Nivel</th>
           <th>Áreas con acceso</th>
+          <th>Permisos del módulo</th>
           <th>Usuarios</th>
           <th>Estado</th>
           <th>Acciones</th>
@@ -32,6 +33,11 @@
             {% if rol.descripcion %}
             <div style="font-size:12px;color:#8899aa;margin-top:2px;">{{ rol.descripcion|truncatechars:60 }}</div>
             {% endif %}
+          </td>
+          <td>
+            <span style="background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;">
+              Ver · Incluir · Modificar · Eliminar
+            </span>
           </td>
           <td>
             <span style="background:#e8eaf6;color:#283593;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;">
@@ -68,7 +74,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" style="text-align:center;padding:40px;color:#8899aa;">
+          <td colspan="7" style="text-align:center;padding:40px;color:#8899aa;">
             No hay roles configurados. <a href="{% url 'core:rol_crear' %}">Crear el primero</a>
           </td>
         </tr>

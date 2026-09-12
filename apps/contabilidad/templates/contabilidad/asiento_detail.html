@@ -171,10 +171,10 @@
               </span>
             </td>
             <td class="text-end fw-bold text-primary">
-              {% if l.tipo == "debe" %}${{ l.monto|floatformat:2 }}{% endif %}
+              ${{ l.debe|floatformat:2 }}
             </td>
             <td class="text-end fw-bold text-danger">
-              {% if l.tipo == "haber" %}${{ l.monto|floatformat:2 }}{% endif %}
+              ${{ l.haber|floatformat:2 }}
             </td>
             <td class="small text-muted">{{ l.descripcion|default:"—" }}</td>
             {% if asiento.estado == "borrador" %}

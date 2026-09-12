@@ -12,7 +12,7 @@ except ImportError:
 # Clave secreta (usa variable de entorno o fallback para desarrollo)
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
-    os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mantenimiento-erp-limpieza-sustituir-en-produccion')
+    os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-erp-produccion-textil-sustituir-en-produccion')
 )
 
 # Modo depuración
@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'apps.inventarios.apps.InventariosConfig',
     'apps.administracion',
     'apps.rrhh',
+    'apps.gerencia',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.core.access.GerenciaAccessMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -92,6 +94,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'apps.administracion.context_processors.empresa_context',
+                'apps.core.context_processors.module_access',
             ],
         },
     },

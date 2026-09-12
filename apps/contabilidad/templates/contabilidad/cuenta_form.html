@@ -17,13 +17,22 @@
           <div class="col-md-4"><label class="form-label">Tipo *</label>{{ form.tipo }}</div>
           <div class="col-md-4"><label class="form-label">Naturaleza *</label>{{ form.naturaleza }}</div>
           <div class="col-md-4"><label class="form-label">Nivel</label>{{ form.nivel }}</div>
-          <div class="col-md-6"><label class="form-label">Cuenta Padre (agrupación)</label>{{ form.padre }}</div>
+          <div class="col-md-6">
+            <label class="form-label">Cuenta Padre (agrupación)</label>
+            <div class="input-group">
+              {{ form.padre }}
+              <a href="{% url 'contabilidad:cuenta_create' %}" class="btn btn-outline-success" title="Agregar cuenta padre">
+                <i class="bi bi-plus-lg"></i>
+              </a>
+            </div>
+            <div class="form-text">Cree primero la cuenta agrupadora si aún no existe.</div>
+          </div>
           <div class="col-md-3"><label class="form-label">Saldo Inicial</label>{{ form.saldo_inicial }}</div>
           <div class="col-md-3 d-flex align-items-end gap-3">
             <div class="form-check mb-1">{{ form.acepta_movimientos }}<label class="form-check-label ms-1 small">Acepta movimientos</label></div>
           </div>
           <div class="col-md-3 d-flex align-items-end">
-            <div class="form-check mb-1">{{ form.activa }}<label class="form-check-label ms-1 small">Activa</label></div>
+            <div class="form-check mb-1">{{ form.activo }}<label class="form-check-label ms-1 small">Activa</label></div>
           </div>
           <div class="col-12"><label class="form-label">Descripción</label>{{ form.descripcion }}</div>
         </div>

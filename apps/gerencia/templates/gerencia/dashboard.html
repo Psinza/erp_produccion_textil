@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% block title %}Gerencia y Dirección{% endblock %}
+{% block page_title %}Gerencia y Dirección{% endblock %}
+{% block breadcrumb %}Indicadores integrales de la fábrica textil{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h2 class="fw-bold mb-1">Panel Gerencial</h2><p class="text-muted mb-0">Indicadores operativos, financieros y de producción desde {{ inicio|date:"d/m/Y" }}.</p></div>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">Inicio</a>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card shadow-sm border-0 p-3"><small class="text-muted">Ventas del mes</small><h3 class="text-success">{{ ventas_mes|floatformat:2 }}</h3><small>Moneda según cada pedido</small></div></div>
+    <div class="col-md-3"><div class="card shadow-sm border-0 p-3"><small class="text-muted">Compras del mes</small><h3 class="text-warning">{{ compras_mes|floatformat:2 }}</h3><small>Órdenes de compra</small></div></div>
+    <div class="col-md-3"><div class="card shadow-sm border-0 p-3"><small class="text-muted">Resultado operativo</small><h3 class="{% if resultado_mes < 0 %}text-danger{% else %}text-primary{% endif %}">{{ resultado_mes|floatformat:2 }}</h3><small>Ventas - compras - producción - nómina</small></div></div>
+    <div class="col-md-3"><div class="card shadow-sm border-0 p-3"><small class="text-muted">Nómina del mes</small><h3>{{ nomina_mes|floatformat:2 }}</h3><small>Asignaciones netas registradas</small></div></div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-6"><div class="card shadow-sm h-100"><div class="card-header fw-bold">Producción textil</div><div class="card-body"><div class="row g-3"><div class="col-6"><strong>{{ ordenes_total }}</strong><br><small>Órdenes totales</small></div><div class="col-6"><strong>{{ ordenes_activas }}</strong><br><small>Órdenes activas</small></div><div class="col-6"><strong>{{ ordenes_completadas }}</strong><br><small>Órdenes completadas</small></div><div class="col-6"><strong>{{ unidades_producidas }}</strong><br><small>Unidades buenas</small></div><div class="col-6 text-danger"><strong>{{ unidades_rechazadas }}</strong><br><small>Pérdidas / rechazo</small></div><div class="col-6"><strong>{{ tiempo_produccion|default:"Sin datos" }}</strong><br><small>Tiempo promedio por orden</small></div></div></div></div></div>
+    <div class="col-lg-6"><div class="card shadow-sm h-100"><div class="card-header fw-bold">Compras y abastecimiento</div><div class="card-body"><div class="row g-3"><div class="col-6"><strong>{{ compras_pendientes }}</strong><br><small>Compras pendientes</small></div><div class="col-6"><strong>{{ compras_recibidas }}</strong><br><small>Compras recibidas</small></div><div class="col-6"><strong>{% if compras_dias %}{{ compras_dias|first }}{% else %}Sin datos{% endif %}</strong><br><small>Tiempo de embarque/recepción</small></div><div class="col-6"><strong>{{ pedidos_pendientes }}</strong><br><small>Pedidos por atender</small></div></div><p class="small text-muted mt-3 mb-0">El tiempo de compra se calculará cuando el modelo registre fecha de embarque y fecha de recepción.</p></div></div></div>
+    <div class="col-lg-4"><div class="card shadow-sm h-100"><div class="card-header fw-bold">Almacenes y despachos</div><div class="card-body"><p>Movimientos: <strong>{{ movimientos_almacen }}</strong></p><p>Entradas: <strong class="text-success">{{ entradas_almacen }}</strong></p><p>Salidas: <strong class="text-danger">{{ salidas_almacen }}</strong></p><p>Despachos: <strong>{{ despachos_total }}</strong></p><p>Pendientes: <strong>{{ despachos_pendientes }}</strong></p></div></div></div>
+    <div class="col-lg-4"><div class="card shadow-sm h-100"><div class="card-header fw-bold">Mantenimiento y reparaciones</div><div class="card-body"><p>Reparaciones registradas: <strong>{{ reparaciones }}</strong></p><p>Pendientes: <strong class="text-warning">{{ reparaciones_pendientes }}</strong></p><a href="{% url 'produccion:mecanica_dashboard' %}" class="btn btn-outline-primary btn-sm">Ver mecánica textil</a></div></div></div>
+    <div class="col-lg-4"><div class="card shadow-sm h-100"><div class="card-header fw-bold">Personal y activos</div><div class="card-body"><p>Empleados activos: <strong>{{ empleados_activos }}</strong></p><p>Activos registrados: <strong>{{ activos_total }}</strong></p><p>Valor de activos: <strong>{{ activos_valor|floatformat:2 }}</strong></p><p>Costo producción estimado: <strong>{{ costo_produccion|floatformat:2 }}</strong></p></div></div></div>
+  </div>
+</div>
+{% endblock %}

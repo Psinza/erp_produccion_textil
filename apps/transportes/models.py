@@ -309,6 +309,14 @@ class Despacho(models.Model):
     conductor       = models.ForeignKey(
         Conductor, on_delete=models.PROTECT, related_name="despachos"
     )
+    pedido          = models.ForeignKey(
+        'ventas.Pedido', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='despachos_transportes'
+    )
+    material_orden = models.CharField(max_length=255, blank=True, verbose_name='Material según orden')
+    autorizacion = models.CharField(max_length=100, blank=True)
+    tipo_ruta = models.CharField(max_length=80, blank=True)
+    viatico = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
     fecha_salida    = models.DateTimeField()
     fecha_llegada_estimada = models.DateTimeField(null=True, blank=True)
@@ -426,6 +434,17 @@ class EntregaDespacho(models.Model):
 
     def __str__(self):
         return f"{self.despacho} | {self.punto_entrega.nombre}"
+
+
+class ViaticoTransporte(models.Model):
+    ESTADOS = [('solicitado', 'Solicitado'), ('aprobado', 'Aprobado'), ('pagado', 'Pagado'), ('rendido', 'Rendido')]
+    despacho = models.ForeignKey(Despacho, on_delete=models.CASCADE, related_name='viaticos')
+    beneficiario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    concepto = models.CharField(max_length=200)
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    fecha = models.DateField(default=timezone.now)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='solicitado')
+    comprobante = models.FileField(upload_to='transportes/viaticos/', blank=True, null=True)
 
 
 # ─────────────────────────────────────────────

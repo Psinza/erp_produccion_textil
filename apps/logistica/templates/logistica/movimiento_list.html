@@ -38,11 +38,9 @@
                             <td class="ps-4 small text-muted">{{ mov.fecha|date:"d/m/Y H:i" }}</td>
                             <td>
                                 <div class="fw-bold">
-                                    {% if mov.materia_prima %}
-                                        <i class="bi bi-droplet-half text-primary me-1"></i> {{ mov.materia_prima.nombre }}
-                                    {% else %}
-                                        <i class="bi bi-box-seam text-success me-1"></i> {{ mov.producto_pt.nombre }}
-                                    {% endif %}
+                                    {% if mov.materia_prima %}<i class="bi bi-droplet-half text-primary me-1"></i> {{ mov.materia_prima.nombre }}
+                                    {% elif mov.producto_pt %}<i class="bi bi-box-seam text-success me-1"></i> {{ mov.producto_pt.nombre }}
+                                    {% else %}<i class="bi bi-gear text-warning me-1"></i> {{ mov.repuesto.nombre }}{% endif %}
                                 </div>
                                 <small class="text-muted">{{ mov.referencia|default:"—" }}</small>
                             </td>

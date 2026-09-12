@@ -16,4 +16,8 @@ urlpatterns = [
     path('productos/', views.producto_list, name='producto_list'),
     path('productos/nuevo/', views.producto_create, name='producto_create'),
     path('productos/<int:pk>/editar/', views.producto_update, name='producto_update'),
+    path('requerimientos/', views.requerimiento_list, name='requerimiento_list'),
+    path('requerimientos/nuevo/', views.requerimiento_create, name='requerimiento_create'),
+    path('recepciones/', views.recepcion_list, name='recepcion_list'),
+    path('recepciones/nueva/', views.recepcion_create, name='recepcion_create'),
 ]

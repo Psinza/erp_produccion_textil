@@ -12,7 +12,20 @@
         <h6 class="text-muted text-uppercase fw-bold mb-3 border-bottom pb-2">Identificación</h6>
         <div class="row g-3 mb-4">
           <div class="col-md-3"><label class="form-label">Placa *</label>{{ form.placa }}{% if form.placa.errors %}<div class="text-danger small">{{ form.placa.errors }}</div>{% endif %}</div>
-          <div class="col-md-3"><label class="form-label">Tipo *</label>{{ form.tipo }}</div>
+          <div class="col-md-3">
+            <label class="form-label">Tipo *</label>
+            <div class="input-group">
+              {{ form.tipo }}
+              <a href="{% url 'transportes:tipo_vehiculo_create' %}" class="btn btn-outline-success" target="_blank" title="Agregar tipo de vehículo">
+                <i class="bi bi-plus-lg"></i>
+              </a>
+              <a href="{% url 'transportes:tipo_vehiculo_list' %}" class="btn btn-outline-secondary" target="_blank" title="Administrar tipos de vehículo">
+                <i class="bi bi-gear"></i>
+              </a>
+            </div>
+            <div class="form-text">Puede crear y editar tipos desde el catálogo.</div>
+            {% if form.tipo.errors %}<div class="text-danger small">{{ form.tipo.errors }}</div>{% endif %}
+          </div>
           <div class="col-md-3"><label class="form-label">Marca *</label>{{ form.marca }}</div>
           <div class="col-md-3"><label class="form-label">Modelo *</label>{{ form.modelo }}</div>
           <div class="col-md-2"><label class="form-label">Año *</label>{{ form.año }}</div>

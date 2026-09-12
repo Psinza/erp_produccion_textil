@@ -9,7 +9,7 @@ set -e   # Detener si hay error
 
 echo ""
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║     ERP Fábrica de Productos de Limpieza — Setup    ║"
+echo "║     ERP Fábrica de Producción Textil — Setup       ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""
 

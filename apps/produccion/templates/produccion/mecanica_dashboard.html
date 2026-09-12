@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% block title %}Mecánica Industrial Textil{% endblock %}
+{% block page_title %}Mecánica Industrial Textil{% endblock %}
+{% block breadcrumb %}Producción / Mecánica Industrial{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 mb-4">
+  <a href="{% url 'produccion:dashboard' %}" class="btn btn-outline-secondary">Inicio Producción</a>
+  <a href="{% url 'produccion:mecanica_maquina_create' %}" class="btn btn-primary">Nueva máquina</a>
+  <a href="{% url 'produccion:mecanica_linea_create' %}" class="btn btn-outline-primary">Nueva línea</a>
+  <a href="{% url 'produccion:mecanica_solicitud_create' %}" class="btn btn-warning">Pedir pieza</a>
+  <a href="{% url 'produccion:mecanica_mantenimiento_create' %}" class="btn btn-outline-warning">Planificar mantenimiento</a>
+  <a href="{% url 'produccion:mecanica_chequeo_create' %}" class="btn btn-outline-success">Chequear línea</a>
+  <a href="{% url 'produccion:mecanica_plan_create' %}" class="btn btn-outline-dark">Nuevo plan</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div class="card shadow-sm"><div class="card-header">Stock de máquinas y alineación por línea</div><div class="card-body p-0"><table class="table mb-0"><tr><th>Código</th><th>Máquina</th><th>Tipo</th><th>Línea</th><th>Estado</th></tr>{% for m in maquinas %}<tr><td>{{ m.codigo }}</td><td>{{ m.nombre }}</td><td>{{ m.tipo }}</td><td>{{ m.linea|default:"Sin asignar" }}</td><td>{{ m.get_estado_display }}</td></tr>{% empty %}<tr><td colspan="5" class="text-center">No hay máquinas registradas.</td></tr>{% endfor %}</table></div></div></div>
+  <div class="col-lg-5"><div class="card shadow-sm mb-3"><div class="card-header">Solicitudes de piezas pendientes</div><div class="card-body">{% for s in solicitudes %}<p class="mb-2"><strong>{% if s.pieza %}{{ s.pieza.nombre }}{% else %}{{ s.pieza_nueva }}{% endif %}</strong> · {{ s.maquina.codigo }} · {{ s.cantidad }}<br><small class="text-muted">Destino: Almacén de Repuestos de Máquinas{% for r in s.requerimientos_compra.all %} · {{ r.numero }} ({{ r.get_estado_display }}){% endfor %}</small></p>{% empty %}<p class="text-muted mb-0">No hay solicitudes pendientes.</p>{% endfor %}</div></div><div class="card shadow-sm"><div class="card-header">Mantenimientos programados</div><div class="card-body">{% for o in mantenimientos %}<p class="mb-2"><strong>{{ o.maquina.codigo }}</strong> · {{ o.get_tipo_display }} · {{ o.fecha_programada }}</p>{% empty %}<p class="text-muted mb-0">No hay mantenimientos pendientes.</p>{% endfor %}</div></div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}Logística / Almacén de Repuestos{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <a href="{% url 'logistica:repuesto_list' %}" class="btn btn-outline-secondary mb-3">Volver al almacén de piezas</a>
+    <div class="card shadow-sm">
+        <div class="card-header"><h4 class="mb-0">{{ titulo }}</h4></div>
+        <form method="post" class="card-body">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>{{ field }}
+                {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                {{ field.errors }}
+            </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Guardar pieza</button>
+            <a href="{% url 'logistica:repuesto_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

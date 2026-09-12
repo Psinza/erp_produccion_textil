@@ -8,5 +8,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     });
 
-    console.log("ERP Limpieza System Initialized");
+    console.log("ERP Producción Textil System Initialized");
 });

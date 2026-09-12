@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import (
     OrdenProduccion,
     DepartamentoUDP,
@@ -8,7 +9,8 @@ from .models import (
     DepartamentoDespacho,
     DepartamentoCalidadISO9001,
     MateriaPrima,
-    ProductoTerminado
+    ProductoTerminado,
+    ProcesoDepartamento, IndicadorProceso, MedicionIndicador, NoConformidad
 )
 
 class OrdenProduccionForm(forms.ModelForm):
@@ -33,6 +35,7 @@ class DepartamentoUDPForm(forms.ModelForm):
             'orden', 'proyecto', 'tipo_uniforme', 'tipo_diseno', 
             'cantidad_disenos', 'piezas_por_diseno', 'rango_tallas', 
             'tipo_tela', 'especificaciones_tecnicas'
+            , 'requerimiento_materiales', 'ficha_tecnica', 'aprobado'
         ]
         widgets = {
             'orden': forms.Select(attrs={'class': 'form-select'}),
@@ -46,10 +49,22 @@ class DepartamentoUDPForm(forms.ModelForm):
             'especificaciones_tecnicas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Gramaje superior a 280 g/m², acabados repelentes, etc.'}),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('aprobado') and not cleaned_data.get('ficha_tecnica'):
+            raise ValidationError('La ficha técnica es obligatoria para aprobar UDP.')
+        if cleaned_data.get('aprobado') and not cleaned_data.get('requerimiento_materiales'):
+            raise ValidationError('El requerimiento de materiales es obligatorio para aprobar UDP.')
+        return cleaned_data
+
 class DepartamentoCorteForm(forms.ModelForm):
     class Meta:
         model = DepartamentoCorte
-        fields = ['orden', 'tela_tendida_metros', 'disenos_recibidos', 'piezas_por_lote', 'piezas_defectuosas_corte']
+        fields = [
+            'orden', 'tela_tendida_metros', 'disenos_recibidos', 'piezas_por_lote',
+            'piezas_defectuosas_corte', 'tipo_tela_validado',
+            'observaciones_calidad_tela', 'corte_habilitado',
+        ]
         widgets = {
             'orden': forms.Select(attrs={'class': 'form-select'}),
             'tela_tendida_metros': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -57,6 +72,12 @@ class DepartamentoCorteForm(forms.ModelForm):
             'piezas_por_lote': forms.NumberInput(attrs={'class': 'form-control'}),
             'piezas_defectuosas_corte': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('corte_habilitado') and not cleaned_data.get('tipo_tela_validado'):
+            raise ValidationError('Debe validarse el tipo de tela antes de habilitar el corte.')
+        return cleaned_data
 
 class DepartamentoProduccionForm(forms.ModelForm):
     class Meta:
@@ -84,7 +105,10 @@ class DepartamentoBordadoForm(forms.ModelForm):
 class DepartamentoDespachoForm(forms.ModelForm):
     class Meta:
         model = DepartamentoDespacho
-        fields = ['orden', 'responsable_empaque', 'planchado_ok', 'empaquetado_ok', 'piezas_empaquetadas']
+        fields = [
+            'orden', 'responsable_empaque', 'planchado_ok', 'empaquetado_ok',
+            'piezas_empaquetadas', 'fibras_hilos_sueltos_ok', 'observaciones_revision',
+        ]
         widgets = {
             'orden': forms.Select(attrs={'class': 'form-select'}),
             'responsable_empaque': forms.Select(attrs={'class': 'form-select'}),
@@ -92,6 +116,14 @@ class DepartamentoDespachoForm(forms.ModelForm):
             'empaquetado_ok': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'piezas_empaquetadas': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('empaquetado_ok') and not cleaned_data.get('planchado_ok'):
+            raise ValidationError('El planchado debe estar conforme antes de empaquetar.')
+        if cleaned_data.get('empaquetado_ok') and not cleaned_data.get('fibras_hilos_sueltos_ok'):
+            raise ValidationError('Debe aprobarse la revisión de fibras e hilos sueltos.')
+        return cleaned_data
 
 class DepartamentoCalidadISOForm(forms.ModelForm):
     class Meta:
@@ -105,4 +137,42 @@ class DepartamentoCalidadISOForm(forms.ModelForm):
             'piezas_aprobadas_qc': forms.NumberInput(attrs={'class': 'form-control'}),
             'piezas_rechazadas_qc': forms.NumberInput(attrs={'class': 'form-control'}),
             'informe_auditoria': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class ProcesoDepartamentoForm(forms.ModelForm):
+    class Meta:
+        model = ProcesoDepartamento
+        exclude = ['version', 'fecha_aprobacion', 'creado_en', 'actualizado_en']
+        widgets = {
+            'entradas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'actividades': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'salidas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'criterios_aceptacion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class MedicionIndicadorForm(forms.ModelForm):
+    class Meta:
+        model = MedicionIndicador
+        fields = ['indicador', 'orden', 'valor', 'periodo', 'observaciones']
+        widgets = {
+            'periodo': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+
+class NoConformidadForm(forms.ModelForm):
+    class Meta:
+        model = NoConformidad
+        fields = [
+            'orden', 'origen', 'descripcion', 'cantidad_afectada',
+            'porcentaje_rechazo', 'accion_inmediata', 'causa_raiz',
+            'accion_correctiva', 'estado', 'responsable',
+        ]
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'accion_inmediata': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'causa_raiz': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'accion_correctiva': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }

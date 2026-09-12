@@ -35,4 +35,5 @@ urlpatterns = [
     path('departamentos/<int:pk>/editar/', views.departamento_update, name='departamento_edit'),
     path('cargos/', views.cargo_list, name='cargo_list'),
     path('cargos/nuevo/', views.cargo_create, name='cargo_create'),
+    path('cargos/<int:pk>/editar/', views.cargo_update, name='cargo_edit'),
 ]

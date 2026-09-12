@@ -1,0 +1,10 @@
+{% extends "core/base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}Producción / Mecánica Industrial{% endblock %}
+{% block content %}
+<div class="card shadow-sm"><div class="card-body">
+<a href="{% url 'produccion:mecanica_dashboard' %}" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Volver a Mecánica</a>
+<form method="post">{% csrf_token %}{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="mb-3"><label class="form-label">{{ field.label }}</label>{{ field }}{% if field.name == 'pieza' %}<div class="form-text">Seleccione un repuesto del stock o deje vacío para solicitar una pieza nueva.</div>{% endif %}{% if field.name == 'pieza_nueva' %}<div class="form-text">Complete este campo solo si la pieza no existe en el catálogo.</div>{% endif %}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}<button class="btn btn-primary">Guardar</button></form>
+</div></div>
+{% endblock %}

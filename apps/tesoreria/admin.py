@@ -4,7 +4,7 @@ from .models import (
     Banco, CuentaBancaria, MovimientoBancario,
     Caja, MovimientoCaja,
     CuentaPorCobrar, CuentaPorPagar,
-    Cobro, Pago, TransferenciaBancaria
+    Cobro, Pago, TransferenciaBancaria, MovimientoTesoreria
 )
 
 @admin.register(Banco)
@@ -50,3 +50,9 @@ class PagoAdmin(admin.ModelAdmin):
 @admin.register(TransferenciaBancaria)
 class TransferenciaBancariaAdmin(admin.ModelAdmin):
     list_display = ('cuenta_origen', 'cuenta_destino', 'monto', 'fecha', 'ejecutada')
+
+
+@admin.register(MovimientoTesoreria)
+class MovimientoTesoreriaAdmin(admin.ModelAdmin):
+    list_display = ('fecha', 'tipo', 'concepto', 'monto', 'cuenta', 'caja', 'autorizado_por')
+    list_filter = ('tipo', 'fecha')

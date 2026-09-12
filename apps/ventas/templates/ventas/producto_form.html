@@ -27,24 +27,21 @@
                             {{ form.nombre }}
                         </div>
 
-                        <div class="col-12">
-                            <label class="form-label">{{ form.descripcion.label }}</label>
-                            {{ form.descripcion }}
-                        </div>
-
                         <div class="col-md-6">
                             <label class="form-label">{{ form.categoria.label }}</label>
-                            {{ form.categoria }}
+                            <div class="input-group">
+                                {{ form.categoria }}
+                                <a href="/admin/ventas/categoriaproductoventa/add/" target="_blank" class="btn btn-outline-secondary" title="Crear categoría">
+                                    <i class="bi bi-plus-lg"></i>
+                                </a>
+                            </div>
+                            <div class="form-text">Categorías textiles de venta.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">{{ form.producto_base.label }}</label>
                             {{ form.producto_base }}
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label">{{ form.unidad_medida.label }}</label>
-                            {{ form.unidad_medida }}
-                        </div>
                         <div class="col-md-4">
                             <label class="form-label">{{ form.precio_venta.label }}</label>
                             {{ form.precio_venta }}
@@ -54,11 +51,33 @@
                             {{ form.impuesto_pct }}
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">{{ form.precio_minimo.label }}</label>
-                            {{ form.precio_minimo }}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.moneda.label }}</label>
+                            {{ form.moneda }}
                         </div>
-                        <div class="col-md-6 d-flex align-items-center mt-4">
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.tipo_producto.label }}</label>
+                            {{ form.tipo_producto }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.composicion_textil.label }}</label>
+                            {{ form.composicion_textil }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.tallas.label }}</label>
+                            {{ form.tallas }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.colores.label }}</label>
+                            {{ form.colores }}
+                        </div>
+                        <div class="col-md-3 d-flex align-items-center mt-4">
+                            <div class="form-check">
+                                {{ form.es_sobre_pedido }}
+                                <label class="form-check-label ms-2">Sobre pedido</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-center mt-4">
                             <div class="form-check">
                                 {{ form.activo }}
                                 <label class="form-check-label ms-2" for="{{ form.activo.id_for_label }}">Producto Activo</label>

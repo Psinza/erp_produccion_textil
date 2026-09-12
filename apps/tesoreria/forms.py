@@ -5,6 +5,7 @@ from .models import (
     Caja, MovimientoCaja,
     CuentaPorCobrar, CuentaPorPagar,
     Cobro, Pago, TransferenciaBancaria,
+    MovimientoTesoreria,
 )
 
 CTR  = {"class": "form-control"}
@@ -49,8 +50,8 @@ class CuentaBancariaForm(forms.ModelForm):
 class MovimientoBancarioForm(forms.ModelForm):
     class Meta:
         model  = MovimientoBancario
-        fields = ["cuenta", "fecha", "tipo", "concepto",
-                  "descripcion", "referencia", "monto"]
+        fields = ["cuenta", "fecha", "tipo", "concepto", "pago", "monto_igtf",
+              "descripcion", "referencia", "monto", "conciliado"]
         widgets = {
             "cuenta":      forms.Select(attrs=SEL),
             "fecha":       forms.DateInput(attrs=DATE),
@@ -59,6 +60,8 @@ class MovimientoBancarioForm(forms.ModelForm):
             "descripcion": forms.TextInput(attrs=CTR),
             "referencia":  forms.TextInput(attrs=CTR),
             "monto":       forms.NumberInput(attrs=NUM),
+            "monto_igtf":  forms.NumberInput(attrs=NUM),
+            "conciliado": forms.CheckboxInput(attrs=CHK),
         }
 
 
@@ -106,6 +109,12 @@ class CuentaPorCobrarForm(forms.ModelForm):
             "observaciones":    forms.Textarea(attrs=TXT),
         }
 
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("fecha_emision") and cleaned.get("fecha_vencimiento") and cleaned["fecha_vencimiento"] < cleaned["fecha_emision"]:
+            raise forms.ValidationError("La fecha de vencimiento no puede ser anterior a la fecha de emisión.")
+        return cleaned
+
 
 class CuentaPorPagarForm(forms.ModelForm):
     class Meta:
@@ -124,6 +133,12 @@ class CuentaPorPagarForm(forms.ModelForm):
             "monto_total":       forms.NumberInput(attrs=NUM),
             "observaciones":     forms.Textarea(attrs=TXT),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("fecha_emision") and cleaned.get("fecha_vencimiento") and cleaned["fecha_vencimiento"] < cleaned["fecha_emision"]:
+            raise forms.ValidationError("La fecha de vencimiento no puede ser anterior a la fecha de emisión.")
+        return cleaned
 
 
 class CobroForm(forms.ModelForm):
@@ -177,3 +192,10 @@ class TransferenciaBancariaForm(forms.ModelForm):
                 "La cuenta de origen y destino no pueden ser la misma."
             )
         return cd
+
+
+class MovimientoTesoreriaForm(forms.ModelForm):
+    class Meta:
+        model = MovimientoTesoreria
+        fields = ['fecha', 'tipo', 'concepto', 'monto', 'cuenta', 'caja', 'referencia', 'observaciones']
+        widgets = {'fecha': forms.DateInput(attrs=DATE), 'observaciones': forms.Textarea(attrs=TXT)}

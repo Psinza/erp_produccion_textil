@@ -14,7 +14,7 @@ class Banco(models.Model):
 
 class CuentaBancaria(models.Model):
     TIPO_CUENTA = [('corriente', 'Corriente'), ('ahorro', 'Ahorro')]
-    MONEDA = [('VES', 'Bolívares'), ('USD', 'Dólares')]
+    MONEDA = [('VES', 'Bolívares'), ('USD', 'Dólares'), ('EUR', 'Euros')]
 
     banco = models.ForeignKey(Banco, on_delete=models.CASCADE)
     numero = models.CharField(max_length=20)
@@ -166,6 +166,21 @@ class MovimientoBancario(models.Model):
     class Meta:
         verbose_name = "Movimiento Bancario"
         verbose_name_plural = "Movimientos Bancarios"
+
+
+class MovimientoTesoreria(models.Model):
+    """Movimiento unificado para el historial operativo de tesorería."""
+    TIPOS = [('ingreso', 'Ingreso'), ('egreso', 'Egreso'), ('transferencia', 'Transferencia')]
+    fecha = models.DateField()
+    tipo = models.CharField(max_length=20, choices=TIPOS)
+    concepto = models.CharField(max_length=150)
+    monto = models.DecimalField(max_digits=20, decimal_places=2)
+    cuenta = models.ForeignKey(CuentaBancaria, on_delete=models.PROTECT, null=True, blank=True, related_name='movimientos_tesoreria')
+    caja = models.ForeignKey(Caja, on_delete=models.PROTECT, null=True, blank=True, related_name='movimientos_tesoreria')
+    referencia = models.CharField(max_length=100, blank=True)
+    autorizado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='movimientos_tesoreria_autorizados')
+    observaciones = models.TextField(blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
 
 class TransferenciaBancaria(models.Model):
     cuenta_origen = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE, related_name='transferencias_realizadas')

@@ -1,7 +1,9 @@
-# Módulo PRODUCCIÓN — ERP Fábrica de Limpieza
+# Módulo PRODUCCIÓN TEXTIL — ERP
 ## Django + PostgreSQL | Bootstrap 5 + Bootstrap Icons
 
 ---
+
+Este módulo gestiona el flujo UDP, Corte, Producción textil, Pool de calidad, Bordados y Despacho. Incluye trazabilidad por lote, planes de proceso, indicadores, notificaciones y no conformidades alineados con ISO 9001:2015. Las referencias venezolanas deben ser confirmadas por el responsable de calidad según el producto y contrato aplicable.
 
 ## 📦 Estructura del módulo
 
@@ -37,7 +39,7 @@ apps/produccion/
 
 ---
 
-## 🗃️ Modelos
+## 🗃️ Modelos textiles y de calidad
 
 | Modelo                      | Descripción                                                  |
 |-----------------------------|--------------------------------------------------------------|
@@ -45,36 +47,34 @@ apps/produccion/
 | `CategoriaMateriaPrima`     | Agrupación de materias primas                                |
 | `ProductoTerminado`         | Producto final con stock y costo estimado                    |
 | `MateriaPrima`              | Insumo con stock, costo y alerta de mínimo                   |
-| `Formula`                   | Receta de producción con versión y rendimiento               |
-| `LineaFormula`              | Ingrediente de la fórmula con cantidad y costo               |
-| `OrdenProduccion`           | Orden para producir N veces una fórmula                      |
-| `LoteProduccion`            | Lote físico generado por la orden                            |
-| `ConsumoMateriaPrima`       | Registro de materia prima consumida en la orden              |
-| `ControlCalidad`            | Inspección fisicoquímica del lote (pH, viscosidad, densidad) |
+| `OrdenProduccion`           | Orden y lote físico de una prenda                            |
+| `DepartamentoUDP`           | Diseño, ficha técnica, tallaje y requerimientos              |
+| `DepartamentoCorte`         | Tendido, validación de tela y habilitación                   |
+| `DepartamentoProduccionTextil` | Confección por línea y fallas de costura                   |
+| `DepartamentoCalidadISO9001`| Pool de calidad y liberación del lote                        |
+| `DepartamentoBordado`       | Logos, nombres y emblemas                                    |
+| `DepartamentoDespacho`      | Planchado, fibras sueltas, empaque y entrega                 |
+| `CatalogoProceso`            | Catálogo maestro de los seis procesos                        |
+| `ProcesoDepartamento`       | Plan documentado por orden, versión y cláusula ISO            |
+| `IndicadorProceso`           | Definición de KPI y objetivo                                 |
+| `MedicionIndicador`          | Evidencia fechada de medición                                |
+| `Notificacion`               | Avisos de avance y calidad                                   |
+| `NoConformidad`              | Registro, causa y acción correctiva                          |
 
 ---
 
-## 🔄 Flujos implementados
+## 🔄 Flujo textil implementado
 
-### Fórmula
+### Orden de producción
 ```
-Borrador → [agregar ingredientes] → [Activar] → Activa → Obsoleta
-```
-
-### Orden de Producción
-```
-Planificada → [Iniciar] → En Proceso → [Pausar] → Pausada → [Reanudar]
-                                     → [Registrar Lote]
-                                     → [Completar] → Completada
+UDP → Corte → Bordados → Producción textil → Despacho → Pool → Completada
 ```
 
-### Lote de Producción
-```
-En Producción → [Enviar a QC] → En Control QC
-                                      → [Registrar Control Calidad]
-                                      → Aprobado → [Liberar] → Liberado al Almacén
-                                      → Rechazado
-```
+Cada transición genera una notificación. Un rechazo igual o superior al 5% abre una no conformidad y retiene el lote para análisis del Pool.
+
+## 📊 Indicadores iniciales
+
+Se cargan mediante la migración `0008_seed_produccion_textil`: merma de tela, rechazo en corte, FPY de confección, FPY del Pool, rechazo de bordados y OTIF de Despacho.
 
 ---
 

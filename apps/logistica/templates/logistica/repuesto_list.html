@@ -1,0 +1,61 @@
+{% extends "core/base.html" %}
+{% block title %}Almacén de Repuestos de Máquinas{% endblock %}
+{% block page_title %}Almacén de Repuestos de Máquinas{% endblock %}
+{% block breadcrumb %}Logística / Piezas de equipos de costura{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Piezas de equipos de máquinas de coser</h2>
+            <p class="text-muted mb-0">{{ almacen|default:"Almacén de repuestos no configurado" }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'logistica:dashboard' %}" class="btn btn-outline-secondary">Logística</a>
+            <a href="{% url 'logistica:repuesto_create' %}" class="btn btn-primary">Nueva pieza</a>
+        </div>
+    </div>
+    <div class="alert alert-info">
+        Registre las piezas recibidas mediante <strong>Nuevo movimiento</strong> usando tipo
+        <strong>Entrada</strong> y como destino el Almacén de Repuestos de Máquinas.
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Catálogo y existencias</strong>
+            {% if almacen %}<span class="text-muted small">{{ almacen.ubicacion }}</span>{% endif %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Código</th><th>Pieza</th><th>Tipo</th><th>Máquina compatible</th><th class="text-end">Stock almacén</th><th>Stock mínimo</th><th>Acciones</th></tr></thead>
+                <tbody>
+                {% for pieza in repuestos %}
+                <tr class="{% if pieza.stock_almacen <= pieza.stock_minimo %}table-warning{% endif %}">
+                    <td><code>{{ pieza.codigo }}</code></td><td class="fw-bold">{{ pieza.nombre }}</td>
+                    <td>{{ pieza.get_tipo_display }}</td><td>{{ pieza.maquina_compatible|default:"-" }}</td>
+                    <td class="text-end fw-bold">{{ pieza.stock_almacen }} {{ pieza.unidad_medida }}</td>
+                    <td>{{ pieza.stock_minimo }}</td>
+                    <td class="text-nowrap">
+                        <a href="{% url 'logistica:repuesto_update' pieza.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        <a href="{% url 'logistica:movimiento_create' %}?repuesto={{ pieza.pk }}{% if almacen %}&almacen_destino={{ almacen.pk }}{% endif %}" class="btn btn-sm btn-outline-primary">Registrar movimiento</a>
+                    </td>
+                </tr>
+                {% empty %}<tr><td colspan="7" class="text-center py-4 text-muted">No hay piezas registradas.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Movimientos de stock de piezas</strong>
+            <a href="{% url 'logistica:movimiento_create' %}{% if almacen %}?almacen_destino={{ almacen.pk }}{% endif %}" class="btn btn-sm btn-primary">Nuevo movimiento</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead><tr><th>Fecha</th><th>Pieza</th><th>Tipo</th><th>Cantidad</th><th>Origen / destino</th><th>Referencia</th></tr></thead>
+                <tbody>{% for mov in movimientos %}
+                    <tr><td>{{ mov.fecha|date:"d/m/Y H:i" }}</td><td>{{ mov.repuesto.codigo }} - {{ mov.repuesto.nombre }}</td><td>{{ mov.get_tipo_display }}</td><td>{% if mov.tipo == "S" %}-{% else %}+{% endif %}{{ mov.cantidad }}</td><td>{{ mov.almacen_origen|default:"Externo" }} → {{ mov.almacen_destino|default:"-" }}</td><td>{{ mov.referencia|default:"-" }}</td></tr>
+                {% empty %}<tr><td colspan="6" class="text-center py-4 text-muted">No hay movimientos de piezas registrados.</td></tr>{% endfor %}</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

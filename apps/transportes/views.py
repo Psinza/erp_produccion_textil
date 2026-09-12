@@ -4,11 +4,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import (
     ConductorForm, DespachoFinalizarForm, DespachoForm, EntregaDespachoForm,
     MantenimientoForm, PuntoEntregaForm, RutaForm, TipoVehiculoForm,
-    VehiculoForm, ZonaForm,
+    VehiculoForm, ZonaForm, ViaticoTransporteForm,
 )
 from .models import (
     Conductor, Despacho, EntregaDespacho, Mantenimiento, PuntoEntrega,
     Ruta, TipoVehiculo, Vehiculo, Zona,
+    ViaticoTransporte,
 )
 
 
@@ -142,18 +143,26 @@ def despacho_eliminar(request, pk):
 
 
 @login_required
+def viatico_crear(request):
+    return _form(request, ViaticoTransporteForm, 'transportes/viatico_form.html', 'Nuevo viático de transporte')
+
+
+@login_required
 def tipo_vehiculo_lista(request):
-    return _list(request, TipoVehiculo, 'transportes/zona_list.html', 'Tipos de vehiculo')
+    return render(request, 'transportes/tipo_vehiculo_list.html', {
+        'tipos': TipoVehiculo.objects.order_by('nombre'),
+        'titulo': 'Tipos de vehículo',
+    })
 
 
 @login_required
 def tipo_vehiculo_crear(request):
-    return _form(request, TipoVehiculoForm, 'transportes/vehiculo_form.html', 'Nuevo tipo de vehiculo')
+    return _form(request, TipoVehiculoForm, 'transportes/tipo_vehiculo_form.html', 'Nuevo tipo de vehiculo')
 
 
 @login_required
 def tipo_vehiculo_editar(request, pk):
-    return _form(request, TipoVehiculoForm, 'transportes/vehiculo_form.html', 'Editar tipo de vehiculo', get_object_or_404(TipoVehiculo, pk=pk))
+    return _form(request, TipoVehiculoForm, 'transportes/tipo_vehiculo_form.html', 'Editar tipo de vehiculo', get_object_or_404(TipoVehiculo, pk=pk))
 
 
 @login_required

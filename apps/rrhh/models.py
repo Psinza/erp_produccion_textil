@@ -38,6 +38,7 @@ class Cargo(models.Model):
         return f"{self.nombre} - {self.departamento.nombre}"
 
 class Empleado(models.Model):
+    MONEDAS = [('VES', 'Bolívares (VES)'), ('USD', 'Dólares (USD)'), ('EUR', 'Euros (EUR)')]
     NACIONALIDAD_CHOICES = [('V', 'Venezolano'), ('E', 'Extranjero')]
     CONTRATO_CHOICES = [
         ('IND', 'Tiempo Indeterminado'),
@@ -72,14 +73,23 @@ class Empleado(models.Model):
     cargo = models.ForeignKey(Cargo, on_delete=models.PROTECT, null=True, verbose_name="Cargo")
     tipo_contrato = models.CharField(max_length=3, choices=CONTRATO_CHOICES, default='IND', verbose_name="Tipo de Contrato")
     
-    salario_base = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Salario Base (VES)")
-    bono_alimentacion = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Cesta Ticket / Bono Alimentación (VES)")
-    bono_divisas = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Bono Complementario (USD)")
+    salario_base = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Salario Base")
+    salario_moneda = models.CharField(max_length=3, choices=MONEDAS, default='VES', verbose_name="Moneda del salario")
+    bono_alimentacion = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Cesta Ticket")
+    bono_alimentacion_moneda = models.CharField(max_length=3, choices=MONEDAS, default='VES', verbose_name="Moneda de cesta ticket")
+    bono_guerra = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Bono de Guerra Económica")
+    bono_guerra_moneda = models.CharField(max_length=3, choices=MONEDAS, default='VES', verbose_name="Moneda del bono de guerra")
+    bono_produccion = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Bono de Producción")
+    bono_produccion_moneda = models.CharField(max_length=3, choices=MONEDAS, default='VES', verbose_name="Moneda del bono de producción")
+    bono_divisas = models.DecimalField(max_digits=14, decimal_places=2, default=0.00, verbose_name="Bono Complementario")
+    bono_divisas_moneda = models.CharField(max_length=3, choices=MONEDAS, default='USD', verbose_name="Moneda del bono complementario")
     
     fecha_ingreso = models.DateField(verbose_name="Fecha de Ingreso")
     fecha_egreso = models.DateField(blank=True, null=True, verbose_name="Fecha de Egreso")
     cargas_familiares = models.IntegerField(default=0, verbose_name="Cargas Familiares")
     cuenta_bancaria = models.CharField(max_length=20, blank=True, null=True, verbose_name="Cuenta Bancaria (20 dígitos)")
+    banco_pago = models.ForeignKey('tesoreria.Banco', on_delete=models.PROTECT, null=True, blank=True, related_name='empleados_pago')
+    tipo_cuenta_pago = models.CharField(max_length=20, blank=True, default='corriente')
     
     ESTADO_CHOICES = [
         ('activo', 'Activo'),
@@ -98,8 +108,38 @@ class Empleado(models.Model):
         hoy = timezone.now().date()
         return relativedelta(hoy, self.fecha_ingreso).years
 
+    def conceptos_laborales_en_ves(self, fecha=None):
+        """Convierte los conceptos laborales usando la tasa BCV registrada."""
+        from apps.core.currency import convertir_a_ves
+        conceptos = {
+            'salario_base': (self.salario_base, self.salario_moneda),
+            'cesta_ticket': (self.bono_alimentacion, self.bono_alimentacion_moneda),
+            'bono_guerra': (self.bono_guerra, self.bono_guerra_moneda),
+            'bono_produccion': (self.bono_produccion, self.bono_produccion_moneda),
+            'bono_complementario': (self.bono_divisas, self.bono_divisas_moneda),
+        }
+        return {
+            nombre: convertir_a_ves(monto, moneda, fecha)
+            for nombre, (monto, moneda) in conceptos.items()
+        }
+
     def __str__(self):
         return f"{self.nacionalidad}-{self.cedula} {self.nombres} {self.apellidos}"
+
+
+class DocumentoEmpleado(models.Model):
+    TIPOS = [
+        ('cedula', 'Cédula'), ('rif', 'RIF'), ('partida_nacimiento', 'Partida de nacimiento'),
+        ('estudios', 'Estudios'), ('cv', 'CV personal'), ('constancia_medica', 'Constancia médica'),
+    ]
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='documentos')
+    tipo = models.CharField(max_length=30, choices=TIPOS)
+    archivo = models.FileField(upload_to='rrhh/documentos/%Y/%m/', max_length=255)
+    numero = models.CharField(max_length=60, blank=True)
+    fecha_vencimiento = models.DateField(null=True, blank=True)
+    validado = models.BooleanField(default=False)
+    observaciones = models.TextField(blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
 
 class Nomina(models.Model):
     TIPO_NOMINA_CHOICES = [

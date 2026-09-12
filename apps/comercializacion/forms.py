@@ -18,7 +18,8 @@ class InformacionComercialForm(forms.ModelForm):
     class Meta:
         model = InformacionComercial
         fields = ['producto', 'categoria', 'nombre_comercial', 'descripcion_larga',
-                  'ficha_tecnica', 'en_oferta', 'destacado']
+                  'ficha_tecnica', 'composicion', 'colores_disponibles',
+                  'tallas_disponibles', 'unidad_venta', 'en_oferta', 'destacado']
         widgets = {
             'producto': forms.Select(attrs={'class': 'form-select'}),
             'categoria': forms.Select(attrs={'class': 'form-select'}),
@@ -30,12 +31,18 @@ class InformacionComercialForm(forms.ModelForm):
                 'placeholder': 'Descripción detallada para el cliente'
             }),
             'ficha_tecnica': forms.FileInput(attrs={'class': 'form-control'}),
+            'composicion': forms.TextInput(attrs={'class': 'form-control'}),
+            'colores_disponibles': forms.TextInput(attrs={'class': 'form-control'}),
+            'tallas_disponibles': forms.TextInput(attrs={'class': 'form-control'}),
+            'unidad_venta': forms.TextInput(attrs={'class': 'form-control'}),
             'en_oferta': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'destacado': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['categoria'].queryset = CategoriaComercial.objects.order_by('nombre')
+        self.fields['categoria'].empty_label = 'Seleccione una categoría...'
         qs = ProductoTerminado.objects.all()
         if not self.instance.pk:
             productos_usados = InformacionComercial.objects.values_list('producto_id', flat=True)

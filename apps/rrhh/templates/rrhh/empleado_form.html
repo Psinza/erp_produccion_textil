@@ -110,11 +110,23 @@
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">Departamento *</label>
-            {{ form.departamento }}
+            <div class="input-group">
+              {{ form.departamento }}
+              <a href="{% url 'rrhh:departamento_create' %}" target="_blank" class="btn btn-outline-secondary" title="Agregar departamento">
+                <i class="bi bi-plus-lg"></i>
+              </a>
+            </div>
+            <div class="form-text">Puede crear un departamento sin salir del registro.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label">Cargo *</label>
-            {{ form.cargo }}
+            <div class="input-group">
+              {{ form.cargo }}
+              <a href="{% url 'rrhh:cargo_create' %}" target="_blank" class="btn btn-outline-secondary" title="Agregar cargo">
+                <i class="bi bi-plus-lg"></i>
+              </a>
+            </div>
+            <div class="form-text">El cargo se asocia al departamento seleccionado.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label">Tipo de Contrato *</label>
@@ -122,16 +134,29 @@
           </div>
           
           <div class="col-md-4">
-            <label class="form-label">Salario Base (VES) *</label>
+            <label class="form-label">Salario Base *</label>
             {{ form.salario_base }}
+            {{ form.salario_moneda }}
           </div>
           <div class="col-md-4">
-            <label class="form-label">Cesta Ticket (VES)</label>
+            <label class="form-label">Cesta Ticket</label>
             {{ form.bono_alimentacion }}
+            {{ form.bono_alimentacion_moneda }}
           </div>
           <div class="col-md-4">
-            <label class="form-label">Bono Complementario (USD)</label>
+            <label class="form-label">Bono de Guerra</label>
+            {{ form.bono_guerra }}
+            {{ form.bono_guerra_moneda }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Bono de Producción</label>
+            {{ form.bono_produccion }}
+            {{ form.bono_produccion_moneda }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Bono Complementario</label>
             {{ form.bono_divisas }}
+            {{ form.bono_divisas_moneda }}
           </div>
 
           <div class="col-md-6">

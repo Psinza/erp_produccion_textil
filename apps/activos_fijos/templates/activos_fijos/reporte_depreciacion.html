@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
         <div>
             <h2 class="fw-bold mb-0">Reporte de Depreciación</h2>
-            <p class="text-muted">Cálculo de desvalorización de activos al {% now "d/m/Y" %}.</p>
+            <p class="text-muted">Cálculo de depreciación contable de activos textiles al {% now "d/m/Y" %}.</p>
         </div>
         <button onclick="window.print()" class="btn btn-danger shadow-sm">
             <i class="bi bi-file-earmark-pdf me-1"></i> Exportar a PDF / Imprimir
@@ -17,19 +17,19 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm text-center py-3">
                 <h6 class="text-muted text-uppercase small">Costo Total Inicial</h6>
-                <h3 class="fw-bold text-dark">${{ total_compra|floatformat:2 }}</h3>
+                <h3 class="fw-bold text-dark">Bs. {{ total_compra|floatformat:2 }}</h3>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm text-center py-3">
                 <h6 class="text-muted text-uppercase small">Total Depreciado</h6>
-                <h3 class="fw-bold text-danger">-${{ total_acumulada|floatformat:2 }}</h3>
+                <h3 class="fw-bold text-danger">-Bs. {{ total_acumulada|floatformat:2 }}</h3>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm text-center py-3 bg-success text-white">
                 <h6 class="text-uppercase small opacity-75">Valor Contable Neto</h6>
-                <h3 class="fw-bold">${{ total_libro|floatformat:2 }}</h3>
+                <h3 class="fw-bold">Bs. {{ total_libro|floatformat:2 }}</h3>
             </div>
         </div>
     </div>
@@ -57,9 +57,9 @@
                         </td>
                         <td class="small">{{ a.fecha_adquisicion|date:"d/m/Y" }}</td>
                         <td class="small">{{ a.get_metodo_depreciacion_display }}</td>
-                        <td class="text-end fw-bold">${{ a.valor_compra|floatformat:2 }}</td>
-                        <td class="text-end text-danger">${{ a.depreciacion_acumulada|floatformat:2 }}</td>
-                        <td class="text-end pe-3 fw-bold text-success">${{ a.valor_libro|floatformat:2 }}</td>
+                        <td class="text-end fw-bold">Bs. {{ a.valor_compra|floatformat:2 }}</td>
+                        <td class="text-end text-danger">Bs. {{ a.depreciacion_acumulada|floatformat:2 }}</td>
+                        <td class="text-end pe-3 fw-bold text-success">Bs. {{ a.valor_libro|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

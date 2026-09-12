@@ -36,7 +36,6 @@
                         <th class="ps-4">N° Cot.</th>
                         <th>Cliente</th>
                         <th>Fecha Emisión</th>
-                        <th>Vencimiento</th>
                         <th class="text-end">Total</th>
                         <th class="text-center">Estado</th>
                         <th class="text-end pe-4">Acciones</th>
@@ -46,14 +45,11 @@
                     {% for c in cotizaciones %}
                     <tr>
                         <td class="ps-4">
-                            <a href="{% url 'ventas:cotizacion_detail' c.pk %}" class="fw-bold text-primary">COT-{{ c.numero }}</a>
+                            <span class="fw-bold text-primary">COT-{{ c.numero }}</span>
                         </td>
-                        <td>{{ c.cliente.nombre_display }}</td>
+                        <td>{{ c.cliente.razon_social }}</td>
                         <td>{{ c.fecha_emision|date:"d/m/Y" }}</td>
-                        <td>{{ c.fecha_vencimiento|date:"d/m/Y" }}</td>
-                        <td class="text-end fw-bold">
-                            {{ c.moneda|default:"USD" }} {{ c.total|floatformat:2 }}
-                        </td>
+                        <td class="text-end fw-bold">VES {{ c.total|floatformat:2 }}</td>
                         <td class="text-center">
                             <span class="badge {% if c.estado == 'aceptada' or c.estado == 'convertida' %}bg-success{% elif c.estado == 'enviada' %}bg-info text-dark{% elif c.estado == 'rechazada' or c.estado == 'vencida' %}bg-danger{% else %}bg-secondary{% endif %} px-3">
                                 {{ c.get_estado_display }}
@@ -61,11 +57,11 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="btn-group">
-                                <a href="{% url 'ventas:cotizacion_detail' c.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
-                                    <i class="bi bi-eye"></i>
+                                <a href="{% url 'ventas:cotizacion_create' %}" class="btn btn-sm btn-outline-primary" title="Nueva cotización">
+                                    <i class="bi bi-plus"></i>
                                 </a>
-                                <a href="{% url 'ventas:cotizacion_update' c.pk %}" class="btn btn-sm btn-outline-dark" title="Editar">
-                                    <i class="bi bi-pencil"></i>
+                                <a href="{% url 'ventas:generar_produccion_cotizacion' c.pk %}" class="btn btn-sm btn-outline-success" title="Generar producción">
+                                    <i class="bi bi-gear-wide-connected"></i>
                                 </a>
                             </div>
                         </td>

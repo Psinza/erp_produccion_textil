@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}ERP Limpieza Industrial{% endblock %}</title>
+  <title>{% block title %}ERP Producción Textil{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --erp-primary:   #0d47a1;
-      --erp-accent:    #1565c0;
-      --erp-dark:      #0a1929;
-      --erp-sidebar:   #0d1b2a;
-      --erp-sidebar2:  #112240;
+      --erp-primary:   #3f6212;
+      --erp-accent:    #556b2f;
+      --erp-dark:      #1f2d16;
+      --erp-sidebar:   #26351d;
+      --erp-sidebar2:  #344b28;
       --erp-text:      #e8edf5;
       --erp-muted:     #8899aa;
       --erp-border:    rgba(255,255,255,0.07);
@@ -32,6 +32,28 @@
       display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100;
       transition: width .25s ease;
     }
+    #sidebar-toggle {
+      position: absolute; top: 72px; right: -15px; z-index: 2;
+      width: 30px; height: 30px; border: 1px solid #dbe4ef; border-radius: 50%;
+      background: #fff; color: var(--erp-primary); display: flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: transform .25s ease;
+    }
+    #sidebar-toggle:hover { background: #eaf2ff; }
+    #sidebar.collapsed { width: 72px; }
+    #sidebar.collapsed .sidebar-brand { padding-left: 25px; padding-right: 10px; }
+    #sidebar.collapsed .brand-name { font-size: 0; white-space: nowrap; }
+    #sidebar.collapsed .brand-name .brand-dot { margin-right: 0; }
+    #sidebar.collapsed .brand-sub,
+    #sidebar.collapsed .sidebar-section,
+    #sidebar.collapsed .nav-link span,
+    #sidebar.collapsed .user-card > div:not(.user-avatar) { display: none; }
+    #sidebar.collapsed .nav-item { margin-left: 12px; margin-right: 12px; }
+    #sidebar.collapsed .nav-link { justify-content: center; padding-left: 8px; padding-right: 8px; }
+    #sidebar.collapsed .nav-link i { margin: 0; }
+    #sidebar.collapsed #sidebar-toggle i { transform: rotate(180deg); }
+    #main { transition: margin-left .25s ease; }
+    body.sidebar-collapsed #main { margin-left: 72px; }
     .sidebar-brand {
       padding: 20px 20px 16px;
       border-bottom: 1px solid var(--erp-border);
@@ -41,7 +63,7 @@
       color: #fff; letter-spacing: .5px; line-height: 1.2;
     }
     .sidebar-brand .brand-sub { font-size: 11px; color: var(--erp-muted); letter-spacing: 1px; text-transform: uppercase; }
-    .sidebar-brand .brand-dot { width: 8px; height: 8px; background: #42a5f5; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .sidebar-brand .brand-dot { width: 8px; height: 8px; background: #b8d88a; border-radius: 50%; display: inline-block; margin-right: 6px; }
 
     .sidebar-section { padding: 18px 12px 4px; font-size: 10px; font-weight: 600; color: var(--erp-muted); letter-spacing: 1.5px; text-transform: uppercase; }
 
@@ -60,7 +82,7 @@
     .nav-link:hover { background: var(--erp-hover); color: #fff; }
     .nav-link.active { background: var(--erp-accent); color: #fff; font-weight: 500; }
     .nav-link i { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
-    .nav-badge { margin-left: auto; background: #42a5f5; color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
+    .nav-badge { margin-left: auto; background: #789b4a; color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
 
     .sidebar-footer {
       padding: 12px; border-top: 1px solid var(--erp-border);
@@ -174,6 +196,17 @@
     @media (max-width: 768px) {
       #sidebar { transform: translateX(-100%); }
       #sidebar.open { transform: translateX(0); }
+      #sidebar.collapsed { width: 250px; }
+      #sidebar.collapsed .sidebar-brand { padding-left: 20px; padding-right: 20px; }
+      #sidebar.collapsed .brand-name { font-size: 15px; }
+      #sidebar.collapsed .brand-sub,
+      #sidebar.collapsed .sidebar-section,
+      #sidebar.collapsed .nav-link span,
+      #sidebar.collapsed .user-card > div:not(.user-avatar) { display: block; }
+      #sidebar.collapsed .nav-item { margin-left: 8px; margin-right: 8px; }
+      #sidebar.collapsed .nav-link { justify-content: flex-start; padding-left: 12px; padding-right: 12px; }
+      body.sidebar-collapsed #main { margin-left: 0; }
+      #sidebar-toggle { top: 64px; right: -14px; }
       #main { margin-left: 0; }
     }
   </style>
@@ -184,52 +217,55 @@
 {% if user.is_authenticated %}
 <!-- ══ SIDEBAR ══ -->
 <nav id="sidebar">
+  <button id="sidebar-toggle" type="button" title="Contraer menú" aria-label="Contraer menú" aria-expanded="true">
+    <i class="bi bi-chevron-left"></i>
+  </button>
   <div class="sidebar-brand">
-    <div class="brand-name"><span class="brand-dot"></span>ERP Industrial</div>
-    <div class="brand-sub">Limpieza &amp; Desinfección</div>
+    <div class="brand-name"><span class="brand-dot"></span>ERP Textil Venezuela</div>
+    <div class="brand-sub">Producción y confección textil</div>
   </div>
 
   <div class="sidebar-nav">
     <div class="sidebar-section">Principal</div>
     <div class="nav-item">
       <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'core' %}active{% endif %}">
-        <i class="bi bi-grid-1x2"></i> Dashboard
+        <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
       </a>
     </div>
 
     <div class="sidebar-section">Operaciones</div>
-    <div class="nav-item"><a href="{% url 'produccion:dashboard' %}" class="nav-link"><i class="bi bi-gear"></i> Producción</a></div>
-    <div class="nav-item"><a href="{% url 'logistica:dashboard' %}" class="nav-link"><i class="bi bi-box-seam"></i> Logística</a></div>
-    <div class="nav-item"><a href="{% url 'compras:dashboard' %}" class="nav-link"><i class="bi bi-cart3"></i> Compras</a></div>
-    <div class="nav-item"><a href="{% url 'ventas:dashboard' %}" class="nav-link"><i class="bi bi-graph-up-arrow"></i> Ventas</a></div>
-    <div class="nav-item"><a href="{% url 'comercializacion:dashboard' %}" class="nav-link"><i class="bi bi-megaphone"></i> Comercialización</a></div>
-    <div class="nav-item"><a href="{% url 'transportes:dashboard' %}" class="nav-link"><i class="bi bi-truck"></i> Transportes</a></div>
+    {% if 'produccion' in allowed_modules %}<div class="nav-item"><a href="{% url 'produccion:dashboard' %}" class="nav-link"><i class="bi bi-gear"></i><span>Producción</span></a></div>{% endif %}
+    {% if 'logistica' in allowed_modules %}<div class="nav-item"><a href="{% url 'logistica:dashboard' %}" class="nav-link"><i class="bi bi-box-seam"></i><span>Logística</span></a></div>{% endif %}
+    {% if 'compras' in allowed_modules %}<div class="nav-item"><a href="{% url 'compras:dashboard' %}" class="nav-link"><i class="bi bi-cart3"></i><span>Compras</span></a></div>{% endif %}
+    {% if 'ventas' in allowed_modules %}<div class="nav-item"><a href="{% url 'ventas:dashboard' %}" class="nav-link"><i class="bi bi-graph-up-arrow"></i><span>Ventas</span></a></div>{% endif %}
+    {% if 'comercializacion' in allowed_modules %}<div class="nav-item"><a href="{% url 'comercializacion:dashboard' %}" class="nav-link"><i class="bi bi-megaphone"></i><span>Comercialización</span></a></div>{% endif %}
+    {% if 'transportes' in allowed_modules %}<div class="nav-item"><a href="{% url 'transportes:dashboard' %}" class="nav-link"><i class="bi bi-truck"></i><span>Transportes</span></a></div>{% endif %}
 
     <div class="sidebar-section">Finanzas</div>
-    <div class="nav-item"><a href="{% url 'tesoreria:dashboard' %}" class="nav-link"><i class="bi bi-bank"></i> Tesorería</a></div>
-    <div class="nav-item"><a href="{% url 'contabilidad:dashboard' %}" class="nav-link"><i class="bi bi-calculator"></i> Contabilidad</a></div>
-    <div class="nav-item"><a href="{% url 'facturacion:dashboard' %}" class="nav-link"><i class="bi bi-receipt"></i> Facturación</a></div>
+    {% if 'tesoreria' in allowed_modules %}<div class="nav-item"><a href="{% url 'tesoreria:dashboard' %}" class="nav-link"><i class="bi bi-bank"></i><span>Tesorería</span></a></div>{% endif %}
+    {% if 'contabilidad' in allowed_modules %}<div class="nav-item"><a href="{% url 'contabilidad:dashboard' %}" class="nav-link"><i class="bi bi-calculator"></i><span>Contabilidad</span></a></div>{% endif %}
+    {% if 'facturacion' in allowed_modules %}<div class="nav-item"><a href="{% url 'facturacion:dashboard' %}" class="nav-link"><i class="bi bi-receipt"></i><span>Facturación</span></a></div>{% endif %}
 
     <div class="sidebar-section">Gestión</div>
-    <div class="nav-item"><a href="{% url 'rrhh:dashboard' %}" class="nav-link"><i class="bi bi-people"></i> RRHH</a></div>
-    <div class="nav-item"><a href="{% url 'viaticos:dashboard' %}" class="nav-link"><i class="bi bi-briefcase"></i> Viáticos</a></div>
-    <div class="nav-item"><a href="{% url 'activos_fijos:dashboard' %}" class="nav-link"><i class="bi bi-building"></i> Activos Fijos</a></div>
+    {% if 'rrhh' in allowed_modules %}<div class="nav-item"><a href="{% url 'rrhh:dashboard' %}" class="nav-link"><i class="bi bi-people"></i><span>RRHH</span></a></div>{% endif %}
+    {% if 'viaticos' in allowed_modules %}<div class="nav-item"><a href="{% url 'viaticos:dashboard' %}" class="nav-link"><i class="bi bi-briefcase"></i><span>Viáticos</span></a></div>{% endif %}
+    {% if 'activos_fijos' in allowed_modules %}<div class="nav-item"><a href="{% url 'activos_fijos:dashboard' %}" class="nav-link"><i class="bi bi-building"></i><span>Activos Fijos</span></a></div>{% endif %}
 
     {% if user.is_superuser %}
     <div class="sidebar-section">Administración</div>
     <div class="nav-item">
       <a href="{% url 'administracion:usuario_list' %}" class="nav-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="bi bi-person-gear"></i> Usuarios
+        <i class="bi bi-person-gear"></i><span>Usuarios</span>
       </a>
     </div>
     <div class="nav-item">
       <a href="{% url 'administracion:rol_list' %}" class="nav-link {% if 'rol' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="bi bi-shield-lock"></i> Roles
+        <i class="bi bi-shield-lock"></i><span>Roles</span>
       </a>
     </div>
     <div class="nav-item">
       <a href="{% url 'administracion:mantenimiento' %}" class="nav-link">
-        <i class="bi bi-database"></i> Sistema
+        <i class="bi bi-database"></i><span>Sistema</span>
       </a>
     </div>
     {% endif %}
@@ -255,6 +291,12 @@
       <div class="topbar-breadcrumb">{% block breadcrumb %}Inicio{% endblock %}</div>
     </div>
     <div class="topbar-right">
+      <a href="{% url 'core:dashboard' %}" onclick="if (history.length > 1) { event.preventDefault(); history.back(); }" class="topbar-btn" title="Regresar" aria-label="Regresar">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <a href="{% url 'core:dashboard' %}" class="topbar-btn" title="Inicio" aria-label="Inicio">
+        <i class="bi bi-house"></i>
+      </a>
       <a href="/admin/" class="topbar-btn" title="Mi perfil"><i class="bi bi-person"></i></a>
       <a href="{% url 'logout' %}" class="topbar-btn" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></a>
     </div>
@@ -279,5 +321,30 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
+<script>
+  (() => {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('sidebar-toggle');
+    if (!sidebar || !toggle) return;
+    sidebar.querySelectorAll('.nav-link').forEach((link) => {
+      const label = link.textContent.trim().replace(/\s+/g, ' ');
+      if (label) link.title = label;
+    });
+    const collapsed = localStorage.getItem('erp-sidebar-collapsed') === 'true';
+    if (collapsed) {
+      sidebar.classList.add('collapsed');
+      document.body.classList.add('sidebar-collapsed');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.title = 'Expandir menú';
+    }
+    toggle.addEventListener('click', () => {
+      const isCollapsed = sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+      localStorage.setItem('erp-sidebar-collapsed', isCollapsed);
+      toggle.setAttribute('aria-expanded', String(!isCollapsed));
+      toggle.title = isCollapsed ? 'Expandir menú' : 'Contraer menú';
+    });
+  })();
+</script>
 </body>
 </html>

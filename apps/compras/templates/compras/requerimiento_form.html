@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1">{{ titulo }}</h2>
+            <p class="text-muted mb-0">Solicite materiales textiles o repuestos para producción y mantenimiento.</p>
+        </div>
+        <a href="{% url 'compras:requerimiento_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Regresar</a>
+    </div>
+    <form method="post" class="card card-body shadow-sm">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <h5 class="border-bottom pb-2">Datos del requerimiento</h5>
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Número</label>{{ form.numero }}{{ form.numero.errors }}</div>
+            <div class="col-md-8">
+                <label class="form-label">Orden de producción</label>
+                <div class="input-group">{{ form.orden_produccion }}<a class="btn btn-outline-success" href="{% url 'produccion:orden_create' %}" target="_blank" title="Agregar orden de producción"><i class="bi bi-plus-lg"></i></a></div>
+                {{ form.orden_produccion.errors }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Solicitud pieza</label>
+                <div class="input-group">{{ form.solicitud_pieza }}<a class="btn btn-outline-success" href="{% url 'produccion:mecanica_solicitud_create' %}" target="_blank" title="Agregar solicitud de pieza"><i class="bi bi-plus-lg"></i></a></div>
+                {{ form.solicitud_pieza.errors }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Almacén destino</label>
+                <div class="input-group">{{ form.almacen_destino }}<a class="btn btn-outline-success" href="{% url 'logistica:almacen_create' %}" target="_blank" title="Agregar almacén"><i class="bi bi-plus-lg"></i></a></div>
+                {{ form.almacen_destino.errors }}
+            </div>
+            <div class="col-md-4"><label class="form-label">Estado</label>{{ form.estado }}{{ form.estado.errors }}</div>
+            <div class="col-md-4"><label class="form-label">Fecha requerida</label>{{ form.fecha_requerida }}{{ form.fecha_requerida.errors }}</div>
+            <div class="col-md-12"><label class="form-label">Observaciones</label>{{ form.observaciones }}{{ form.observaciones.errors }}</div>
+        </div>
+        <h5 class="mt-4 border-bottom pb-2">Materiales y repuestos</h5>
+        {{ formset.management_form }}
+        {% for detalle in formset %}
+        <div class="border rounded p-3 mb-3 bg-light">
+            {% for hidden in detalle.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5"><label class="form-label">Materia prima</label><div class="input-group">{{ detalle.materia_prima }}<a class="btn btn-outline-success" href="{% url 'compras:materia_prima_create' %}" target="_blank" title="Agregar materia prima"><i class="bi bi-plus-lg"></i></a></div>{{ detalle.materia_prima.errors }}</div>
+                <div class="col-md-5"><label class="form-label">Repuesto</label><div class="input-group">{{ detalle.repuesto }}<a class="btn btn-outline-success" href="{% url 'logistica:repuesto_create' %}" target="_blank" title="Agregar repuesto"><i class="bi bi-plus-lg"></i></a></div>{{ detalle.repuesto.errors }}</div>
+                <div class="col-md-2"><label class="form-label">Cantidad</label>{{ detalle.cantidad }}{{ detalle.cantidad.errors }}</div>
+                <div class="col-md-5"><label class="form-label">Descripción</label>{{ detalle.descripcion }}</div>
+                <div class="col-md-3"><label class="form-label">Unidad medida</label>{{ detalle.unidad_medida }}</div>
+                <div class="col-md-4"><label class="form-label">Especificación</label>{{ detalle.especificacion }}</div>
+                {% if detalle.DELETE %}<div class="col-12 form-check">{{ detalle.DELETE }} <label class="form-check-label">Eliminar</label></div>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-end gap-2 mt-2">
+            <a href="{% url 'compras:requerimiento_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-save2"></i> Guardar requerimiento</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

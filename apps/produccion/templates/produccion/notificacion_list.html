@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-3">{{ titulo }}</h2>
+    <div class="list-group shadow-sm">
+    {% for notificacion in notificaciones %}
+        <div class="list-group-item {% if notificacion.tipo == 'calidad' %}list-group-item-warning{% endif %}">
+            <div class="d-flex justify-content-between"><strong>{{ notificacion.get_tipo_display }}</strong><small>{{ notificacion.creada_en }}</small></div>
+            <p class="mb-0">{{ notificacion.mensaje }} · Lote {{ notificacion.orden.lote_numero }}</p>
+        </div>
+    {% empty %}<div class="list-group-item text-muted">No hay notificaciones.</div>{% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.utils import timezone
 
@@ -10,6 +10,54 @@ rif_validator = RegexValidator(
     regex=r'^[JGVEP]-?\d{7,9}-?\d?$',
     message='Use RIF venezolano. Ej: J-12345678-9.',
 )
+
+
+class Moneda(models.Model):
+    CODIGOS = (
+        ('VES', 'Bolívar venezolano'),
+        ('USD', 'Dólar estadounidense'),
+        ('EUR', 'Euro'),
+    )
+    codigo = models.CharField(max_length=3, choices=CODIGOS, unique=True)
+    nombre = models.CharField(max_length=60)
+    simbolo = models.CharField(max_length=5)
+    es_base = models.BooleanField(default=False)
+    activa = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['codigo']
+        verbose_name = 'Moneda'
+        verbose_name_plural = 'Monedas'
+
+    def __str__(self):
+        return f'{self.codigo} - {self.nombre}'
+
+
+class TasaBCV(models.Model):
+    fecha = models.DateField(unique=True)
+    usd_ves = models.DecimalField(max_digits=18, decimal_places=6, validators=[MinValueValidator(Decimal('0.000001'))])
+    eur_ves = models.DecimalField(max_digits=18, decimal_places=6, validators=[MinValueValidator(Decimal('0.000001'))])
+    fuente = models.CharField(max_length=120, default='Banco Central de Venezuela')
+    publicada_en = models.DateTimeField(null=True, blank=True)
+    observaciones = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-fecha']
+        verbose_name = 'Tasa BCV'
+        verbose_name_plural = 'Tasas BCV'
+
+    def __str__(self):
+        return f'Tasa BCV {self.fecha:%d/%m/%Y}'
+
+    def convertir_a_ves(self, monto, codigo_moneda):
+        monto = Decimal(monto)
+        if codigo_moneda == 'VES':
+            return monto
+        if codigo_moneda == 'USD':
+            return monto * self.usd_ves
+        if codigo_moneda == 'EUR':
+            return monto * self.eur_ves
+        raise ValueError(f'Moneda no soportada: {codigo_moneda}')
 
 
 class Area(models.Model):
@@ -81,6 +129,7 @@ class Empresa(models.Model):
 
 class EjercicioContable(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
+    ano = models.PositiveSmallIntegerField(verbose_name='Año')
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     cerrado = models.BooleanField(default=False)
@@ -105,15 +154,32 @@ class PeriodoContable(models.Model):
 
 
 class CuentaContable(models.Model):
+    TIPO_CUENTA = [
+        ('activo', 'Activo'),
+        ('pasivo', 'Pasivo'),
+        ('patrimonio', 'Patrimonio / Capital'),
+        ('ingreso', 'Ingreso'),
+        ('gasto', 'Gasto / Egreso'),
+    ]
+    NATURALEZAS = [
+        ('deudora', 'Deudora'),
+        ('acreedora', 'Acreedora'),
+    ]
     codigo = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=200)
-    tipo = models.CharField(max_length=20)
-    naturaleza = models.CharField(max_length=20)
+    tipo = models.CharField(max_length=20, choices=TIPO_CUENTA)
+    naturaleza = models.CharField(max_length=20, choices=NATURALEZAS)
+    nivel = models.PositiveSmallIntegerField(default=1)
     saldo_inicial = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
     saldo_actual = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
     es_cuenta_mayor = models.BooleanField(default=False)
     activo = models.BooleanField(default=True)
     padre = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='hijos')
+    descripcion = models.TextField(blank=True)
+
+    @property
+    def acepta_movimientos(self):
+        return not self.es_cuenta_mayor
 
     def __str__(self):
         return f'{self.codigo} - {self.nombre}'
@@ -129,14 +195,36 @@ class ConfiguracionContable(models.Model):
 
 
 class AsientoContable(models.Model):
+    TIPO_CHOICES = [
+        ('general', 'Asiento general'),
+        ('compra', 'Compra'),
+        ('venta', 'Venta'),
+        ('nomina', 'Nómina'),
+        ('produccion', 'Producción'),
+        ('ajuste', 'Ajuste'),
+    ]
     numero = models.CharField(max_length=50, unique=True, blank=True)
     fecha = models.DateField()
     descripcion = models.TextField()
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='general')
+    referencia = models.CharField(max_length=100, blank=True)
     ejercicio = models.ForeignKey(EjercicioContable, on_delete=models.PROTECT)
     estado = models.CharField(max_length=20, default='borrador')
     creado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_aprobacion = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def total_debe(self):
+        return sum(linea.debe for linea in self.lineas.all())
+
+    @property
+    def total_haber(self):
+        return sum(linea.haber for linea in self.lineas.all())
+
+    @property
+    def esta_cuadrado(self):
+        return self.total_debe == self.total_haber
 
     def __str__(self):
         return self.numero or f'Asiento {self.pk}'

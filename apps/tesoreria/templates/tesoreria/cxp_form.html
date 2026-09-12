@@ -62,7 +62,7 @@
         {% endif %}
         <div class="d-flex gap-2 mt-3">
           <button type="submit" class="btn btn-warning text-dark fw-semibold">
-            <i class="bi bi-save"></i> Crear CXP
+            <i class="bi bi-save"></i> {% if cuenta %}Guardar cambios{% else %}Crear CXP{% endif %}
           </button>
           <a href="{% url 'tesoreria:cxp_list' %}" class="btn btn-outline-secondary">Cancelar</a>
         </div>

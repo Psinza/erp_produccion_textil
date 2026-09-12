@@ -7,7 +7,7 @@
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
       <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-3"><label class="form-label small fw-semibold">Ejercicio *</label>{{ form.ejercicio }}</div>
+        <div class="col-md-3"><label class="form-label small fw-semibold">Ejercicio fiscal *</label>{{ form.ejercicio }}<a href="{% url 'contabilidad:ejercicio_create' %}" target="_blank" class="small text-success"><i class="bi bi-plus-circle"></i> Crear ejercicio fiscal</a></div>
         <div class="col-md-2"><label class="form-label small fw-semibold">Desde</label>{{ form.fecha_inicio }}</div>
         <div class="col-md-2"><label class="form-label small fw-semibold">Hasta</label>{{ form.fecha_fin }}</div>
         <div class="col-md-2">
@@ -35,9 +35,9 @@
             <tbody>
               {% for c in ingresos %}
               <tr>
-                <td><code class="small">{{ c.cuenta__codigo }}</code></td>
-                <td>{{ c.cuenta__nombre }}</td>
-                <td class="text-end text-success fw-bold">${{ c.neto|floatformat:2 }}</td>
+                <td><code class="small">{{ c.codigo }}</code></td>
+                <td>{{ c.nombre }}</td>
+                <td class="text-end text-success fw-bold">${{ c.saldo_actual|floatformat:2 }}</td>
               </tr>
               {% empty %}
               <tr><td colspan="3" class="text-center text-muted py-3">Sin ingresos.</td></tr>
@@ -64,9 +64,9 @@
             <tbody>
               {% for c in costos %}
               <tr>
-                <td><code class="small">{{ c.cuenta__codigo }}</code></td>
-                <td>{{ c.cuenta__nombre }}</td>
-                <td class="text-end text-warning fw-bold">${{ c.neto|floatformat:2 }}</td>
+                <td><code class="small">{{ c.codigo }}</code></td>
+                <td>{{ c.nombre }}</td>
+                <td class="text-end text-warning fw-bold">${{ c.saldo_actual|floatformat:2 }}</td>
               </tr>
               {% empty %}
               <tr><td colspan="3" class="text-center text-muted py-3">Sin costos.</td></tr>
@@ -99,9 +99,9 @@
             <tbody>
               {% for c in gastos %}
               <tr>
-                <td><code class="small">{{ c.cuenta__codigo }}</code></td>
-                <td>{{ c.cuenta__nombre }}</td>
-                <td class="text-end text-danger fw-bold">${{ c.neto|floatformat:2 }}</td>
+                <td><code class="small">{{ c.codigo }}</code></td>
+                <td>{{ c.nombre }}</td>
+                <td class="text-end text-danger fw-bold">${{ c.saldo_actual|floatformat:2 }}</td>
               </tr>
               {% empty %}
               <tr><td colspan="3" class="text-center text-muted py-3">Sin gastos.</td></tr>

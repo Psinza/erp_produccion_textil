@@ -73,15 +73,28 @@ class ProductoVenta(models.Model):
     moneda = models.CharField(max_length=5, default='USD')
     activo = models.BooleanField(default=True)
     tipo_producto = models.CharField(max_length=50, blank=True)
+    composicion_textil = models.CharField(max_length=150, blank=True)
+    tallas = models.CharField(max_length=150, blank=True)
+    colores = models.CharField(max_length=255, blank=True)
+    es_sobre_pedido = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nombre
 
 class Cotizacion(models.Model):
+    MONEDAS = [('VES', 'Bolívares (VES)'), ('USD', 'Dólares (USD)'), ('EUR', 'Euros (EUR)')]
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('enviada', 'Enviada'),
+        ('aceptada', 'Aceptada'),
+        ('rechazada', 'Rechazada'),
+        ('convertida', 'Convertida'),
+    ]
     numero = models.CharField(max_length=20, unique=True, blank=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    moneda = models.CharField(max_length=3, choices=MONEDAS, default='USD', verbose_name="Moneda")
     fecha_emision = models.DateField(default=timezone.now)
-    estado = models.CharField(max_length=20, default='borrador')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     descuento_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     base_imponible = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -106,6 +119,7 @@ class DetalleCotizacion(models.Model):
         return f"Detalle {self.producto.nombre} - Cotización {self.cotizacion.numero}"
 
 class Pedido(models.Model):
+    MONEDAS = [('VES', 'Bolívares (VES)'), ('USD', 'Dólares (USD)'), ('EUR', 'Euros (EUR)')]
     ESTADO_CHOICES = [
         ('borrador', 'Borrador'),
         ('pendiente', 'Pendiente'),
@@ -117,6 +131,7 @@ class Pedido(models.Model):
 
     numero = models.CharField(max_length=20, unique=True, blank=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='pedidos')
+    moneda = models.CharField(max_length=3, choices=MONEDAS, default='USD', verbose_name="Moneda")
     fecha_pedido = models.DateField(default=timezone.now)
     dias_credito = models.PositiveIntegerField(default=0)
     direccion_despacho = models.TextField(blank=True, verbose_name="Dirección de Despacho")
@@ -180,6 +195,10 @@ class DetallePedido(models.Model):
     descuento_monto = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     observaciones = models.TextField(blank=True)
+    orden_produccion = models.ForeignKey(
+        'produccion.OrdenProduccion', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='detalles_venta'
+    )
 
     class Meta:
         verbose_name = "Detalle de Pedido"

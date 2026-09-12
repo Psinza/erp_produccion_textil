@@ -32,14 +32,14 @@ class CategoriaProductoVentaAdmin(admin.ModelAdmin):
 
 @admin.register(ProductoVenta)
 class ProductoVentaAdmin(admin.ModelAdmin):
-    list_display = ["codigo", "nombre", "categoria", "precio_venta", "impuesto_pct", "activo"]
+    list_display = ["codigo", "nombre", "categoria", "precio_venta", "es_sobre_pedido", "activo"]
     list_filter = ["categoria", "activo"]
     search_fields = ["codigo", "nombre"]
 
 class DetalleCotizacionInline(admin.TabularInline):
     model = DetalleCotizacion
     extra = 0
-    fields = ["producto", "cantidad", "precio_unitario", "descuento_pct", "subtotal"]
+    fields = ["producto", "cantidad", "precio_unitario", "descuento_pct", "orden_produccion", "subtotal"]
     readonly_fields = ["descuento_monto", "subtotal"]
 
 @admin.register(Cotizacion)

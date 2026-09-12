@@ -5,6 +5,7 @@ from .models import (
     TipoVehiculo, Vehiculo, Conductor,
     Zona, Ruta, PuntoEntrega,
     Despacho, EntregaDespacho, Mantenimiento,
+    ViaticoTransporte,
 )
 
 CTR  = {"class": "form-control"}
@@ -59,6 +60,11 @@ class VehiculoForm(forms.ModelForm):
             "foto":                forms.ClearableFileInput(attrs=CTR),
             "observaciones":       forms.Textarea(attrs=TXT),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["tipo"].queryset = TipoVehiculo.objects.order_by("nombre")
+        self.fields["tipo"].empty_label = "Seleccione un tipo de vehículo..."
 
 
 class ConductorForm(forms.ModelForm):
@@ -144,6 +150,8 @@ class DespachoForm(forms.ModelForm):
         model  = Despacho
         fields = [
             "ruta", "vehiculo", "conductor",
+            "pedido",
+            "tipo_ruta", "material_orden", "autorizacion", "viatico",
             "fecha_salida", "fecha_llegada_estimada",
             "numero_guia_despacho", "numero_control_guia", "rif_transportista",
             "descripcion_carga", "peso_carga_kg", "declara_material_peligroso",
@@ -223,3 +231,10 @@ class MantenimientoForm(forms.ModelForm):
             "costo":            forms.NumberInput(attrs=NUM),
             "observaciones":    forms.Textarea(attrs=TXT),
         }
+
+
+class ViaticoTransporteForm(forms.ModelForm):
+    class Meta:
+        model = ViaticoTransporte
+        fields = ['despacho', 'beneficiario', 'concepto', 'monto', 'fecha', 'estado', 'comprobante']
+        widgets = {'fecha': forms.DateInput(attrs=DATE)}

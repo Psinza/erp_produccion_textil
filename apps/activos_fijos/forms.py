@@ -1,5 +1,16 @@
 from django import forms
-from .models import ActivoFijo, AsignacionActivo, MantenimientoActivo
+from .models import ActivoFijo, AsignacionActivo, MantenimientoActivo, CategoriaActivo
+
+
+class CategoriaActivoForm(forms.ModelForm):
+    class Meta:
+        model = CategoriaActivo
+        fields = ['nombre', 'prefijo_codigo', 'vida_util_defecto']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Maquinaria textil'}),
+            'prefijo_codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: MAQ', 'maxlength': 5}),
+            'vida_util_defecto': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+        }
 
 class ActivoFijoForm(forms.ModelForm):
     class Meta:
@@ -27,6 +38,13 @@ class ActivoFijoForm(forms.ModelForm):
             'ubicacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ubicación física actual'}),
             'responsable': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['categoria'].queryset = CategoriaActivo.objects.order_by('nombre')
+        self.fields['categoria'].empty_label = 'Seleccione una clasificación SUDEBIP'
+        self.fields['responsable'].queryset = self.fields['responsable'].queryset.order_by('apellidos', 'nombres')
+        self.fields['responsable'].empty_label = 'Seleccione un responsable'
 
 class AsignacionActivoForm(forms.ModelForm):
     class Meta:

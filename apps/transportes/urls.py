@@ -28,6 +28,7 @@ urlpatterns = [
     path('despachos/<int:pk>/finalizar/', views.despacho_finalizar, name='despacho_finalizar'), # Vista existente, URL faltante
     path('despachos/<int:pk>/editar/', views.despacho_editar, name='despacho_edit'),
     path('despachos/<int:pk>/eliminar/', views.despacho_eliminar, name='despacho_delete'),
+    path('viaticos/nuevo/', views.viatico_crear, name='viatico_create'),
 
     # Tipo de Vehículo (CRUD)
     path('tipos-vehiculo/', views.tipo_vehiculo_lista, name='tipo_vehiculo_list'),

@@ -5,6 +5,7 @@ from django.urls import NoReverseMatch
 from django.contrib import messages
 from .models import Usuario, Area, Empresa
 from .forms import EmpresaForm
+from .access import allowed_modules
 
 @login_required
 def dashboard_principal(request):
@@ -22,8 +23,14 @@ def dashboard_principal(request):
         {'nombre': 'RRHH', 'icono': 'bi-person-badge', 'url': 'rrhh:dashboard', 'color': 'danger', 'desc': 'Personal y Nómina', 'cat': 'Administración'},
         {'nombre': 'Logística', 'icono': 'bi-box-seam', 'url': 'logistica:dashboard', 'color': 'secondary', 'desc': 'Inventario y Almacén', 'cat': 'Operaciones'},
         {'nombre': 'Mantenimiento', 'icono': 'bi-tools', 'url': 'core:mantenimiento', 'color': 'dark', 'desc': 'Configuración de Empresa', 'cat': 'Configuración'},
+        {'nombre': 'Gerencia', 'icono': 'bi-bar-chart-line', 'url': 'gerencia:dashboard', 'color': 'primary', 'desc': 'Indicadores integrales y resultados', 'cat': 'Dirección'},
     ]
 
+    modulos_raw = [
+        m for m in modulos_raw
+        if request.user.is_superuser
+        or m['url'].split(':', 1)[0] in allowed_modules(request.user)
+    ]
     modulos_agrupados = {}
     for m in modulos_raw:
         try:

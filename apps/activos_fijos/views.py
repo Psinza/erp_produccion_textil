@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.utils import timezone
-from .models import ActivoFijo, MantenimientoActivo
-from .forms import ActivoFijoForm, AsignacionActivoForm, MantenimientoActivoForm
+from .models import ActivoFijo, MantenimientoActivo, CategoriaActivo
+from .forms import ActivoFijoForm, AsignacionActivoForm, MantenimientoActivoForm, CategoriaActivoForm
 
 @login_required
 def dashboard(request):
@@ -77,9 +77,14 @@ def activo_delete(request, pk):
 @login_required
 def reporte_depreciacion(request):
     activos = ActivoFijo.objects.all().order_by('categoria', 'codigo')
+    total_compra = sum((activo.valor_compra for activo in activos), 0)
+    total_acumulada = sum((activo.depreciacion_acumulada for activo in activos), 0)
     return render(request, 'activos_fijos/reporte_depreciacion.html', {
         'titulo': 'Reporte de Depreciación',
         'activos': activos,
+        'total_compra': total_compra,
+        'total_acumulada': total_acumulada,
+        'total_libro': total_compra - total_acumulada,
     })
 
 @login_required
@@ -109,3 +114,37 @@ def mantenimiento_create(request, pk):
     else:
         form = MantenimientoActivoForm(initial={'fecha_mantenimiento': timezone.now().date()})
     return render(request, 'activos_fijos/mantenimiento_form.html', {'form': form, 'activo': activo, 'titulo': 'Registrar Mantenimiento'})
+
+
+@login_required
+def categoria_list(request):
+    categorias = CategoriaActivo.objects.order_by('nombre')
+    return render(request, 'activos_fijos/categoria_list.html', {
+        'titulo': 'Clasificaciones SUDEBIP',
+        'categorias': categorias,
+    })
+
+
+@login_required
+def categoria_create(request):
+    form = CategoriaActivoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('activos_fijos:categoria_list')
+    return render(request, 'activos_fijos/categoria_form.html', {
+        'form': form,
+        'titulo': 'Nueva Clasificación SUDEBIP',
+    })
+
+
+@login_required
+def categoria_edit(request, pk):
+    categoria = get_object_or_404(CategoriaActivo, pk=pk)
+    form = CategoriaActivoForm(request.POST or None, instance=categoria)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('activos_fijos:categoria_list')
+    return render(request, 'activos_fijos/categoria_form.html', {
+        'form': form,
+        'titulo': 'Editar Clasificación SUDEBIP',
+    })

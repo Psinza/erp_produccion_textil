@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     EjercicioContable, CuentaContable, AsientoContable, LineaAsiento, 
-    PeriodoContable, ConfiguracionContable, Empresa, Area, Rol, Usuario
+    PeriodoContable, ConfiguracionContable, Empresa, Area, Rol, Usuario,
+    Moneda, TasaBCV
 )
 
 @admin.register(Empresa)
@@ -67,3 +68,16 @@ class RolAdmin(admin.ModelAdmin):
 class UsuarioAdmin(admin.ModelAdmin):
     list_display = ('username', 'nombres', 'apellidos', 'area', 'estado', 'activo')
     list_filter = ('estado', 'area', 'activo')
+
+
+@admin.register(Moneda)
+class MonedaAdmin(admin.ModelAdmin):
+    list_display = ('codigo', 'nombre', 'simbolo', 'es_base', 'activa')
+    list_filter = ('es_base', 'activa')
+
+
+@admin.register(TasaBCV)
+class TasaBCVAdmin(admin.ModelAdmin):
+    list_display = ('fecha', 'usd_ves', 'eur_ves', 'fuente')
+    list_filter = ('fuente',)
+    date_hierarchy = 'fecha'

@@ -46,15 +46,10 @@
                 <tbody>
                     {% for p in pedidos %}
                     <tr>
-                        <td class="ps-4">
-                            <a href="{% url 'ventas:pedido_detail' p.pk %}" class="fw-bold text-primary">PED-{{ p.numero }}</a>
-                            {% if p.cotizacion %}
-                            <div class="small text-muted">COT-{{ p.cotizacion.numero }}</div>
-                            {% endif %}
-                        </td>
-                        <td>{{ p.cliente.nombre_display }}</td>
+                        <td class="ps-4"><span class="fw-bold text-primary">PED-{{ p.numero }}</span></td>
+                        <td>{{ p.cliente.razon_social }}</td>
                         <td>{{ p.fecha_pedido|date:"d/m/Y" }}</td>
-                        <td>{{ p.fecha_entrega|date:"d/m/Y"|default:"—" }}</td>
+                        <td>Según planificación</td>
                         <td class="text-end text-muted small">${{ p.impuesto_total|floatformat:2 }}</td>
                         <td class="text-end fw-bold">${{ p.total|floatformat:2 }}</td>
                         <td class="text-center">
@@ -70,8 +65,8 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="btn-group">
-                                <a href="{% url 'ventas:pedido_detail' p.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
-                                    <i class="bi bi-eye"></i>
+                                <a href="{% url 'ventas:generar_produccion' p.pk %}" class="btn btn-sm btn-outline-success" title="Generar orden de producción">
+                                    <i class="bi bi-gear-wide-connected"></i> Producción
                                 </a>
                             </div>
                         </td>

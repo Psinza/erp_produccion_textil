@@ -1,11 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
 from apps.core.models import CuentaContable, AsientoContable, LineaAsiento
-from apps.tesoreria.models import CuentaPorCobrar, CuentaPorPagar
+from apps.tesoreria.models import Banco, CuentaPorCobrar, CuentaPorPagar, MovimientoTesoreria
+from .forms import (
+    MovimientoTesoreriaForm, BancoForm, CuentaPorCobrarForm, CuentaPorPagarForm,
+)
 
 @login_required
 def dashboard(request):
@@ -102,11 +106,28 @@ def cxc_list(request):
         cxc = CuentaPorCobrar.objects.order_by('-fecha_emision')
     except Exception:
         cxc = []
-    return render(request, 'tesoreria/cxc_list.html', {'titulo': 'Cuentas por Cobrar', 'cxc': cxc})
+    return render(request, 'tesoreria/cxc_list.html', {'titulo': 'Cuentas por Cobrar', 'cxc': cxc, 'cxc_list': cxc})
 
 @login_required
 def cxc_create(request):
-    return render(request, 'tesoreria/cxc_form.html', {'titulo': 'Nueva Cuenta por Cobrar'})
+    form = CuentaPorCobrarForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        cuenta = form.save(commit=False)
+        cuenta.saldo_pendiente = cuenta.monto_total
+        cuenta.save()
+        messages.success(request, 'Cuenta por cobrar creada correctamente.')
+        return redirect('tesoreria:cxc_list')
+    return render(request, 'tesoreria/cxc_form.html', {'titulo': 'Nueva Cuenta por Cobrar', 'form': form})
+
+@login_required
+def cxc_edit(request, pk):
+    cuenta = get_object_or_404(CuentaPorCobrar, pk=pk)
+    form = CuentaPorCobrarForm(request.POST or None, instance=cuenta)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Cuenta por cobrar actualizada correctamente.')
+        return redirect('tesoreria:cxc_detail', pk=pk)
+    return render(request, 'tesoreria/cxc_form.html', {'titulo': 'Editar Cuenta por Cobrar', 'form': form, 'cuenta': cuenta})
 
 @login_required
 def cxc_detail(request, pk):
@@ -124,11 +145,28 @@ def cxp_list(request):
         cxp = CuentaPorPagar.objects.order_by('-fecha_emision')
     except Exception:
         cxp = []
-    return render(request, 'tesoreria/cxp_list.html', {'titulo': 'Cuentas por Pagar', 'cxp': cxp})
+    return render(request, 'tesoreria/cxp_list.html', {'titulo': 'Cuentas por Pagar', 'cxp': cxp, 'cxp_list': cxp})
 
 @login_required
 def cxp_create(request):
-    return render(request, 'tesoreria/cxp_form.html', {'titulo': 'Nueva Cuenta por Pagar'})
+    form = CuentaPorPagarForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        cuenta = form.save(commit=False)
+        cuenta.saldo_pendiente = cuenta.monto_total
+        cuenta.save()
+        messages.success(request, 'Cuenta por pagar creada correctamente.')
+        return redirect('tesoreria:cxp_list')
+    return render(request, 'tesoreria/cxp_form.html', {'titulo': 'Nueva Cuenta por Pagar', 'form': form})
+
+@login_required
+def cxp_edit(request, pk):
+    cuenta = get_object_or_404(CuentaPorPagar, pk=pk)
+    form = CuentaPorPagarForm(request.POST or None, instance=cuenta)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Cuenta por pagar actualizada correctamente.')
+        return redirect('tesoreria:cxp_detail', pk=pk)
+    return render(request, 'tesoreria/cxp_form.html', {'titulo': 'Editar Cuenta por Pagar', 'form': form, 'cuenta': cuenta})
 
 @login_required
 def cxp_detail(request, pk):
@@ -151,7 +189,22 @@ def banco_list(request):
 
 @login_required
 def banco_create(request):
-    return render(request, 'tesoreria/banco_form.html', {'titulo': 'Nuevo Banco'})
+    form = BancoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Banco creado correctamente.')
+        return redirect('tesoreria:banco_list')
+    return render(request, 'tesoreria/banco_form.html', {'titulo': 'Nuevo Banco', 'form': form})
+
+@login_required
+def banco_edit(request, pk):
+    banco = get_object_or_404(Banco, pk=pk)
+    form = BancoForm(request.POST or None, instance=banco)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Banco actualizado correctamente.')
+        return redirect('tesoreria:banco_list')
+    return render(request, 'tesoreria/banco_form.html', {'titulo': 'Editar Banco', 'form': form, 'banco': banco})
 
 @login_required
 def cuenta_list(request):
@@ -213,3 +266,17 @@ def transferencia_create(request):
 @login_required
 def flujo_caja(request):
     return render(request, 'tesoreria/flujo_caja.html', {'titulo': 'Flujo de Caja Proyectado'})
+
+
+@login_required
+def movimiento_tesoreria_create(request):
+    form = MovimientoTesoreriaForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        movimiento = form.save(commit=False)
+        movimiento.autorizado_por = request.user
+        movimiento.save()
+        return redirect('tesoreria:flujo_caja')
+    return render(request, 'tesoreria/movimiento_tesoreria_form.html', {
+        'form': form,
+        'titulo': 'Nuevo movimiento de tesorería',
+    })

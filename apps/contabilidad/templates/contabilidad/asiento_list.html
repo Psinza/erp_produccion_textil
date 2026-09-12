@@ -54,7 +54,7 @@
             <td><a href="{% url 'contabilidad:asiento_detail' a.pk %}" class="fw-bold">AST-{{ a.numero }}</a></td>
             <td>{{ a.fecha|date:"d/m/Y" }}</td>
             <td class="small">{{ a.get_tipo_display }}</td>
-            <td class="small">{{ a.concepto|truncatechars:40 }}</td>
+            <td class="small">{{ a.descripcion|truncatechars:40 }}</td>
             <td class="small text-muted">{{ a.referencia|default:"—" }}</td>
             <td class="text-end">${{ a.total_debe|floatformat:2 }}</td>
             <td class="text-end">${{ a.total_haber|floatformat:2 }}</td>

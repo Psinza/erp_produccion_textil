@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% block title %}{{ title }} | ERP{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block breadcrumb %}Comercialización / Categorías{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7">
+  <div class="erp-card">
+    <div class="erp-card-header"><span class="erp-card-title"><i class="bi bi-tag me-2"></i>{{ title }}</span></div>
+    <div class="erp-card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'comercializacion:categoria_list' %}" class="btn-erp btn-erp-outline">Cancelar</a>
+          <button class="btn-erp btn-erp-primary" type="submit"><i class="bi bi-save2 me-1"></i>Guardar categoría</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div></div>
+{% endblock %}

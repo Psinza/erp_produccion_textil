@@ -47,7 +47,13 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold text-dark small" for="{{ form.categoria.id_for_label }}">Clasificación SUDEBIP</label>
-                            {{ form.categoria }}
+                            <div class="input-group">
+                                {{ form.categoria }}
+                                <a href="{% url 'activos_fijos:categoria_create' %}" class="btn btn-outline-success" title="Agregar clasificación SUDEBIP" target="_blank">
+                                    <i class="bi bi-plus-lg"></i>
+                                </a>
+                            </div>
+                            <div class="form-text">Puede crear o editar clasificaciones desde el catálogo SUDEBIP.</div>
                             {% if form.categoria.errors %}<div class="text-danger small mt-1">{{ form.categoria.errors }}</div>{% endif %}
                         </div>
 
@@ -105,7 +111,13 @@
                         </div>
                         <div class="col-md-5">
                             <label class="form-label fw-bold text-dark small" for="{{ form.responsable.id_for_label }}">Responsable Directo / Usuario</label>
-                            {{ form.responsable }}
+                            <div class="input-group">
+                                {{ form.responsable }}
+                                <a href="{% url 'rrhh:empleado_create' %}" class="btn btn-outline-success" title="Agregar responsable" target="_blank">
+                                    <i class="bi bi-person-plus"></i>
+                                </a>
+                            </div>
+                            <div class="form-text">El responsable debe existir en el registro de Talento Humano.</div>
                             {% if form.responsable.errors %}<div class="text-danger small mt-1">{{ form.responsable.errors }}</div>{% endif %}
                         </div>
                         

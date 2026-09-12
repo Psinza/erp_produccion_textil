@@ -1,0 +1,7 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">{{ titulo }}</h2>
+    <form method="post" class="card card-body shadow-sm">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary" type="submit">Guardar medición</button></form>
+</div>
+{% endblock %}

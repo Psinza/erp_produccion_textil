@@ -13,7 +13,7 @@
       <form method="post">{% csrf_token %}
         <div class="row g-3">
           <div class="col-12"><label class="form-label">Nombre *</label>{{ form.nombre }}{% if form.nombre.errors %}<div class="text-danger small">{{ form.nombre.errors }}</div>{% endif %}</div>
-          <div class="col-md-4"><label class="form-label">Año *</label>{{ form.año }}</div>
+          <div class="col-md-4"><label class="form-label">Año *</label>{{ form.ano }}{% if form.ano.errors %}<div class="text-danger small">{{ form.ano.errors }}</div>{% endif %}</div>
           <div class="col-md-4"><label class="form-label">Fecha Inicio *</label>{{ form.fecha_inicio }}</div>
           <div class="col-md-4"><label class="form-label">Fecha Fin *</label>{{ form.fecha_fin }}</div>
         </div>

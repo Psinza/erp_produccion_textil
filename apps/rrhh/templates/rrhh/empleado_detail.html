@@ -69,7 +69,15 @@
             <dt class="col-5">Egreso</dt>
             <dd class="col-7">{{ emp.fecha_egreso|default:"—" }}</dd>
             <dt class="col-5">Salario</dt>
-            <dd class="col-7 fw-bold text-success">${{ emp.salario|floatformat:2 }}</dd>
+            <dd class="col-7 fw-bold text-success">{{ emp.salario_base|floatformat:2 }} {{ emp.salario_moneda }}</dd>
+            <dt class="col-5">Cesta Ticket</dt>
+            <dd class="col-7">{{ emp.bono_alimentacion|floatformat:2 }} {{ emp.bono_alimentacion_moneda }}</dd>
+            <dt class="col-5">Bono de Guerra</dt>
+            <dd class="col-7">{{ emp.bono_guerra|floatformat:2 }} {{ emp.bono_guerra_moneda }}</dd>
+            <dt class="col-5">Bono de Producción</dt>
+            <dd class="col-7">{{ emp.bono_produccion|floatformat:2 }} {{ emp.bono_produccion_moneda }}</dd>
+            <dt class="col-5">Bono Complementario</dt>
+            <dd class="col-7">{{ emp.bono_divisas|floatformat:2 }} {{ emp.bono_divisas_moneda }}</dd>
             <dt class="col-5">Estado</dt>
             <dd class="col-7">
               <span class="badge

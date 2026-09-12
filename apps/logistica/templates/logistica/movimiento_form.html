@@ -40,6 +40,10 @@
                             <label class="form-label">Producto Terminado</label>
                             {{ form.producto_pt }}
                         </div>
+                        <div id="div_repuesto" class="col-md-12" style="display:none;">
+                            <label class="form-label">Repuesto de Máquina</label>
+                            {{ form.repuesto }}
+                        </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Almacén Origen (Salida)</label>
@@ -76,14 +80,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemTipo = document.getElementById('{{ form.item_tipo.id_for_label }}');
     const divMP = document.getElementById('div_materia_prima');
     const divPT = document.getElementById('div_producto_pt');
+    const divRepuesto = document.getElementById('div_repuesto');
 
     function toggleFields() {
         if (itemTipo.value === 'mp') {
             divMP.style.display = 'block';
             divPT.style.display = 'none';
-        } else {
+            divRepuesto.style.display = 'none';
+        } else if (itemTipo.value === 'pt') {
             divMP.style.display = 'none';
             divPT.style.display = 'block';
+            divRepuesto.style.display = 'none';
+        } else {
+            divMP.style.display = 'none';
+            divPT.style.display = 'none';
+            divRepuesto.style.display = 'block';
         }
     }
 

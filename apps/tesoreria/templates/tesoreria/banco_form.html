@@ -10,6 +10,7 @@
     <div class="card-body p-4">
       <form method="post">{% csrf_token %}
         {% for field in form %}<div class="mb-3"><label class="form-label">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}</div>{% endfor %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
         <div class="d-flex gap-2 mt-3">
           <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar</button>
           <a href="{% url 'tesoreria:banco_list' %}" class="btn btn-outline-secondary">Cancelar</a>
