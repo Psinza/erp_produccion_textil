@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+{% block page_title %}Estadísticas de venta{% endblock %}
+{% block breadcrumb %}Comercialización / Estadísticas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div><h1 class="h4 mb-1">Estadísticas de venta</h1><p class="text-muted mb-0">Consolidado operativo de órdenes comerciales.</p></div>
+  <a class="btn-erp btn-erp-outline" href="{% url 'comercializacion:manual_procedimientos' %}">Ver manual GO-01</a>
+</div>
+<div class="row g-3">
+  <div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ ordenes_total }}</div><div class="stat-label">Órdenes registradas</div></div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ ordenes_en_proceso }}</div><div class="stat-label">En proceso</div></div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ ordenes_cerradas }}</div><div class="stat-label">Cerradas</div></div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ unidades_total }}</div><div class="stat-label">Unidades solicitadas</div></div></div></div>
+</div>
+{% endblock %}

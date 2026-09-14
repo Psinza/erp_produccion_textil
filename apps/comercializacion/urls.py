@@ -42,4 +42,18 @@ urlpatterns = [
 
     # Promociones
     path('promociones/crear/', views.promocion_create, name='promocion_create'),
+    path('manual-procedimientos/', views.manual_procedimientos, name='manual_procedimientos'),
+    path('solicitudes-cotizacion/', views.solicitudes_cotizacion, name='solicitudes_cotizacion'),
+    path('solicitudes-cotizacion/nueva/', views.solicitud_cotizacion_edit, name='solicitud_cotizacion_create'),
+    path('solicitudes-cotizacion/<int:pk>/editar/', views.solicitud_cotizacion_edit, name='solicitud_cotizacion_update'),
+    path('cotizaciones/', views.cotizaciones, name='cotizaciones'),
+    path('cotizaciones/nueva/', views.cotizacion_edit, name='cotizacion_create'),
+    path('cotizaciones/<int:pk>/editar/', views.cotizacion_edit, name='cotizacion_update'),
+    path('reclamos/', views.reclamos, name='reclamos'),
+    path('reclamos/nuevo/', views.reclamo_edit, name='reclamo_create'),
+    path('reclamos/<int:pk>/editar/', views.reclamo_edit, name='reclamo_update'),
+    path('donaciones/', views.donaciones, name='donaciones'),
+    path('donaciones/nueva/', views.donacion_edit, name='donacion_create'),
+    path('donaciones/<int:pk>/editar/', views.donacion_edit, name='donacion_update'),
+    path('estadisticas-venta/', views.estadisticas_venta, name='estadisticas_venta'),
 ]

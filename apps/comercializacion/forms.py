@@ -1,5 +1,9 @@
 from django import forms
-from .models import InformacionComercial, ListaPrecio, ItemPrecio, CategoriaComercial, OrdenProduccionComercial, EncuestaSatisfaccionCliente
+from .models import (
+    InformacionComercial, ListaPrecio, ItemPrecio, CategoriaComercial,
+    OrdenProduccionComercial, EncuestaSatisfaccionCliente, SolicitudCotizacion,
+    CotizacionComercial, ReclamoComercial, SolicitudDonacion,
+)
 from django.utils import timezone
 from apps.produccion.models import ProductoTerminado
 from decimal import Decimal
@@ -166,8 +170,83 @@ class EncuestaSatisfaccionClienteForm(forms.ModelForm):
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-    def clean_materiales(self):
-        value = self.cleaned_data['materiales']
-        if not isinstance(value, list):
-            raise forms.ValidationError('Use una lista JSON de materiales.')
-        return value
+def _styled_form(form):
+    for field in form.fields.values():
+        if isinstance(field.widget, forms.Select):
+            field.widget.attrs['class'] = 'form-select'
+        elif isinstance(field.widget, forms.FileInput):
+            field.widget.attrs['class'] = 'form-control'
+        elif not isinstance(field.widget, forms.CheckboxInput):
+            field.widget.attrs['class'] = 'form-control'
+    return form
+
+
+class SolicitudCotizacionForm(forms.ModelForm):
+    class Meta:
+        model = SolicitudCotizacion
+        exclude = ['numero', 'creado_por', 'creado_en']
+        widgets = {
+            'fecha_recepcion': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_limite_cotizacion': forms.DateInput(attrs={'type': 'date'}),
+            'requerimiento': forms.Textarea(attrs={'rows': 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _styled_form(self)
+        if not self.instance.pk:
+            self.initial.setdefault('fecha_recepcion', timezone.localdate())
+
+
+class CotizacionComercialForm(forms.ModelForm):
+    class Meta:
+        model = CotizacionComercial
+        exclude = ['numero', 'creado_por', 'creado_en']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'vigencia_hasta': forms.DateInput(attrs={'type': 'date'}),
+            'observaciones': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _styled_form(self)
+        if not self.instance.pk:
+            self.initial.setdefault('fecha', timezone.localdate())
+
+
+class ReclamoComercialForm(forms.ModelForm):
+    class Meta:
+        model = ReclamoComercial
+        exclude = ['numero', 'creado_por', 'creado_en']
+        widgets = {
+            'fecha_recepcion': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_respuesta': forms.DateInput(attrs={'type': 'date'}),
+            'descripcion': forms.Textarea(attrs={'rows': 4}),
+            'causa': forms.Textarea(attrs={'rows': 3}),
+            'acciones': forms.Textarea(attrs={'rows': 3}),
+            'respuesta': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _styled_form(self)
+        if not self.instance.pk:
+            self.initial.setdefault('fecha_recepcion', timezone.localdate())
+
+
+class SolicitudDonacionForm(forms.ModelForm):
+    class Meta:
+        model = SolicitudDonacion
+        exclude = ['numero', 'creado_por', 'creado_en']
+        widgets = {
+            'fecha_solicitud': forms.DateInput(attrs={'type': 'date'}),
+            'justificacion': forms.Textarea(attrs={'rows': 4}),
+            'observaciones': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _styled_form(self)
+        if not self.instance.pk:
+            self.initial.setdefault('fecha_solicitud', timezone.localdate())

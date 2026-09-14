@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import CategoriaComercial, InformacionComercial, ListaPrecio, ItemPrecio, OrdenProduccionComercial, EncuestaSatisfaccionCliente
+from .models import (
+    CategoriaComercial, InformacionComercial, ListaPrecio, ItemPrecio,
+    OrdenProduccionComercial, EncuestaSatisfaccionCliente, SolicitudCotizacion,
+    CotizacionComercial, ReclamoComercial, SolicitudDonacion,
+)
 
 @admin.register(CategoriaComercial)
 class CategoriaComercialAdmin(admin.ModelAdmin):
@@ -36,3 +40,31 @@ class EncuestaSatisfaccionClienteAdmin(admin.ModelAdmin):
     list_display = ('fecha', 'organizacion', 'representante', 'calidad_servicio', 'producto_servicio')
     list_filter = ('fecha', 'calidad_servicio', 'producto_servicio')
     search_fields = ('organizacion', 'representante', 'correo')
+
+
+@admin.register(SolicitudCotizacion)
+class SolicitudCotizacionAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'cliente', 'tipo', 'fecha_recepcion', 'estado')
+    list_filter = ('tipo', 'estado')
+    search_fields = ('numero', 'cliente', 'correo')
+
+
+@admin.register(CotizacionComercial)
+class CotizacionComercialAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'solicitud', 'fecha', 'vigencia_hasta', 'estado', 'aprobada_por_cliente')
+    list_filter = ('estado', 'moneda', 'aprobada_por_cliente')
+    search_fields = ('numero', 'solicitud__cliente')
+
+
+@admin.register(ReclamoComercial)
+class ReclamoComercialAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'cliente', 'fecha_recepcion', 'fecha_limite_respuesta', 'estado')
+    list_filter = ('estado', 'canal')
+    search_fields = ('numero', 'cliente', 'asunto')
+
+
+@admin.register(SolicitudDonacion)
+class SolicitudDonacionAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'beneficiario', 'institucion_solicitante', 'fecha_solicitud', 'estado')
+    list_filter = ('estado', 'aprobacion_presidencia')
+    search_fields = ('numero', 'beneficiario', 'institucion_solicitante')

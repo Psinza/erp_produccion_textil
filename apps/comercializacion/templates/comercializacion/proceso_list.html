@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}Comercialización / {{ titulo }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">{{ titulo }}</h1>
+  <a class="btn-erp btn-erp-primary" href="{% url crear_url %}"><i class="bi bi-plus-lg me-1"></i>Nuevo registro</a>
+</div>
+<div class="erp-card">
+  <div class="erp-card-body p-0">
+    <div class="table-responsive">
+      <table class="erp-table">
+        <thead><tr><th>Identificador</th><th>Parte relacionada</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        {% for registro in registros %}
+          <tr>
+            <td class="fw-semibold">{{ registro.numero }}</td>
+            <td>{{ registro.cliente|default:registro.beneficiario|default:registro.solicitud|default:registro.asunto|default:"—" }}</td>
+            <td>{{ registro.fecha_recepcion|default:registro.fecha_solicitud|default:registro.fecha|date:"d/m/Y" }}</td>
+            <td><span class="badge bg-light text-dark border">{{ registro.get_estado_display }}</span></td>
+            <td><a class="btn-erp btn-erp-outline" href="{% url edit_name registro.pk %}">Editar</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted py-5">No hay registros. Cree el primero para iniciar la trazabilidad.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

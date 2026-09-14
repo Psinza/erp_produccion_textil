@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% block page_title %}Manual de procedimientos{% endblock %}
+{% block breadcrumb %}Inicio / Comercialización / Manual GO-01{% endblock %}
+{% block content %}
+<div class="erp-card mb-4">
+  <div class="erp-card-body">
+    <span class="badge bg-primary mb-2">GO-01 · Adaptación digital</span>
+    <h1 class="h4">Manual de Normas y Procedimientos de Comercialización</h1>
+    <p class="text-muted mb-0">Flujo operativo adaptado al ERP para registrar, validar, aprobar y dar seguimiento a las operaciones comerciales del Complejo Industrial Tiuna.</p>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-6"><div class="erp-card h-100"><div class="erp-card-body"><h2 class="h6">01 · Venta de productos fabricados</h2><p class="small text-muted">Solicitud técnica, cotización, aceptación, anticipo, orden comercial, aprobación de muestra, producción, despacho y expediente de venta.</p><a href="{% url 'comercializacion:solicitudes_cotizacion' %}" class="btn-erp btn-erp-outline">Solicitudes</a></div></div></div>
+  <div class="col-md-6"><div class="erp-card h-100"><div class="erp-card-body"><h2 class="h6">02 · Venta de productos no fabricados</h2><p class="small text-muted">Cotización de bienes comercializados, validación de adquisición, coordinación con logística y entrega documentada.</p><a href="{% url 'comercializacion:cotizaciones' %}" class="btn-erp btn-erp-outline">Cotizaciones</a></div></div></div>
+  <div class="col-md-6"><div class="erp-card h-100"><div class="erp-card-body"><h2 class="h6">03 · Estadísticas de venta</h2><p class="small text-muted">Consolidado de órdenes, unidades solicitadas, órdenes en proceso y cierres para la toma de decisiones.</p><a href="{% url 'comercializacion:estadisticas_venta' %}" class="btn-erp btn-erp-outline">Ver estadísticas</a></div></div></div>
+  <div class="col-md-6"><div class="erp-card h-100"><div class="erp-card-body"><h2 class="h6">04 · Quejas y reclamos</h2><p class="small text-muted">Recepción digital o escrita, análisis de causa, acciones correctivas y respuesta en un máximo de cinco días hábiles.</p><a href="{% url 'comercializacion:reclamos' %}" class="btn-erp btn-erp-outline">Gestionar reclamos</a></div></div></div>
+  <div class="col-md-6"><div class="erp-card h-100"><div class="erp-card-body"><h2 class="h6">05 · Solicitud de donaciones</h2><p class="small text-muted">Registro del beneficiario, aprobación, documentación de soporte, contrato, carta de aceptación y entrega.</p><a href="{% url 'comercializacion:donaciones' %}" class="btn-erp btn-erp-outline">Gestionar donaciones</a></div></div></div>
+</div>
+{% endblock %}

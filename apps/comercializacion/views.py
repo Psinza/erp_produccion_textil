@@ -2,8 +2,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import CategoriaComercial, InformacionComercial, ListaPrecio, ItemPrecio, OrdenProduccionComercial, EncuestaSatisfaccionCliente
-from .forms import CategoriaComercialForm, InformacionComercialForm, ListaPrecioForm, ItemPrecioForm, OrdenProduccionComercialForm, EncuestaSatisfaccionClienteForm
+from .models import (
+    CategoriaComercial, InformacionComercial, ListaPrecio, ItemPrecio,
+    OrdenProduccionComercial, EncuestaSatisfaccionCliente, SolicitudCotizacion,
+    CotizacionComercial, ReclamoComercial, SolicitudDonacion,
+)
+from .forms import (
+    CategoriaComercialForm, InformacionComercialForm, ListaPrecioForm,
+    ItemPrecioForm, OrdenProduccionComercialForm, EncuestaSatisfaccionClienteForm,
+    SolicitudCotizacionForm, CotizacionComercialForm, ReclamoComercialForm,
+    SolicitudDonacionForm,
+)
 
 @login_required
 def dashboard_comercializacion(request):
@@ -310,3 +319,100 @@ def promocion_create(request):
     else:
         form = PromocionForm()
     return render(request, 'comercializacion/promocion_form.html', {'form': form, 'titulo': 'Crear Promoción'})
+
+
+@login_required
+def manual_procedimientos(request):
+    """Presenta el manual GO-01 adaptado al flujo digital del ERP."""
+    return render(request, 'comercializacion/manual_procedimientos.html')
+
+
+def _editable_record(request, model, form_class, template_title, redirect_name, pk=None):
+    instance = get_object_or_404(model, pk=pk) if pk else None
+    form = form_class(request.POST or None, request.FILES or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        record = form.save(commit=False)
+        if not instance:
+            record.creado_por = request.user
+        record.save()
+        messages.success(request, f'{template_title} guardado correctamente.')
+        return redirect(redirect_name)
+    return render(request, 'comercializacion/proceso_form.html', {
+        'form': form, 'titulo': f'Editar {template_title}' if instance else f'Nueva {template_title}',
+    })
+
+
+@login_required
+def solicitudes_cotizacion(request):
+    return render(request, 'comercializacion/proceso_list.html', {
+        'titulo': 'Solicitudes de cotización',
+        'crear_url': 'comercializacion:solicitud_cotizacion_create',
+        'registros': SolicitudCotizacion.objects.select_related('producto'),
+        'columns': ['numero', 'cliente', 'tipo', 'fecha_recepcion', 'estado'],
+        'edit_name': 'comercializacion:solicitud_cotizacion_update',
+    })
+
+
+@login_required
+def solicitud_cotizacion_edit(request, pk=None):
+    return _editable_record(request, SolicitudCotizacion, SolicitudCotizacionForm, 'Solicitud de cotización', 'comercializacion:solicitudes_cotizacion', pk)
+
+
+@login_required
+def cotizaciones(request):
+    return render(request, 'comercializacion/proceso_list.html', {
+        'titulo': 'Cotizaciones comerciales',
+        'crear_url': 'comercializacion:cotizacion_create',
+        'registros': CotizacionComercial.objects.select_related('solicitud'),
+        'columns': ['numero', 'solicitud', 'fecha', 'vigencia_hasta', 'total', 'estado'],
+        'edit_name': 'comercializacion:cotizacion_update',
+    })
+
+
+@login_required
+def cotizacion_edit(request, pk=None):
+    return _editable_record(request, CotizacionComercial, CotizacionComercialForm, 'Cotización comercial', 'comercializacion:cotizaciones', pk)
+
+
+@login_required
+def reclamos(request):
+    return render(request, 'comercializacion/proceso_list.html', {
+        'titulo': 'Quejas y reclamos',
+        'crear_url': 'comercializacion:reclamo_create',
+        'registros': ReclamoComercial.objects.select_related('orden'),
+        'columns': ['numero', 'cliente', 'asunto', 'fecha_recepcion', 'fecha_limite_respuesta', 'estado'],
+        'edit_name': 'comercializacion:reclamo_update',
+    })
+
+
+@login_required
+def reclamo_edit(request, pk=None):
+    return _editable_record(request, ReclamoComercial, ReclamoComercialForm, 'Reclamo comercial', 'comercializacion:reclamos', pk)
+
+
+@login_required
+def donaciones(request):
+    return render(request, 'comercializacion/proceso_list.html', {
+        'titulo': 'Solicitudes de donación',
+        'crear_url': 'comercializacion:donacion_create',
+        'registros': SolicitudDonacion.objects.select_related('producto'),
+        'columns': ['numero', 'beneficiario', 'institucion_solicitante', 'fecha_solicitud', 'cantidad', 'estado'],
+        'edit_name': 'comercializacion:donacion_update',
+    })
+
+
+@login_required
+def donacion_edit(request, pk=None):
+    return _editable_record(request, SolicitudDonacion, SolicitudDonacionForm, 'Solicitud de donación', 'comercializacion:donaciones', pk)
+
+
+@login_required
+def estadisticas_venta(request):
+    ordenes = OrdenProduccionComercial.objects.all()
+    context = {
+        'ordenes_total': ordenes.count(),
+        'ordenes_cerradas': ordenes.filter(estado='cerrada').count(),
+        'ordenes_en_proceso': ordenes.filter(estado__in=['validacion', 'enviada', 'ejecutando']).count(),
+        'unidades_total': sum(orden.cantidad_total for orden in ordenes),
+    }
+    return render(request, 'comercializacion/estadisticas_venta.html', context)
