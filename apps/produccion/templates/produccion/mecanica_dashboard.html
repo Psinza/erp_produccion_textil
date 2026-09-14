@@ -10,7 +10,15 @@
   <a href="{% url 'produccion:mecanica_solicitud_create' %}" class="btn btn-warning">Pedir pieza</a>
   <a href="{% url 'produccion:mecanica_mantenimiento_create' %}" class="btn btn-outline-warning">Planificar mantenimiento</a>
   <a href="{% url 'produccion:mecanica_chequeo_create' %}" class="btn btn-outline-success">Chequear línea</a>
-  <a href="{% url 'produccion:mecanica_plan_create' %}" class="btn btn-outline-dark">Nuevo plan</a>
+  <a class="btn btn-primary" href="{% url 'produccion:mecanica_plan_create' %}">Programación preventiva</a>
+  <a class="btn btn-outline-primary" href="{% url 'produccion:mecanica_mantenimiento_create' %}">Orden de mantenimiento</a>
+    <a class="btn btn-outline-secondary" href="{% url 'produccion:mecanica_minuta_create' %}">Minuta diaria</a>
+    <a class="btn btn-outline-warning" href="{% url 'produccion:mecanica_traslado_create' %}">Traslado de máquina</a>
+    <a class="btn btn-outline-info" href="{% url 'produccion:mecanica_diagnostico_create' %}">Diagnóstico de elementos</a>
+</div>
+<div class="alert alert-light border mb-4">
+    La programación debe ser aprobada por la jefatura antes de ejecutarse. Cada intervención debe registrar seguridad,
+    actividades, prueba de costura, aceptación de muestra y minuta.
 </div>
 <div class="row g-3">
   <div class="col-lg-7"><div class="card shadow-sm"><div class="card-header">Stock de máquinas y alineación por línea</div><div class="card-body p-0"><table class="table mb-0"><tr><th>Código</th><th>Máquina</th><th>Tipo</th><th>Línea</th><th>Estado</th></tr>{% for m in maquinas %}<tr><td>{{ m.codigo }}</td><td>{{ m.nombre }}</td><td>{{ m.tipo }}</td><td>{{ m.linea|default:"Sin asignar" }}</td><td>{{ m.get_estado_display }}</td></tr>{% empty %}<tr><td colspan="5" class="text-center">No hay máquinas registradas.</td></tr>{% endfor %}</table></div></div></div>

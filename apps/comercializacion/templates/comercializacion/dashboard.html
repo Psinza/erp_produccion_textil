@@ -4,184 +4,145 @@
 {% block breadcrumb %}Inicio / Comercialización{% endblock %}
 
 {% block content %}
-<!-- Encabezado -->
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
   <div>
-    <h1 class="mb-1" style="font-family:var(--font-head);font-size:22px;font-weight:700;color:#1a2332;">
-      Panel de Comercialización
-    </h1>
-    <p class="text-muted small mb-0">Catálogo, listas de precios y promociones comerciales</p>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
+            style="width:38px;height:38px;background:#e8f0fe;color:#1a73e8;">
+        <i class="bi bi-briefcase-fill"></i>
+      </span>
+      <h1 class="mb-0" style="font-family:var(--font-head);font-size:24px;font-weight:700;color:#1a2332;">
+        Panel de Comercialización
+      </h1>
+    </div>
+    <p class="text-muted small mb-0 ms-5">Gestione clientes, pedidos, catálogo, precios y seguimiento comercial.</p>
   </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'comercializacion:catalogo_create' %}" class="btn-erp btn-erp-primary">
-      <i class="bi bi-plus-lg"></i> Nuevo ítem catálogo
-    </a>
-    <a href="{% url 'comercializacion:promocion_create' %}" class="btn-erp btn-erp-outline">
-      <i class="bi bi-tag"></i> Crear promoción
-    </a>
-    <a href="{% url 'comercializacion:lista_precio_create' %}" class="btn-erp btn-erp-outline">
-      <i class="bi bi-list-ul"></i> Nueva lista precios
-    </a>
+  <a href="{% url 'comercializacion:orden_produccion_create' %}" class="btn-erp btn-erp-primary">
+    <i class="bi bi-plus-lg me-1"></i> Nueva orden comercial
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div class="stat-icon" style="background:#e8f0fe;color:#1a73e8;"><i class="bi bi-box-seam"></i></div>
+      <div><div class="stat-value">{{ total_productos_catalogo }}</div><div class="stat-label">Productos en catálogo</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div class="stat-icon" style="background:#e6f4ea;color:#1e8e3e;"><i class="bi bi-tags"></i></div>
+      <div><div class="stat-value">{{ listas_activas }}</div><div class="stat-label">Listas activas</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div class="stat-icon" style="background:#fce8e6;color:#d93025;"><i class="bi bi-percent"></i></div>
+      <div><div class="stat-value">{{ productos_en_oferta }}</div><div class="stat-label">Productos en oferta</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div class="stat-icon" style="background:#fef7e0;color:#b7791f;"><i class="bi bi-star-fill"></i></div>
+      <div><div class="stat-value">{{ productos_destacados }}</div><div class="stat-label">Productos destacados</div></div>
+    </div>
   </div>
 </div>
 
-<!-- KPIs -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#e8f0fe;color:#1a73e8;">
-        <i class="bi bi-grid-3x3-gap"></i>
+<div class="erp-card mb-4">
+  <div class="erp-card-header">
+    <span class="erp-card-title"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Acciones comerciales</span>
+    <span class="text-muted small">Accesos frecuentes</span>
+  </div>
+  <div class="erp-card-body">
+    <div class="row g-2">
+      <div class="col-6 col-md-3"><a href="{% url 'comercializacion:orden_produccion_create' %}" class="btn btn-erp btn-erp-primary w-100"><i class="bi bi-file-earmark-plus me-1"></i> Nueva orden</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'ventas:pedido_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-cart-plus me-1"></i> Nuevo pedido</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'ventas:producto_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-box-seam me-1"></i> Nuevo producto</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'comercializacion:catalogo_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-journal-plus me-1"></i> Ficha comercial</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'comercializacion:lista_precio_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-currency-exchange me-1"></i> Nueva lista de precios</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'comercializacion:promocion_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-megaphone me-1"></i> Nueva promoción</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'comercializacion:encuesta_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-chat-square-text me-1"></i> Encuesta cliente</a></div>
+      <div class="col-6 col-md-3"><a href="{% url 'ventas:cliente_create' %}" class="btn btn-erp btn-erp-outline w-100"><i class="bi bi-person-plus me-1"></i> Nuevo cliente</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="erp-card h-100">
+      <div class="erp-card-header">
+        <span class="erp-card-title"><i class="bi bi-kanban me-2"></i>Órdenes de producción comerciales</span>
+        <a href="{% url 'comercializacion:orden_produccion_list' %}" class="btn-erp btn-erp-outline" style="font-size:12px;">Ver todas <i class="bi bi-arrow-right"></i></a>
       </div>
-      <div>
-        <div class="stat-value">{{ total_productos_catalogo }}</div>
-        <div class="stat-label">Productos en catálogo</div>
+      <div class="erp-card-body p-0">
+        <div class="table-responsive">
+          <table class="erp-table">
+            <thead><tr><th>Número</th><th>Producto</th><th>Cliente</th><th>Entrega</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+              {% for orden in ordenes_produccion %}
+              <tr>
+                <td class="fw-semibold">{{ orden.numero }}</td>
+                <td>{{ orden.producto.nombre }}</td>
+                <td>{{ orden.cliente|default:"—" }}</td>
+                <td>{{ orden.fecha_entrega|date:"d/m/Y"|default:"—" }}</td>
+                <td><span class="badge bg-light text-dark border">{{ orden.get_estado_display }}</span></td>
+                <td><a class="btn-erp btn-erp-outline" style="font-size:11px;padding:4px 9px;" href="{% url 'comercializacion:orden_produccion_detail' orden.pk %}">Abrir</a></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-inbox fs-3 d-block mb-2"></i>No hay órdenes comerciales registradas.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#e6f4ea;color:#1e8e3e;">
-        <i class="bi bi-list-check"></i>
-      </div>
-      <div>
-        <div class="stat-value">{{ listas_activas }}</div>
-        <div class="stat-label">Listas de precio activas</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fce8e6;color:#d93025;">
-        <i class="bi bi-percent"></i>
-      </div>
-      <div>
-        <div class="stat-value">{{ productos_en_oferta }}</div>
-        <div class="stat-label">En oferta</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fef7e0;color:#f9a825;">
-        <i class="bi bi-star"></i>
-      </div>
-      <div>
-        <div class="stat-value">{{ productos_destacados }}</div>
-        <div class="stat-label">Destacados</div>
+  <div class="col-xl-4">
+    <div class="erp-card h-100">
+      <div class="erp-card-header"><span class="erp-card-title"><i class="bi bi-diagram-3 me-2"></i>Flujo comercial</span></div>
+      <div class="erp-card-body">
+        <div class="d-flex gap-3 mb-3"><span class="text-primary fs-5">01</span><div><strong>Cliente y pedido</strong><div class="text-muted small">Registre la necesidad y el comprador.</div></div></div>
+        <div class="d-flex gap-3 mb-3"><span class="text-primary fs-5">02</span><div><strong>Cotización y aprobación</strong><div class="text-muted small">Defina precio, condiciones y alcance.</div></div></div>
+        <div class="d-flex gap-3"><span class="text-primary fs-5">03</span><div><strong>Producción y entrega</strong><div class="text-muted small">Envíe la orden y conserve la trazabilidad.</div></div></div>
       </div>
     </div>
   </div>
 </div>
 
 <div class="row g-4">
-  <!-- Últimos productos del catálogo -->
-  <div class="col-md-7">
-    <div class="erp-card">
+  <div class="col-xl-7">
+    <div class="erp-card h-100">
       <div class="erp-card-header">
         <span class="erp-card-title"><i class="bi bi-box me-2"></i>Catálogo reciente</span>
-        <a href="{% url 'comercializacion:catalogo_list' %}" class="btn-erp btn-erp-outline" style="font-size:12px;">
-          Ver todo <i class="bi bi-arrow-right"></i>
-        </a>
+        <a href="{% url 'comercializacion:catalogo_list' %}" class="btn-erp btn-erp-outline" style="font-size:12px;">Ver catálogo</a>
       </div>
       <div class="erp-card-body p-0">
         {% if ultimos_productos %}
         <table class="erp-table">
-          <thead>
-            <tr>
-              <th>Producto comercial</th>
-              <th>Categoría</th>
-              <th>Estado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for p in ultimos_productos %}
-            <tr>
-              <td>
-                <div style="font-weight:600;font-size:13px;">{{ p.nombre_comercial }}</div>
-                <div class="text-muted" style="font-size:11px;">{{ p.producto.nombre }}</div>
-              </td>
-              <td><span class="badge-area">{{ p.categoria|default:"Sin categoría" }}</span></td>
-              <td>
-                {% if p.en_oferta %}<span class="badge bg-danger text-white" style="font-size:10px;">Oferta</span>{% endif %}
-                {% if p.destacado %}<span class="badge bg-warning text-dark" style="font-size:10px;">⭐ Destacado</span>{% endif %}
-                {% if not p.en_oferta and not p.destacado %}<span class="text-muted small">—</span>{% endif %}
-              </td>
-              <td>
-                <a href="{% url 'comercializacion:catalogo_edit' p.pk %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:4px 10px;">
-                  <i class="bi bi-pencil"></i>
-                </a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
+          <thead><tr><th>Producto comercial</th><th>Producto base</th><th>Estado</th><th></th></tr></thead>
+          <tbody>{% for p in ultimos_productos %}<tr><td class="fw-semibold">{{ p.nombre_comercial }}</td><td class="text-muted small">{{ p.producto.nombre }}</td><td>{% if p.en_oferta %}<span class="badge bg-danger">Oferta</span>{% elif p.destacado %}<span class="badge bg-warning text-dark">Destacado</span>{% else %}<span class="text-muted small">Activo</span>{% endif %}</td><td><a href="{% url 'comercializacion:catalogo_edit' p.pk %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:4px 9px;"><i class="bi bi-pencil"></i></a></td></tr>{% endfor %}</tbody>
         </table>
         {% else %}
-        <div class="text-center py-5 text-muted">
-          <i class="bi bi-inbox" style="font-size:2rem;"></i>
-          <p class="mt-2 small">No hay productos en el catálogo aún.</p>
-          <a href="{% url 'comercializacion:catalogo_create' %}" class="btn-erp btn-erp-primary mt-2">
-            <i class="bi bi-plus"></i> Añadir primer producto
-          </a>
-        </div>
+        <div class="text-center py-5 text-muted"><i class="bi bi-box-seam fs-3 d-block mb-2"></i>No hay productos en el catálogo.<br><a href="{% url 'comercializacion:catalogo_create' %}" class="btn-erp btn-erp-primary mt-3">Crear ficha comercial</a></div>
         {% endif %}
       </div>
     </div>
   </div>
-
-  <!-- Listas de precios -->
-  <div class="col-md-5">
-    <div class="erp-card">
-      <div class="erp-card-header">
-        <span class="erp-card-title"><i class="bi bi-currency-dollar me-2"></i>Listas de Precios</span>
-        <a href="{% url 'comercializacion:lista_precio_create' %}" class="btn-erp btn-erp-primary" style="font-size:12px;">
-          <i class="bi bi-plus"></i> Nueva
-        </a>
-      </div>
-      <div class="erp-card-body p-0">
-        {% if listas %}
-        <table class="erp-table">
-          <thead>
-            <tr><th>Lista</th><th>Moneda</th><th></th></tr>
-          </thead>
-          <tbody>
-            {% for lista in listas %}
-            <tr>
-              <td style="font-weight:600;font-size:13px;">{{ lista.nombre }}</td>
-              <td><span class="badge-area">{{ lista.moneda }}</span></td>
-              <td class="d-flex gap-1">
-                <a href="{% url 'comercializacion:lista_precio_detail' lista.pk %}" class="btn-erp btn-erp-outline" style="font-size:11px;padding:4px 10px;" title="Ver detalle">
-                  <i class="bi bi-eye"></i>
-                </a>
-                <a href="{% url 'comercializacion:lista_imprimir' lista.pk %}" target="_blank" class="btn-erp btn-erp-outline" style="font-size:11px;padding:4px 10px;" title="Imprimir">
-                  <i class="bi bi-printer"></i>
-                </a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <div class="text-center py-5 text-muted">
-          <i class="bi bi-list-ul" style="font-size:2rem;"></i>
-          <p class="mt-2 small">No hay listas de precios activas.</p>
-          <a href="{% url 'comercializacion:lista_precio_create' %}" class="btn-erp btn-erp-primary mt-2">
-            <i class="bi bi-plus"></i> Crear lista
-          </a>
-        </div>
-        {% endif %}
-      </div>
+  <div class="col-xl-5">
+    <div class="erp-card mb-4">
+      <div class="erp-card-header"><span class="erp-card-title"><i class="bi bi-hand-thumbs-up me-2"></i>Satisfacción del cliente</span><a href="{% url 'comercializacion:encuesta_list' %}" class="btn-erp btn-erp-outline" style="font-size:12px;">Ver encuestas</a></div>
+      <div class="erp-card-body"><p class="small text-muted mb-3">Registre la evaluación E/B/R/M/D y documente comentarios cuando el resultado sea regular, mejorable o deficiente.</p><a href="{% url 'comercializacion:encuesta_create' %}" class="btn btn-erp btn-erp-primary w-100"><i class="bi bi-plus-lg me-1"></i> Nueva encuesta</a></div>
     </div>
-
-    <!-- Acceso rápido a promociones -->
-    <div class="erp-card mt-3">
-      <div class="erp-card-body text-center py-4">
-        <i class="bi bi-tag-fill" style="font-size:2rem;color:#d93025;"></i>
-        <h6 class="mt-2 mb-1" style="font-family:var(--font-head);font-weight:700;">Gestión de Promociones</h6>
-        <p class="text-muted small mb-3">Aplica descuentos a múltiples productos del catálogo de forma masiva.</p>
-        <a href="{% url 'comercializacion:promocion_create' %}" class="btn-erp btn-erp-primary">
-          <i class="bi bi-lightning"></i> Crear promoción ahora
-        </a>
+    <div class="erp-card">
+      <div class="erp-card-header"><span class="erp-card-title"><i class="bi bi-link-45deg me-2"></i>Módulos relacionados</span></div>
+      <div class="erp-card-body">
+        <div class="row g-2">
+          <div class="col-6"><a class="btn btn-erp btn-erp-outline w-100" href="{% url 'ventas:cliente_list' %}">Clientes</a></div>
+          <div class="col-6"><a class="btn btn-erp btn-erp-outline w-100" href="{% url 'ventas:pedido_list' %}">Pedidos</a></div>
+          <div class="col-6"><a class="btn btn-erp btn-erp-outline w-100" href="{% url 'ventas:producto_list' %}">Productos</a></div>
+          <div class="col-6"><a class="btn btn-erp btn-erp-outline w-100" href="{% url 'logistica:dashboard' %}">Logística</a></div>
+        </div>
       </div>
     </div>
   </div>

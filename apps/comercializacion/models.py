@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from uuid import uuid4
 from apps.produccion.models import ProductoTerminado
 
 class CategoriaComercial(models.Model):
@@ -56,3 +58,84 @@ class ItemPrecio(models.Model):
 
     def __str__(self):
         return f"{self.producto.nombre} en {self.lista.nombre}"
+
+
+class OrdenProduccionComercial(models.Model):
+    ESTADOS = [
+        ('borrador', 'Borrador'),
+        ('validacion', 'En validación'),
+        ('enviada', 'Enviada a Producción'),
+        ('ejecutando', 'En ejecución'),
+        ('cerrada', 'Cerrada'),
+    ]
+    numero = models.CharField(max_length=30, unique=True, blank=True)
+    producto = models.ForeignKey(ProductoTerminado, on_delete=models.PROTECT)
+    cliente = models.CharField(max_length=200, blank=True)
+    fecha = models.DateField()
+    fecha_entrega = models.DateField(null=True, blank=True)
+    responsable = models.CharField(max_length=150, blank=True)
+    descripcion = models.TextField(blank=True)
+    genero = models.CharField(max_length=30, blank=True)
+    color = models.CharField(max_length=100, blank=True)
+    tipo_tela = models.CharField(max_length=200, blank=True)
+    tallas = models.CharField(max_length=200, blank=True)
+    cantidades_talla = models.JSONField(default=dict, blank=True)
+    cantidad_total = models.PositiveIntegerField(default=0)
+    materiales = models.JSONField(default=list, blank=True)
+    hoja_consumo = models.TextField(blank=True)
+    orden_trabajo = models.TextField(blank=True)
+    observaciones = models.TextField(blank=True)
+    tipo_solicitud = models.CharField(max_length=80, default='Producción')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='borrador')
+    orden_produccion = models.OneToOneField(
+        'produccion.OrdenProduccion', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='orden_comercial_origen',
+    )
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='ordenes_comerciales_produccion',
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-fecha', '-creado_en')
+        verbose_name = 'Orden comercial de producción'
+        verbose_name_plural = 'Órdenes comerciales de producción'
+
+    def save(self, *args, **kwargs):
+        if not self.numero:
+            self.numero = f'OPC-{self.fecha:%Y%m%d}-{uuid4().hex[:6].upper()}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.numero} - {self.producto.nombre}'
+
+
+class EncuestaSatisfaccionCliente(models.Model):
+    CALIFICACIONES = [('E', 'Excelente'), ('B', 'Bueno'), ('R', 'Regular'), ('M', 'Mejorable'), ('D', 'Deficiente')]
+    orden = models.ForeignKey(OrdenProduccionComercial, on_delete=models.SET_NULL, null=True, blank=True, related_name='encuestas_satisfaccion')
+    organizacion = models.CharField(max_length=200)
+    representante = models.CharField(max_length=150)
+    cumplimiento_requerimientos = models.CharField(max_length=1, choices=CALIFICACIONES)
+    tiempo_respuesta = models.CharField(max_length=1, choices=CALIFICACIONES)
+    calidad_servicio = models.CharField(max_length=1, choices=CALIFICACIONES)
+    atencion_personal = models.CharField(max_length=1, choices=CALIFICACIONES)
+    producto_servicio = models.CharField(max_length=1, choices=CALIFICACIONES)
+    comentarios = models.TextField(blank=True)
+    observaciones = models.TextField(blank=True)
+    respondida_por = models.CharField(max_length=150)
+    cargo = models.CharField(max_length=120, blank=True)
+    telefono = models.CharField(max_length=50, blank=True)
+    correo = models.EmailField(blank=True)
+    fecha = models.DateField()
+    registrada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    creada_en = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        if any(getattr(self, campo) in ('R', 'M', 'D') for campo in (
+            'cumplimiento_requerimientos', 'tiempo_respuesta', 'calidad_servicio',
+            'atencion_personal', 'producto_servicio',
+        )) and not self.comentarios.strip():
+            from django.core.exceptions import ValidationError
+            raise ValidationError({'comentarios': 'Los comentarios son obligatorios para una calificación regular o inferior.'})

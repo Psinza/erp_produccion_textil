@@ -44,6 +44,13 @@
                   title="Ver Detalle">
                   <i class="bi bi-eye"></i> Detalle
                 </a>
+                <div class="btn-group btn-group-sm ms-1">
+                  <a href="{% url 'produccion:gestionar_udp' orden.pk %}" class="btn btn-outline-secondary">UDP</a>
+                  <a href="{% url 'produccion:gestionar_corte' orden.pk %}" class="btn btn-outline-warning">Corte</a>
+                  <a href="{% url 'produccion:gestionar_bordado' orden.pk %}" class="btn btn-outline-info">Bordado</a>
+                  <a href="{% url 'produccion:gestionar_produccion' orden.pk %}" class="btn btn-outline-primary">Confección</a>
+                  <a href="{% url 'produccion:gestionar_despacho' orden.pk %}" class="btn btn-outline-dark">Despacho</a>
+                </div>
               </td>
             </tr>
             {% empty %}

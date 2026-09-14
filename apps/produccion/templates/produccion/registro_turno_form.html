@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="card shadow-sm border-0"><div class="card-body">
+    <h2 class="mb-4">{{ titulo }}</h2>
+    <form method="post">{% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="row g-3">{% for field in form %}<div class="{% if field.name == 'observaciones' or field.name == 'causa_parada' or field.name == 'cuello_botella' %}col-12{% else %}col-md-4{% endif %}">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>{% endfor %}</div>
+        <button class="btn btn-primary mt-4" type="submit">Guardar registro</button>
+        <a class="btn btn-outline-secondary mt-4" href="{% url 'produccion:registro_turno_list' %}">Cancelar</a>
+    </form>
+</div></div></div>
+{% endblock %}

@@ -128,3 +128,59 @@ class MovimientoInventario(models.Model):
             else "Desconocido"
         )
         return f"{self.get_tipo_display()} - {item} ({self.cantidad})"
+
+
+class SolicitudAbastecimiento(models.Model):
+    ESTADOS = [
+        ('borrador', 'Borrador'), ('solicitada', 'Solicitada'),
+        ('aprobada', 'Aprobada'), ('atendida', 'Atendida'), ('anulada', 'Anulada'),
+    ]
+    numero = models.CharField(max_length=30, unique=True)
+    orden_produccion = models.ForeignKey(
+        'produccion.OrdenProduccion', on_delete=models.PROTECT,
+        null=True, blank=True, related_name='solicitudes_logistica',
+    )
+    requerimiento = models.ForeignKey(
+        'compras.RequerimientoMaterial', on_delete=models.PROTECT,
+        null=True, blank=True, related_name='solicitudes_logistica',
+    )
+    solicitante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='solicitudes_abastecimiento')
+    almacen_destino = models.ForeignKey(Almacen, on_delete=models.PROTECT, null=True, blank=True, related_name='solicitudes_abastecimiento')
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='borrador')
+    fecha_requerida = models.DateField(null=True, blank=True)
+    prioridad = models.CharField(max_length=15, choices=[('normal', 'Normal'), ('urgente', 'Urgente')], default='normal')
+    detalle_materiales = models.TextField()
+    observaciones = models.TextField(blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+
+class RecepcionLogistica(models.Model):
+    ESTADOS = [('pendiente', 'Pendiente'), ('conforme', 'Conforme'), ('observada', 'Observada'), ('rechazada', 'Rechazada')]
+    numero_acta = models.CharField(max_length=40, unique=True)
+    almacen = models.ForeignKey(Almacen, on_delete=models.PROTECT, related_name='recepciones_logistica')
+    solicitud = models.ForeignKey(SolicitudAbastecimiento, on_delete=models.PROTECT, related_name='recepciones')
+    proveedor = models.CharField(max_length=200, blank=True)
+    fecha = models.DateField()
+    documento_referencia = models.CharField(max_length=100, blank=True)
+    lote = models.CharField(max_length=100, blank=True)
+    cantidad_recibida = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    calidad_verificada = models.BooleanField(default=False)
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='pendiente')
+    recibido_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='recepciones_logistica')
+    observaciones = models.TextField(blank=True)
+
+
+class DespachoLogistico(models.Model):
+    ESTADOS = [('preparando', 'Preparando'), ('despachado', 'Despachado'), ('entregado', 'Entregado'), ('observado', 'Observado')]
+    numero = models.CharField(max_length=40, unique=True)
+    almacen = models.ForeignKey(Almacen, on_delete=models.PROTECT, related_name='despachos_logistica')
+    solicitud = models.ForeignKey(SolicitudAbastecimiento, on_delete=models.PROTECT, related_name='despachos')
+    destino = models.CharField(max_length=200)
+    fecha = models.DateField()
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='preparando')
+    detalle_materiales = models.TextField()
+    cantidad_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    entregado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='despachos_logistica')
+    recibido_por = models.CharField(max_length=150, blank=True)
+    documento_entrega = models.CharField(max_length=100, blank=True)
+    observaciones = models.TextField(blank=True)

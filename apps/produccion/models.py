@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class CategoriaMateriaPrima(models.Model):
@@ -161,6 +162,48 @@ class LineaProduccion(models.Model):
         return f'{self.codigo} - {self.nombre}'
 
 
+class RegistroProduccionTurno(models.Model):
+    """Control diario/bi-horario de avance, calidad y paradas por línea."""
+
+    TURNOS = [('diurno', 'Diurno'), ('nocturno', 'Nocturno')]
+    PERIODOS = [
+        ('06:00-08:00', '06:00 - 08:00'), ('08:00-10:00', '08:00 - 10:00'),
+        ('10:00-12:00', '10:00 - 12:00'), ('12:00-14:00', '12:00 - 14:00'),
+        ('14:00-16:00', '14:00 - 16:00'), ('16:00-18:00', '16:00 - 18:00'),
+        ('18:00-20:00', '18:00 - 20:00'), ('20:00-22:00', '20:00 - 22:00'),
+    ]
+    orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, related_name='registros_turno')
+    linea = models.ForeignKey(LineaProduccion, on_delete=models.PROTECT, related_name='registros_turno', null=True, blank=True)
+    fecha = models.DateField()
+    turno = models.CharField(max_length=15, choices=TURNOS, default='diurno')
+    periodo = models.CharField(max_length=15, choices=PERIODOS)
+    meta_piezas = models.PositiveIntegerField(default=0)
+    piezas_buenas = models.PositiveIntegerField(default=0)
+    piezas_rechazadas = models.PositiveIntegerField(default=0)
+    minutos_planificados = models.PositiveIntegerField(default=120)
+    minutos_parada = models.PositiveIntegerField(default=0)
+    causa_parada = models.CharField(max_length=255, blank=True)
+    cuello_botella = models.CharField(max_length=255, blank=True)
+    materiales_disponibles = models.BooleanField(default=True)
+    observaciones = models.TextField(blank=True)
+    registrado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='registros_produccion_turno')
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-fecha', '-creado_en')
+        constraints = [
+            models.UniqueConstraint(fields=('orden', 'linea', 'fecha', 'turno', 'periodo'), name='unique_registro_turno_linea')
+        ]
+
+    @property
+    def eficiencia(self):
+        return round(self.piezas_buenas * 100 / self.meta_piezas, 2) if self.meta_piezas else 0
+
+    def __str__(self):
+        linea = self.linea.codigo if self.linea else 'Sin línea'
+        return f'{self.orden.lote_numero} - {linea} - {self.fecha} {self.periodo}'
+
+
 class MaquinaTextil(models.Model):
     ESTADOS = [
         ('operativa', 'Operativa'),
@@ -217,6 +260,12 @@ class OrdenMantenimientoTextil(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='planificada')
     tecnico = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     costo_estimado = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    actividades_realizadas = models.TextField(blank=True)
+    bloqueo_seguridad_verificado = models.BooleanField(default=False)
+    prueba_costura_realizada = models.BooleanField(default=False)
+    muestra_costura_aceptada = models.BooleanField(default=False)
+    garantia_trabajo = models.BooleanField(default=True)
+    minuta_registrada = models.BooleanField(default=False)
     observaciones = models.TextField(blank=True)
 
 
@@ -231,14 +280,100 @@ class ChequeoLineaProduccion(models.Model):
 
 
 class PlanMantenimientoTextil(models.Model):
+    PERIODICIDADES = [
+        ('semanal', 'Semanal'),
+        ('mensual', 'Mensual'),
+        ('trimestral', 'Trimestral'),
+        ('anual', 'Anual'),
+    ]
+    ESTADOS = [
+        ('borrador', 'Borrador'),
+        ('pendiente_aprobacion', 'Pendiente de aprobación'),
+        ('aprobado', 'Aprobado'),
+        ('cerrado', 'Cerrado'),
+    ]
     nombre = models.CharField(max_length=150)
     linea = models.ForeignKey(LineaProduccion, on_delete=models.SET_NULL, null=True, blank=True, related_name='planes_mantenimiento')
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     frecuencia_dias = models.PositiveIntegerField(default=30)
+    periodicidad = models.CharField(max_length=15, choices=PERIODICIDADES, default='mensual')
+    estado = models.CharField(max_length=25, choices=ESTADOS, default='borrador')
+    objetivo = models.TextField(blank=True)
+    alcance = models.TextField(blank=True)
+    actividades_programadas = models.TextField(blank=True, help_text='Actividades, diagnóstico y mantenimientos previstos.')
+    aprobado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='planes_mantenimiento_aprobados'
+    )
+    fecha_aprobacion = models.DateTimeField(null=True, blank=True)
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     activo = models.BooleanField(default=True)
     observaciones = models.TextField(blank=True)
+
+
+class MinutaMantenimiento(models.Model):
+    fecha = models.DateField()
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    actividades_realizadas = models.TextField()
+    maquinas_intervenidas = models.ManyToManyField(MaquinaTextil, blank=True, related_name='minutas')
+    novedades = models.TextField(blank=True)
+    restricciones_operacion = models.TextField(blank=True)
+    herramientas_verificadas = models.BooleanField(default=False)
+    seguridad_verificada = models.BooleanField(default=False)
+    entregada_jefatura = models.BooleanField(default=False)
+    creada_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-fecha', '-creada_en')
+
+
+class TrasladoMaquina(models.Model):
+    ESTADOS = [
+        ('solicitado', 'Solicitado'),
+        ('supervisado', 'Supervisado'),
+        ('aprobado', 'Aprobado por jefatura'),
+        ('en_traslado', 'En traslado'),
+        ('instalado', 'Instalado y calibrado'),
+        ('cerrado', 'Cerrado'),
+        ('rechazado', 'Rechazado'),
+    ]
+    maquina = models.ForeignKey(MaquinaTextil, on_delete=models.PROTECT, related_name='traslados')
+    ubicacion_origen = models.CharField(max_length=150)
+    ubicacion_destino = models.CharField(max_length=150)
+    orden_ingenieria = models.CharField(max_length=100, help_text='Referencia de la orden firmada por Ingeniería.')
+    ficha_traslado = models.CharField(max_length=100, blank=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='solicitado')
+    solicitado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='traslados_solicitados')
+    supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='traslados_supervisados')
+    aprobado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='traslados_aprobados')
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    fecha_ejecucion = models.DateTimeField(null=True, blank=True)
+    ajuste_calibracion_realizado = models.BooleanField(default=False)
+    espacios_linea_verificados = models.BooleanField(default=False)
+    observaciones = models.TextField(blank=True)
+
+
+class DiagnosticoElementoMaquina(models.Model):
+    ESTADOS = [('bueno', 'Bueno'), ('desgaste', 'Desgaste'), ('defectuoso', 'Defectuoso'), ('faltante', 'Faltante')]
+    maquina = models.ForeignKey(MaquinaTextil, on_delete=models.PROTECT, related_name='diagnosticos')
+    codigo_elemento = models.CharField(max_length=80)
+    elemento = models.CharField(max_length=150)
+    estado = models.CharField(max_length=15, choices=ESTADOS)
+    resultado = models.TextField()
+    requiere_repuesto = models.BooleanField(default=False)
+    diagnosticado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    fecha = models.DateField()
+    observaciones = models.TextField(blank=True)
+
+
+class ActividadPlanMantenimiento(models.Model):
+    plan = models.ForeignKey(PlanMantenimientoTextil, on_delete=models.CASCADE, related_name='actividades')
+    nombre = models.CharField(max_length=180)
+    tipo = models.CharField(max_length=20, choices=OrdenMantenimientoTextil.TIPOS, default='preventivo')
+    frecuencia = models.CharField(max_length=15, choices=PlanMantenimientoTextil.PERIODICIDADES, default='mensual')
+    checklist = models.TextField(blank=True)
+    activa = models.BooleanField(default=True)
 
 # --- DEPARTAMENTOS ACTUALIZADOS ---
 
@@ -263,25 +398,228 @@ class DepartamentoUDP(models.Model):
     requerimiento_materiales = models.TextField(blank=True, help_text="Materiales, cantidades y tolerancias requeridas.")
     ficha_tecnica = models.TextField(blank=True, help_text="Ficha técnica aprobada de la prenda.")
     aprobado = models.BooleanField(default=False)
+    muestra_aprobada = models.BooleanField(default=False)
+    aprobacion_muestra_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='muestras_udp_aprobadas',
+    )
+    fecha_aprobacion_muestra = models.DateField(null=True, blank=True)
+    referencia_muestra = models.CharField(max_length=255, blank=True)
+    observaciones_muestra = models.TextField(blank=True)
+    referencia_archivo_audaces = models.CharField(max_length=255, blank=True)
+    version_molde_digital = models.CharField(max_length=30, blank=True)
+    tallas_escaladas = models.CharField(max_length=200, blank=True)
+    hoja_medidas_molde = models.TextField(blank=True)
+    tizado_disponible = models.BooleanField(default=False)
     
     fecha_registro = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"UDP: {self.proyecto or 'Sin proyecto'} - {self.get_tipo_uniforme_display()}"
 
+
+class MuestraPrenda(models.Model):
+    ESTADOS = [
+        ('solicitada', 'Solicitada'),
+        ('en_desarrollo', 'En desarrollo'),
+        ('en_revision', 'En revisión'),
+        ('aprobada', 'Aprobada'),
+        ('rechazada', 'Rechazada'),
+    ]
+    APROBACION_ORIGEN = [
+        ('cliente', 'Cliente'),
+        ('gerencia', 'Gerencia de Producción'),
+    ]
+    orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, related_name='muestras')
+    descripcion = models.CharField(max_length=255)
+    requisitos_cliente = models.TextField(blank=True)
+    referencia_fisica = models.CharField(max_length=255, blank=True)
+    materiales_utilizados = models.TextField(blank=True)
+    medidas_verificadas = models.TextField(blank=True)
+    resultado_calidad = models.TextField(blank=True)
+    corte_aprobado = models.BooleanField(default=False)
+    confeccion_completada = models.BooleanField(default=False)
+    calidad_final_aprobada = models.BooleanField(default=False)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='solicitada')
+    aprobacion_origen = models.CharField(max_length=15, choices=APROBACION_ORIGEN, blank=True)
+    solicitada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='muestras_solicitadas')
+    aprobada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='muestras_aprobadas')
+    fecha_aprobacion = models.DateField(null=True, blank=True)
+    observaciones = models.TextField(blank=True)
+    creada_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-creada_en',)
+
+    def clean(self):
+        if self.estado == 'aprobada' and not (
+            self.corte_aprobado and self.confeccion_completada and self.calidad_final_aprobada
+        ):
+            raise ValidationError(
+                'La muestra solo puede aprobarse después de validar corte, confección y calidad final.'
+            )
+        if self.estado == 'aprobada' and not self.aprobacion_origen:
+            raise ValidationError('Una muestra aprobada debe indicar si la aprobó el cliente o la Gerencia.')
+
+
+class DigitalizacionMolde(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente'),
+        ('en_digitalizacion', 'En digitalización'),
+        ('escalado', 'Escalado'),
+        ('validado', 'Validado para tizado'),
+        ('rechazado', 'Requiere corrección'),
+    ]
+    orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, related_name='digitalizaciones')
+    muestra = models.ForeignKey(MuestraPrenda, on_delete=models.SET_NULL, null=True, blank=True, related_name='digitalizaciones')
+    molde_base = models.CharField(max_length=255)
+    sistema = models.CharField(max_length=80, default='Audaces')
+    version = models.CharField(max_length=30, default='1.0')
+    piezas_digitalizadas = models.PositiveIntegerField(default=0)
+    tallas_escaladas = models.CharField(max_length=200)
+    hoja_medidas = models.TextField(blank=True)
+    referencia_archivo = models.CharField(max_length=255, blank=True)
+    tizado_referencia = models.CharField(max_length=255, blank=True)
+    aprovechamiento_porcentaje = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    estado = models.CharField(max_length=25, choices=ESTADOS, default='pendiente')
+    patronista = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='digitalizaciones_patronista')
+    analista = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='digitalizaciones_analista')
+    validado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='digitalizaciones_validadas')
+    observaciones = models.TextField(blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        if self.estado == 'validado' and self.muestra_id:
+            if self.muestra.estado != 'aprobada':
+                raise ValidationError('No se puede validar el molde digital sin una muestra aprobada.')
+
+
+class ProgramacionProduccion(models.Model):
+    PERIODICIDADES = [('semanal', 'Semanal'), ('mensual', 'Mensual'), ('trimestral', 'Trimestral'), ('anual', 'Anual')]
+    ESTADOS = [('borrador', 'Borrador'), ('validada', 'Validada'), ('publicada', 'Publicada'), ('cerrada', 'Cerrada')]
+    orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, related_name='programaciones')
+    periodicidad = models.CharField(max_length=15, choices=PERIODICIDADES, default='semanal')
+    inicio = models.DateField()
+    fin = models.DateField()
+    meta_piezas = models.PositiveIntegerField(default=0)
+    capacidad_disponible = models.PositiveIntegerField(default=0)
+    tiempo_estandar_minutos = models.PositiveIntegerField(default=0)
+    disponibilidad_maquinaria = models.TextField(blank=True)
+    calidad_materia_prima = models.TextField(blank=True)
+    restricciones = models.TextField(blank=True)
+    escenario = models.TextField(blank=True)
+    linea = models.ForeignKey(LineaProduccion, on_delete=models.SET_NULL, null=True, blank=True, related_name='programaciones')
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='borrador')
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='programaciones_produccion')
+    validada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='programaciones_validadas')
+    observaciones = models.TextField(blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+
+class OrdenTrabajoProduccion(models.Model):
+    ESTADOS = [('borrador', 'Borrador'), ('validacion', 'En validación'), ('aprobada', 'Aprobada'), ('distribuida', 'Distribuida'), ('cerrada', 'Cerrada')]
+    numero = models.CharField(max_length=30, unique=True)
+    orden = models.OneToOneField(OrdenProduccion, on_delete=models.CASCADE, related_name='orden_trabajo')
+    programacion = models.ForeignKey(ProgramacionProduccion, on_delete=models.SET_NULL, null=True, blank=True, related_name='ordenes_trabajo')
+    hoja_consumo_disponible = models.BooleanField(default=False)
+    solicitud_materiales_disponible = models.BooleanField(default=False)
+    tiempo_estandar_minutos = models.PositiveIntegerField(default=0)
+    secuencia_fabricacion = models.TextField(blank=True)
+    cuotas_produccion = models.TextField(blank=True)
+    areas_distribuidas = models.CharField(max_length=255, blank=True)
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='borrador')
+    elaborada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='ordenes_trabajo_elaboradas')
+    aprobada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='ordenes_trabajo_aprobadas')
+    fecha_aprobacion = models.DateField(null=True, blank=True)
+    observaciones = models.TextField(blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def puede_distribuir(self):
+        return self.hoja_consumo_disponible and self.solicitud_materiales_disponible and self.estado == 'aprobada'
+
+    def clean(self):
+        if self.estado in ('aprobada', 'distribuida') and not (
+            self.hoja_consumo_disponible and self.solicitud_materiales_disponible
+        ):
+            raise ValidationError(
+                'La orden de trabajo aprobada debe contar con hoja de consumo y solicitud de materiales.'
+            )
+
 class DepartamentoCorte(models.Model):
+    ESTADOS = [
+        ('programado', 'Programado'),
+        ('en_mesa', 'En mesa de corte'),
+        ('calidad_proceso', 'Calidad en proceso'),
+        ('habilitado', 'Habilitado'),
+        ('calidad_post', 'Calidad post corte'),
+        ('enviado', 'Enviado a confección'),
+        ('retenido', 'Retenido por corrección'),
+    ]
+    TIZADO = [
+        ('digital', 'Tizado digital'),
+        ('manual', 'Tizado manual'),
+    ]
     orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, null=True, blank=True, related_name='corte_list')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='programado')
+    orden_corte = models.CharField(max_length=50, blank=True, help_text='Número o referencia de la orden de corte.')
+    fecha_programada = models.DateField(null=True, blank=True)
+    jefe_corte = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='jefaturas_corte'
+    )
+    supervisor_mesa = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='supervisiones_mesa_corte'
+    )
+    equipo_corte = models.TextField(blank=True, help_text='Cortadores y ayudantes que participan.')
+    ruta_corte = models.CharField(max_length=100, default='Mesa de corte')
+    mesa_corte = models.CharField(max_length=100, default='Mesa principal')
+    mesa_calidad = models.CharField(max_length=100, default='Mesa de calidad')
+    mesa_habilitado = models.CharField(max_length=100, default='Mesa de habilitado')
+    carro_carga = models.CharField(max_length=100, default='Carro de carga de corte')
+    instrucciones_jefatura = models.TextField(blank=True)
+    materiales_verificados = models.BooleanField(default=False)
+    observaciones_materiales = models.TextField(blank=True)
+    instrumento_tecnico = models.CharField(max_length=255, blank=True, help_text='Ficha técnica, medidas, color, talla y estilo.')
+    tizado = models.CharField(max_length=10, choices=TIZADO, default='digital')
+    aprovechamiento_tela = models.TextField(blank=True)
     tela_tendida_metros = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     disenos_recibidos = models.PositiveIntegerField(default=0)
     piezas_por_lote = models.PositiveIntegerField(default=0)
     piezas_defectuosas_corte = models.PositiveIntegerField(default=0)
     tipo_tela_validado = models.BooleanField(default=False)
     observaciones_calidad_tela = models.TextField(blank=True)
+    control_calidad_en_proceso = models.BooleanField(default=False)
+    observaciones_calidad_proceso = models.TextField(blank=True)
+    piezas_fusionadas = models.PositiveIntegerField(default=0)
+    fusion_verificada = models.BooleanField(default=False)
+    piezas_habilitadas = models.PositiveIntegerField(default=0)
+    conteo_verificado = models.BooleanField(default=False)
+    paquete_completo = models.BooleanField(default=False)
+    calidad_post_corte_aprobada = models.BooleanField(default=False)
+    observaciones_calidad_post = models.TextField(blank=True)
+    enviado_carro_carga = models.BooleanField(default=False)
+    linea_destino = models.ForeignKey(
+        'LineaProduccion', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='cortes_recibidos'
+    )
     corte_habilitado = models.BooleanField(default=False)
     fecha_corte = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Corte - Lote: {self.orden.lote_numero if self.orden else 'Sin Orden'}"
+
+    def puede_enviar_a_confeccion(self):
+        return all([
+            self.materiales_verificados,
+            self.tipo_tela_validado,
+            self.control_calidad_en_proceso,
+            self.fusion_verificada,
+            self.conteo_verificado,
+            self.paquete_completo,
+            self.calidad_post_corte_aprobada,
+            self.enviado_carro_carga,
+        ])
 
 class DepartamentoProduccionTextil(models.Model):
     orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, null=True, blank=True, related_name='produccion_textil_list')
@@ -292,6 +630,7 @@ class DepartamentoProduccionTextil(models.Model):
 
     def __str__(self):
         return f"Línea {self.linea_produccion} - {self.productos_realizados} uds"
+
 
 class DepartamentoBordado(models.Model):
     orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, related_name='bordados')
@@ -440,19 +779,35 @@ class Notificacion(models.Model):
 
 
 class NoConformidad(models.Model):
-    ESTADOS = [('abierta', 'Abierta'), ('analisis', 'En análisis'), ('cerrada', 'Cerrada')]
-    ORIGENES = [('corte', 'Corte'), ('produccion_textil', 'Producción textil'), ('pool', 'Pool'), ('bordados', 'Bordados'), ('despacho', 'Despacho')]
+    TIPOS = [('nc', 'No conformidad'), ('om', 'Oportunidad de mejora'), ('snc', 'Salida no conforme')]
+    ESTADOS = [('abierta', 'Abierta'), ('analisis', 'En análisis'), ('implementada', 'Acción implementada'), ('cerrada', 'Cerrada')]
+    RIESGOS = [('alto', 'Alto'), ('medio', 'Medio'), ('bajo', 'Bajo')]
+    TRATAMIENTOS = [('correccion', 'Corrección'), ('reproceso', 'Reproceso'), ('contencion', 'Separación / contención'), ('rechazo', 'Rechazo / desecho'), ('liberacion', 'Liberación bajo concesión')]
+    ORIGENES = [('compras', 'Compras / recepción'), ('udp', 'UDP / Diseño'), ('corte', 'Corte'), ('produccion_textil', 'Producción textil'), ('pool', 'Pool / Calidad'), ('bordados', 'Bordados'), ('despacho', 'Despacho'), ('post_entrega', 'Post-entrega'), ('otro', 'Otro')]
     orden = models.ForeignKey(OrdenProduccion, on_delete=models.CASCADE, related_name='no_conformidades')
+    tipo = models.CharField(max_length=5, choices=TIPOS, default='nc')
     origen = models.CharField(max_length=30, choices=ORIGENES)
+    requisito = models.CharField(max_length=255, blank=True, help_text='Requisito del producto, proceso, cliente o norma incumplido.')
+    ubicacion = models.CharField(max_length=150, blank=True)
     descripcion = models.TextField()
     cantidad_afectada = models.PositiveIntegerField(default=1)
     porcentaje_rechazo = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    riesgo = models.CharField(max_length=10, choices=RIESGOS, default='medio')
+    detectada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='no_conformidades_detectadas')
     accion_inmediata = models.TextField(blank=True)
     causa_raiz = models.TextField(blank=True)
     accion_correctiva = models.TextField(blank=True)
+    tratamiento = models.CharField(max_length=20, choices=TRATAMIENTOS, default='correccion')
+    concesion = models.TextField(blank=True, help_text='Autorización documentada cuando se libera una salida no conforme.')
+    autoridad_concesion = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='concesiones_calidad')
+    fecha_verificacion = models.DateField(null=True, blank=True)
+    criterio_eficacia = models.TextField(blank=True)
+    resultado_eficacia = models.TextField(blank=True)
+    eficaz = models.BooleanField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='abierta')
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     creada_en = models.DateTimeField(auto_now_add=True)
+    resuelta_en = models.DateTimeField(null=True, blank=True)
     cerrada_en = models.DateTimeField(null=True, blank=True)
 
     class Meta:

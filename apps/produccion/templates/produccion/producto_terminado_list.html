@@ -15,8 +15,9 @@
     <div class="col-md-3">
       <select name="categoria" class="form-select">
         <option value="">— Categoría —</option>
-        {% for c in categorias %}<option value="{{ c.id }}" {% if cat==c.id|stringformat:"s" %}selected{% endif %}>{{
-          c.nombre }}</option>{% endfor %}
+        {% for c in categorias %}
+        <option value="{{ c.id }}" {% if cat == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="col-md-2">
@@ -62,8 +63,7 @@
                 p.stock_actual }}</td>
               <td class="text-end">${{ p.costo_estimado }}</td>
               <td class="small">{{ p.registro_sanitario|default:"—" }}</td>
-              <td><span class="badge {% if p.activo %}bg-success{% else %}bg-secondary{% endif %}">{% if p.activo
-                  %}Activo{% else %}Inactivo{% endif %}</span></td>
+              <td><span class="badge {% if p.activo %}bg-success{% else %}bg-secondary{% endif %}">{% if p.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
               <td class="text-center">
                 <a href="{% url 'produccion:producto_terminado_edit' p.pk %}" class="btn btn-sm btn-outline-primary"
                   title="Editar">

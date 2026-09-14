@@ -1,0 +1,136 @@
+{% extends 'core/base.html' %}
+{% block title %}Nota de entrega {{ orden.lote_numero }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-print-none d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Nota de entrega {{ orden.lote_numero }}</h2>
+        <div>
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Imprimir
+            </button>
+            <a href="{% url 'produccion:orden_detail' orden.pk %}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <article class="nota-entrega bg-white">
+        <header class="nota-header">
+            <div>
+                <h1>Complejo Industrial Tiuna I C.A</h1>
+                <h2>Gerencia de Producción</h2>
+            </div>
+            <div class="documento">
+                <strong>NOTA DE<br>ENTREGA</strong>
+                <span>N.º {{ orden.lote_numero }}</span>
+            </div>
+        </header>
+
+        <section class="datos-documento">
+            <div><strong>Fecha de entrega:</strong> {{ fecha_entrega|date:"d/m/Y" }}</div>
+            <div><strong>Atención:</strong> {{ orden.responsable|default:"Gerencia de Producción" }}</div>
+            <div><strong>Cliente:</strong> {{ orden.pedido_origen.cliente.razon_social|default:"Producción interna" }}</div>
+            <div><strong>Producción:</strong> Orden {{ orden.lote_numero }}</div>
+            <div class="observaciones"><strong>Observaciones:</strong> {{ orden.observaciones|default:despacho.observaciones|default:"—" }}</div>
+        </section>
+
+        <h3>Tabla descriptiva del producto entregado</h3>
+        <table class="tabla-producto">
+            <thead>
+                <tr>
+                    <th>Ítem</th>
+                    <th>Descripción del producto</th>
+                    <th>Género</th>
+                    <th>Color</th>
+                    <th>Tipo de tela</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ orden.lote_numero }}</td>
+                    <td>{{ orden.producto.nombre }}</td>
+                    <td>{{ orden.producto.get_tipo_prenda_display }}</td>
+                    <td class="campo-vacio">&nbsp;</td>
+                    <td>{{ udp.tipo_tela|default:"Por confirmar en ficha técnica" }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="titulo-tallas">Cuadro de tallas y cantidades de piezas</h3>
+        <table class="tabla-tallas">
+            <thead>
+                <tr>
+                    <th rowspan="2">Ítem</th>
+                    <th colspan="2">Tallas especiales</th>
+                    <th colspan="8">Tallas numéricas</th>
+                    <th colspan="7">Tallas alfabéticas</th>
+                    <th rowspan="2">Total</th>
+                </tr>
+                <tr>
+                    <th>28</th><th>SS</th><th>30</th><th>32</th><th>34</th><th>36</th><th>38</th><th>40</th><th>42</th>
+                    <th>U</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>3XL</th><th>4XL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ orden.lote_numero }}</td>
+                    <td class="campo-vacio"></td><td class="campo-vacio"></td><td class="campo-vacio"></td>
+                    <td class="campo-vacio"></td><td class="campo-vacio"></td><td class="campo-vacio"></td>
+                    <td class="campo-vacio"></td><td class="campo-vacio"></td><td class="campo-vacio"></td>
+                    <td class="campo-vacio"></td><td class="campo-vacio"></td><td class="campo-vacio"></td>
+                    <td class="campo-vacio"></td><td class="campo-vacio"></td><td class="campo-vacio"></td>
+                    <td class="campo-vacio"></td><td class="campo-vacio"></td>
+                    <td class="total">{{ cantidad_entregada }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="total-entregada">CANTIDAD TOTAL ENTREGADA: <strong>{{ cantidad_entregada }}</strong></div>
+
+        <section class="firmas">
+            <div>
+                <div class="linea-firma"></div>
+                <strong>Procedimiento autorizado por:</strong>
+                <span>Gerente de Producción</span>
+                <span>Lic. Elizabeth García</span>
+            </div>
+            <div>
+                <div class="linea-firma"></div>
+                <strong>Recibido por:</strong>
+                <span>Nombre: __________________________</span>
+                <span>C.I.: ______________________________</span>
+                <span>Firma y sello: _______________________</span>
+            </div>
+        </section>
+    </article>
+</div>
+
+<style>
+    .nota-entrega { max-width: 1100px; margin: 0 auto; padding: 28px; color: #111; }
+    .nota-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #111; padding-bottom: 14px; }
+    .nota-header h1, .nota-header h2 { margin: 0; text-transform: uppercase; }
+    .nota-header h1 { font-size: 1.25rem; }
+    .nota-header h2 { font-size: 1rem; font-weight: 600; }
+    .documento { border: 2px solid #111; min-width: 170px; padding: 8px 18px; text-align: center; font-size: 1.15rem; }
+    .documento span { display: block; margin-top: 6px; font-size: .85rem; }
+    .datos-documento { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 24px; margin: 18px 0; font-size: .9rem; }
+    .observaciones { grid-column: 1 / -1; min-height: 32px; border-top: 1px solid #777; padding-top: 6px; }
+    .nota-entrega h3 { margin: 16px 0 7px; font-size: 1rem; text-transform: uppercase; }
+    .tabla-producto, .tabla-tallas { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .tabla-producto th, .tabla-producto td, .tabla-tallas th, .tabla-tallas td { border: 1px solid #111; padding: 5px 3px; text-align: center; font-size: .72rem; word-wrap: break-word; }
+    .tabla-producto th, .tabla-tallas th { background: #e9ecef; font-weight: 700; }
+    .tabla-producto th:nth-child(2) { width: 28%; }
+    .tabla-tallas th, .tabla-tallas td { font-size: .64rem; height: 26px; }
+    .tabla-tallas .total { font-weight: 700; font-size: .8rem; }
+    .campo-vacio { min-height: 24px; }
+    .total-entregada { border: 2px solid #111; border-top: 0; padding: 9px; text-align: right; font-size: .95rem; }
+    .firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; margin-top: 70px; text-align: center; font-size: .85rem; }
+    .firmas div > span { display: block; margin-top: 4px; }
+    .linea-firma { border-top: 1px solid #111; margin-bottom: 7px; }
+    @media print {
+        @page { size: landscape; margin: 12mm; }
+        body { background: white !important; }
+        .nota-entrega { max-width: none; padding: 0; }
+        .nota-entrega h3 { margin-top: 11px; }
+        .d-print-none, nav, footer, .sidebar { display: none !important; }
+    }
+</style>
+{% endblock %}

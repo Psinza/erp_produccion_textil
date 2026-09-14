@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+{% block title %}Órdenes de producción{% endblock %}
+{% block page_title %}Órdenes de producción comerciales{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between mb-3"><p class="text-muted">Órdenes editables que Comercialización entrega a Producción.</p><a class="btn btn-primary" href="{% url 'comercializacion:orden_produccion_create' %}">Nueva orden</a></div>
+  <div class="erp-card"><div class="erp-card-body p-0"><div class="table-responsive"><table class="erp-table">
+    <thead><tr><th>Número</th><th>Producto</th><th>Cliente</th><th>Fecha</th><th>Entrega</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>{% for o in ordenes %}<tr><td>{{ o.numero }}</td><td>{{ o.producto.nombre }}</td><td>{{ o.cliente|default:"—" }}</td><td>{{ o.fecha|date:"d/m/Y" }}</td><td>{{ o.fecha_entrega|date:"d/m/Y"|default:"—" }}</td><td>{{ o.cantidad_total }}</td><td>{{ o.get_estado_display }}</td><td><a class="btn btn-sm btn-outline-primary" href="{% url 'comercializacion:orden_produccion_detail' o.pk %}">Abrir</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'comercializacion:orden_produccion_update' o.pk %}">Editar</a></td></tr>{% empty %}<tr><td colspan="8" class="text-center py-5 text-muted">No hay órdenes.</td></tr>{% endfor %}</tbody>
+  </table></div></div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'calidad/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block calidad_content %}
+<div class="card shadow-sm"><div class="card-header"><h1 class="h5 mb-0">{{ titulo }}</h1></div><div class="card-body">
+{% if form.errors %}<div class="alert alert-danger">{{ form.errors }}</div>{% endif %}
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-success" type="submit">Guardar auditoría</button><a class="btn btn-link" href="{% url 'calidad:dashboard' %}">Cancelar</a></form>
+</div></div>
+{% endblock %}

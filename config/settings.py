@@ -37,6 +37,11 @@ else:
         'http://127.0.0.1:8000',
     ]
 
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 'yes')
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() in ('true', '1', 'yes')
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() in ('true', '1', 'yes')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,6 +62,8 @@ INSTALLED_APPS = [
     'apps.ordenacion_pagos',
     'apps.comercializacion',
     'apps.produccion',
+    'apps.pcpi',
+    'apps.calidad',
     'apps.logistica',
     'apps.facturacion',
     'apps.viaticos',
@@ -111,7 +118,7 @@ if DATABASE_URL:
             default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=True,
+            ssl_require=os.environ.get('DATABASE_SSL_REQUIRE', 'false').lower() in ('true', '1', 'yes'),
         )
     }
 else:

@@ -5,6 +5,14 @@ app_name = 'comercializacion'
 
 urlpatterns = [
     path('', views.dashboard_comercializacion, name='dashboard'),
+    path('ordenes-produccion/', views.orden_produccion_list, name='orden_produccion_list'),
+    path('ordenes-produccion/nueva/', views.orden_produccion_create, name='orden_produccion_create'),
+    path('ordenes-produccion/<int:pk>/', views.orden_produccion_detail, name='orden_produccion_detail'),
+    path('ordenes-produccion/<int:pk>/editar/', views.orden_produccion_update, name='orden_produccion_update'),
+    path('ordenes-produccion/<int:pk>/enviar/', views.enviar_a_produccion, name='enviar_a_produccion'),
+    path('encuestas-satisfaccion/', views.encuesta_list, name='encuesta_list'),
+    path('encuestas-satisfaccion/nueva/', views.encuesta_create, name='encuesta_create'),
+    path('encuestas-satisfaccion/<int:pk>/editar/', views.encuesta_create, name='encuesta_update'),
     
     # Categorías
     path('categorias/', views.categoria_list, name='categoria_list'),

@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div><h2 class="mb-1">{{ titulo }}</h2><p class="text-muted mb-0">Avance, calidad, materiales y paradas por línea.</p></div>
+        <a class="btn btn-primary" href="{% url 'produccion:registro_turno_create' %}">Nuevo registro</a>
+    </div>
+    <div class="card shadow-sm border-0"><div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark"><tr><th>Fecha / período</th><th>Orden</th><th>Línea</th><th>Turno</th><th class="text-end">Meta</th><th class="text-end">Buenas</th><th class="text-end">Rechazadas</th><th class="text-end">Eficiencia</th><th>Materiales</th><th>Registró</th><th>Acciones</th></tr></thead>
+            <tbody>{% for r in registros %}<tr>
+                <td>{{ r.fecha|date:"d/m/Y" }}<br><small>{{ r.get_periodo_display }}</small></td><td>{{ r.orden.lote_numero }}</td><td>{{ r.linea.codigo|default:"—" }}</td><td>{{ r.get_turno_display }}</td><td class="text-end">{{ r.meta_piezas }}</td><td class="text-end text-success fw-bold">{{ r.piezas_buenas }}</td><td class="text-end text-danger">{{ r.piezas_rechazadas }}</td><td class="text-end">{{ r.eficiencia }}%</td><td>{% if r.materiales_disponibles %}<span class="badge bg-success">Disponibles</span>{% else %}<span class="badge bg-danger">Pendientes</span>{% endif %}</td><td>{{ r.registrado_por|default:"—" }}</td><td><a class="btn btn-sm btn-outline-secondary" href="{% url 'produccion:registro_turno_update' r.pk %}">Editar</a></td>
+            </tr>{% empty %}<tr><td colspan="11" class="text-center text-muted py-5">No hay registros de turno.</td></tr>{% endfor %}</tbody>
+        </table>
+    </div></div>
+</div>
+{% endblock %}

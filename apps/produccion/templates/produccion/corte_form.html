@@ -1,0 +1,96 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>{{ titulo }}</h2>
+            <p class="text-muted mb-0">Orden {{ orden.lote_numero }} · {{ orden.producto.nombre }}</p>
+        </div>
+        <a href="{% url 'produccion:orden_detail' orden.pk %}" class="btn btn-outline-secondary">Volver a la orden</a>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>No se puede cerrar el corte todavía.</strong>
+        Revisa los requisitos indicados en cada campo.
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-dark text-white">1. Programación y asignación</div>
+                    <div class="card-body">
+                        {% for field in form %}
+                        {% if field.name in 'orden,estado,orden_corte,fecha_programada,jefe_corte,supervisor_mesa,equipo_corte,ruta_corte,mesa_corte,mesa_calidad,mesa_habilitado,carro_carga,instrucciones_jefatura' %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}{{ field }}
+                            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+                            {{ field.errors }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">2. Materiales, tizado y extensión</div>
+                    <div class="card-body">
+                        {% for field in form %}
+                        {% if field.name in 'materiales_verificados,observaciones_materiales,instrumento_tecnico,tizado,aprovechamiento_tela,tela_tendida_metros,disenos_recibidos,piezas_por_lote,piezas_defectuosas_corte,tipo_tela_validado,observaciones_calidad_tela' %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}{{ field }}
+                            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+                            {{ field.errors }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-warning">3. Corte, calidad en proceso y fusionado</div>
+                    <div class="card-body">
+                        {% for field in form %}
+                        {% if field.name in 'control_calidad_en_proceso,observaciones_calidad_proceso,piezas_fusionadas,fusion_verificada,piezas_habilitadas,conteo_verificado,paquete_completo' %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}{{ field }}
+                            {{ field.errors }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        <div class="alert alert-light small mb-0">
+                            El supervisor debe detener el proceso y registrar correcciones ante cualquier irregularidad.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white">4. Habilitado, calidad post corte y despacho</div>
+                    <div class="card-body">
+                        {% for field in form %}
+                        {% if field.name in 'calidad_post_corte_aprobada,observaciones_calidad_post,linea_destino,enviado_carro_carga,corte_habilitado' %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}{{ field }}
+                            {{ field.errors }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        <div class="alert alert-info small mb-0">
+                            Al marcar “Corte habilitado”, todos los controles deben estar conformes. El paquete pasará a la línea de confección.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success btn-lg mt-4">Guardar control de corte</button>
+    </form>
+</div>
+{% endblock %}

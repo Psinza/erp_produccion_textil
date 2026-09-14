@@ -5,7 +5,7 @@ Crea las áreas, roles predeterminados y el superusuario administrador.
 """
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.core.models import Area, Rol, Permiso, Usuario
+from apps.core.models import Area, Rol, Usuario
 
 
 AREAS_INICIALES = [
@@ -132,13 +132,6 @@ class Command(BaseCommand):
             )
             rol.areas.set([area_map[c] for c in r_data['areas'] if c in area_map])
 
-            for area_codigo in r_data['areas']:
-                if area_codigo not in area_map:
-                    continue
-                for accion in r_data['permisos']:
-                    Permiso.objects.get_or_create(
-                        rol=rol, area=area_map[area_codigo], accion=accion
-                    )
             self.stdout.write(f'    {"[OK]" if created else "[ya existía]"} {rol.nombre}')
 
         # 3. Superusuario

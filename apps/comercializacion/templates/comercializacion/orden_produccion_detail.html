@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}{{ orden.numero }}{% endblock %}
+{% block page_title %}{{ orden.numero }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between mb-3">
+    <div><h2>{{ orden.numero }}</h2><span class="badge bg-primary">{{ orden.get_estado_display }}</span></div>
+    <div><a class="btn btn-outline-secondary" href="{% url 'comercializacion:orden_produccion_update' orden.pk %}">Editar</a>{% if not orden.orden_produccion_id %}<form class="d-inline" method="post" action="{% url 'comercializacion:enviar_a_produccion' orden.pk %}">{% csrf_token %}<button class="btn btn-success">Enviar a Producción</button></form>{% else %}<a class="btn btn-primary" href="{% url 'produccion:orden_detail' orden.orden_produccion_id %}">Abrir ejecución</a>{% endif %}</div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6"><div class="erp-card"><div class="erp-card-body"><h5>Datos del pedido</h5><p><b>Producto:</b> {{ orden.producto.nombre }}</p><p><b>Cliente:</b> {{ orden.cliente|default:"—" }}</p><p><b>Fecha:</b> {{ orden.fecha|date:"d/m/Y" }} <b>Entrega:</b> {{ orden.fecha_entrega|date:"d/m/Y"|default:"—" }}</p><p><b>Responsable:</b> {{ orden.responsable|default:"—" }}</p><p><b>Género:</b> {{ orden.genero|default:"—" }} <b>Color:</b> {{ orden.color|default:"—" }}</p><p><b>Tipo de tela:</b> {{ orden.tipo_tela|default:"—" }}</p><p><b>Tallas:</b> {{ orden.tallas|default:"—" }}</p><p><b>Total:</b> {{ orden.cantidad_total }}</p><p><b>Observaciones:</b> {{ orden.observaciones|default:"—" }}</p></div></div></div>
+    <div class="col-md-6"><div class="erp-card"><div class="erp-card-body"><h5>Documentos operativos</h5><h6>Hoja de consumo</h6><pre class="bg-light p-2">{{ orden.hoja_consumo|default:"Sin registrar" }}</pre><h6>Orden de trabajo</h6><pre class="bg-light p-2">{{ orden.orden_trabajo|default:"Sin registrar" }}</pre><h6>Materiales</h6><pre class="bg-light p-2">{{ orden.materiales }}</pre></div></div></div>
+  </div>
+  <div class="erp-card mt-3"><div class="erp-card-body"><h5>Cantidades por talla</h5><pre class="bg-light p-2">{{ orden.cantidades_talla }}</pre></div></div>
+</div>
+{% endblock %}

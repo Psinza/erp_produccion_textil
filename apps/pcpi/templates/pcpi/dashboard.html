@@ -1,0 +1,16 @@
+{% extends 'pcpi/base.html' %}
+{% block title %}PCPI{% endblock %}
+{% block pcpi_content %}
+<h1>Planificación y Control de la Producción e Inventario</h1>
+<p class="text-muted">Programación, fechas de entrega, materiales y órdenes de trabajo.</p>
+<div class="mb-3">
+    <a class="btn btn-primary" href="{% url 'pcpi:planificacion_create' %}">Nueva planificación</a>
+    <a class="btn btn-outline-primary" href="{% url 'pcpi:programacion_create' %}">Programación semanal</a>
+    <a class="btn btn-outline-primary" href="{% url 'pcpi:resumen_create' %}">Resumen de materiales</a>
+</div>
+<div class="row g-3">
+    <div class="col-lg-4"><div class="card"><div class="card-header">Planificación de entregas</div><ul class="list-group list-group-flush">{% for item in planificaciones %}<li class="list-group-item">{{ item.orden.lote_numero }} - {{ item.get_estado_display }}<br><small>{{ item.fecha_entrega_comprometida|default:"Sin fecha" }}</small> <a href="{% url 'pcpi:planificacion_update' item.pk %}">Editar</a></li>{% empty %}<li class="list-group-item">No hay planificaciones.</li>{% endfor %}</ul></div></div>
+    <div class="col-lg-4"><div class="card"><div class="card-header">Programación semanal</div><ul class="list-group list-group-flush">{% for item in programaciones %}<li class="list-group-item">{{ item.planificacion.orden.lote_numero }} - {{ item.get_estado_display }}<br><small>{{ item.semana_inicio }} a {{ item.semana_fin }}</small> <a href="{% url 'pcpi:programacion_update' item.pk %}">Editar</a></li>{% empty %}<li class="list-group-item">No hay programaciones.</li>{% endfor %}</ul></div></div>
+    <div class="col-lg-4"><div class="card"><div class="card-header">Requerimientos de materiales</div><ul class="list-group list-group-flush">{% for item in resumenes %}<li class="list-group-item">{{ item.numero }} - {{ item.get_estado_display }}<br><small>{{ item.orden.lote_numero }}</small> <a href="{% url 'pcpi:resumen_update' item.pk %}">Editar</a></li>{% empty %}<li class="list-group-item">No hay resúmenes.</li>{% endfor %}</ul></div></div>
+</div>
+{% endblock %}

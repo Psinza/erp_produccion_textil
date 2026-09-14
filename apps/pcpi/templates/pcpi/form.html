@@ -1,0 +1,8 @@
+{% extends 'pcpi/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block pcpi_content %}
+<div class="card shadow-sm"><div class="card-header"><h2 class="h5 mb-0">{{ titulo }}</h2></div><div class="card-body">
+{% if form.errors %}<div class="alert alert-danger">{{ form.errors }}</div>{% endif %}
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-success" type="submit">Guardar</button><a class="btn btn-link" href="{% url 'pcpi:dashboard' %}">Cancelar</a></form>
+</div></div>
+{% endblock %}

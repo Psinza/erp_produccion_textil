@@ -1,0 +1,11 @@
+{% extends 'calidad/base.html' %}
+{% block title %}Auditoría de calidad{% endblock %}
+{% block calidad_content %}
+<h1 class="h3">{{ auditoria.get_procedimiento_display }}</h1>
+<p><strong>Orden:</strong> {{ auditoria.orden.lote_numero|default:auditoria.numero_orden_trabajo }} · <strong>Estado:</strong> {{ auditoria.get_estado_display }}</p>
+<div class="row g-3">
+<div class="col-md-6"><div class="card"><div class="card-header">Identificación</div><div class="card-body">Cliente: {{ auditoria.cliente|default:"-" }}<br>Prenda: {{ auditoria.descripcion_prenda|default:"-" }}<br>Color/talla: {{ auditoria.color|default:"-" }} / {{ auditoria.talla|default:"-" }}<br>Galpón/línea: {{ auditoria.galpon|default:"-" }} / {{ auditoria.linea_costura|default:"-" }}</div></div></div>
+<div class="col-md-6"><div class="card"><div class="card-header">Resultado</div><div class="card-body">Muestra: {{ auditoria.cantidad_muestra }}<br>Aprobadas: {{ auditoria.piezas_aprobadas }}<br>Rechazadas: {{ auditoria.piezas_rechazadas }}<br>Defectos críticos/mayores/menores: {{ auditoria.defectos_criticos }}/{{ auditoria.defectos_mayores }}/{{ auditoria.defectos_menores }}<br>Rechazo: {{ auditoria.porcentaje_rechazo }}%</div></div></div>
+</div>
+<div class="card mt-3"><div class="card-header">Controles y observaciones</div><div class="card-body"><p>{{ auditoria.controles_realizados|linebreaks }}</p><p>{{ auditoria.defectos_observaciones|linebreaks }}</p><p>{{ auditoria.decision_observaciones|linebreaks }}</p></div></div>
+{% endblock %}

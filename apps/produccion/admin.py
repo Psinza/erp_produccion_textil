@@ -9,6 +9,10 @@ from .models import (
     FichaTecnica, MaterialFichaTecnica,
     LineaProduccion, MaquinaTextil, SolicitudPiezaMecanica,
     OrdenMantenimientoTextil, ChequeoLineaProduccion, PlanMantenimientoTextil,
+    MinutaMantenimiento, TrasladoMaquina, DiagnosticoElementoMaquina,
+    ActividadPlanMantenimiento,
+    RegistroProduccionTurno,
+    MuestraPrenda, DigitalizacionMolde, ProgramacionProduccion, OrdenTrabajoProduccion,
 )
 
 @admin.register(CategoriaMateriaPrima)
@@ -47,7 +51,20 @@ class OrdenProduccionAdmin(admin.ModelAdmin):
     search_fields = ('lote_numero', 'producto__nombre')
 
 admin.site.register(DepartamentoUDP)
-admin.site.register(DepartamentoCorte)
+admin.site.register(MuestraPrenda)
+admin.site.register(DigitalizacionMolde)
+admin.site.register(ProgramacionProduccion)
+admin.site.register(OrdenTrabajoProduccion)
+@admin.register(DepartamentoCorte)
+class DepartamentoCorteAdmin(admin.ModelAdmin):
+    list_display = (
+        'orden', 'orden_corte', 'estado', 'supervisor_mesa',
+        'materiales_verificados', 'calidad_post_corte_aprobada',
+        'enviado_carro_carga',
+    )
+    list_filter = ('estado', 'tizado', 'materiales_verificados', 'calidad_post_corte_aprobada')
+    search_fields = ('orden__lote_numero', 'orden_corte', 'equipo_corte')
+
 admin.site.register(DepartamentoBordado)
 admin.site.register(DepartamentoProduccion)
 admin.site.register(DepartamentoDespacho)
@@ -64,3 +81,17 @@ admin.site.register(SolicitudPiezaMecanica)
 admin.site.register(OrdenMantenimientoTextil)
 admin.site.register(ChequeoLineaProduccion)
 admin.site.register(PlanMantenimientoTextil)
+admin.site.register(MinutaMantenimiento)
+admin.site.register(TrasladoMaquina)
+admin.site.register(DiagnosticoElementoMaquina)
+admin.site.register(ActividadPlanMantenimiento)
+
+@admin.register(RegistroProduccionTurno)
+class RegistroProduccionTurnoAdmin(admin.ModelAdmin):
+    list_display = (
+        'fecha', 'periodo', 'orden', 'linea', 'turno',
+        'meta_piezas', 'piezas_buenas', 'piezas_rechazadas',
+        'materiales_disponibles', 'registrado_por',
+    )
+    list_filter = ('fecha', 'turno', 'periodo', 'materiales_disponibles')
+    search_fields = ('orden__lote_numero', 'linea__codigo', 'cuello_botella')

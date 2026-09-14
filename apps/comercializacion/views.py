@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import CategoriaComercial, InformacionComercial, ListaPrecio, ItemPrecio
-from .forms import CategoriaComercialForm, InformacionComercialForm, ListaPrecioForm, ItemPrecioForm
+from .models import CategoriaComercial, InformacionComercial, ListaPrecio, ItemPrecio, OrdenProduccionComercial, EncuestaSatisfaccionCliente
+from .forms import CategoriaComercialForm, InformacionComercialForm, ListaPrecioForm, ItemPrecioForm, OrdenProduccionComercialForm, EncuestaSatisfaccionClienteForm
 
 @login_required
 def dashboard_comercializacion(request):
@@ -21,8 +21,89 @@ def dashboard_comercializacion(request):
         'productos_en_oferta': productos.filter(en_oferta=True).count(),
         'productos_destacados': productos.filter(destacado=True).count(),
         'ultimos_productos': productos.order_by('-id')[:5],
+        'ordenes_produccion': OrdenProduccionComercial.objects.select_related('producto').all()[:5],
     }
     return render(request, 'comercializacion/dashboard.html', context)
+
+
+@login_required
+def orden_produccion_list(request):
+    ordenes = OrdenProduccionComercial.objects.select_related('producto', 'orden_produccion')
+    return render(request, 'comercializacion/orden_produccion_list.html', {'ordenes': ordenes})
+
+
+@login_required
+def orden_produccion_create(request):
+    form = OrdenProduccionComercialForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        orden = form.save(commit=False)
+        orden.creado_por = request.user
+        orden.save()
+        messages.success(request, 'Orden comercial guardada y editable.')
+        return redirect('comercializacion:orden_produccion_detail', orden.pk)
+    return render(request, 'comercializacion/orden_produccion_form.html', {'form': form, 'title': 'Nueva Orden de Producción Comercial'})
+
+
+@login_required
+def orden_produccion_update(request, pk):
+    orden = get_object_or_404(OrdenProduccionComercial, pk=pk)
+    form = OrdenProduccionComercialForm(request.POST or None, instance=orden)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Orden comercial actualizada.')
+        return redirect('comercializacion:orden_produccion_detail', orden.pk)
+    return render(request, 'comercializacion/orden_produccion_form.html', {'form': form, 'title': f'Editar {orden.numero}', 'orden': orden})
+
+
+@login_required
+def orden_produccion_detail(request, pk):
+    orden = get_object_or_404(OrdenProduccionComercial.objects.select_related('producto', 'orden_produccion'), pk=pk)
+    return render(request, 'comercializacion/orden_produccion_detail.html', {'orden': orden})
+
+
+@login_required
+def enviar_a_produccion(request, pk):
+    orden = get_object_or_404(OrdenProduccionComercial, pk=pk)
+    if request.method != 'POST':
+        return redirect('comercializacion:orden_produccion_detail', pk)
+    from apps.produccion.models import OrdenProduccion
+    if orden.orden_produccion_id:
+        messages.info(request, 'La orden ya fue enviada a Producción.')
+    else:
+        produccion = OrdenProduccion.objects.create(
+            lote_numero=orden.numero,
+            producto=orden.producto,
+            cantidad_a_producir=orden.cantidad_total,
+            fecha_planificada=orden.fecha_entrega,
+            observaciones=orden.observaciones,
+        )
+        orden.orden_produccion = produccion
+        orden.estado = 'enviada'
+        orden.save(update_fields=['orden_produccion', 'estado', 'actualizado_en'])
+        messages.success(request, 'Orden enviada a Producción para su ejecución.')
+    return redirect('produccion:orden_detail', orden.orden_produccion_id)
+
+
+@login_required
+def encuesta_list(request):
+    return render(request, 'comercializacion/encuesta_list.html', {
+        'encuestas': EncuestaSatisfaccionCliente.objects.order_by('-fecha', '-creada_en'),
+    })
+
+
+@login_required
+def encuesta_create(request, pk=None):
+    instancia = get_object_or_404(EncuestaSatisfaccionCliente, pk=pk) if pk else None
+    form = EncuestaSatisfaccionClienteForm(request.POST or None, instance=instancia)
+    if request.method == 'POST' and form.is_valid():
+        encuesta = form.save(commit=False)
+        encuesta.registrada_por = request.user
+        encuesta.save()
+        return redirect('comercializacion:encuesta_list')
+    return render(request, 'comercializacion/encuesta_form.html', {
+        'form': form,
+        'titulo': 'Editar encuesta de satisfacción' if instancia else 'Nueva encuesta de satisfacción',
+    })
 
 # Categorías
 @login_required

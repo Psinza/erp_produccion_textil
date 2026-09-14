@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% block page_title %}Operaciones logísticas{% endblock %}
+{% block breadcrumb %}Operaciones / Logística / Registros{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h4 mb-0">Recepciones y despachos editables</h1>
+    <div class="d-flex gap-2">
+      <a class="btn btn-primary" href="{% url 'logistica:recepcion_create' %}">Nueva recepción</a>
+      <a class="btn btn-outline-primary" href="{% url 'logistica:despacho_create' %}">Nuevo despacho</a>
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-6"><div class="card"><div class="card-header">Recepciones</div><div class="card-body p-0"><table class="table table-sm mb-0"><thead><tr><th>Acta</th><th>Fecha</th><th>Estado</th><th></th></tr></thead><tbody>{% for item in recepciones %}<tr><td>{{ item.numero_acta }}</td><td>{{ item.fecha|date:"d/m/Y" }}</td><td>{{ item.get_estado_display }}</td><td><a class="btn btn-sm btn-outline-secondary" href="{% url 'logistica:recepcion_update' item.pk %}">Editar</a></td></tr>{% empty %}<tr><td colspan="4" class="text-center">No hay recepciones.</td></tr>{% endfor %}</tbody></table></div></div></div>
+    <div class="col-lg-6"><div class="card"><div class="card-header">Despachos</div><div class="card-body p-0"><table class="table table-sm mb-0"><thead><tr><th>Número</th><th>Fecha</th><th>Estado</th><th></th></tr></thead><tbody>{% for item in despachos %}<tr><td>{{ item.numero }}</td><td>{{ item.fecha|date:"d/m/Y" }}</td><td>{{ item.get_estado_display }}</td><td><a class="btn btn-sm btn-outline-secondary" href="{% url 'logistica:despacho_update' item.pk %}">Editar</a></td></tr>{% empty %}<tr><td colspan="4" class="text-center">No hay despachos.</td></tr>{% endfor %}</tbody></table></div></div></div>
+  </div>
+</div>
+{% endblock %}

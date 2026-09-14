@@ -13,7 +13,7 @@
                     <div class="d-flex justify-content-between"><h5>{{ indicador.nombre }}</h5><span class="badge bg-secondary">{{ indicador.codigo }}</span></div>
                     <p class="text-muted mb-2">{{ indicador.get_departamento_display }} · Objetivo: {{ indicador.objetivo }} {{ indicador.unidad }}</p>
                     {% with medicion=indicador.mediciones.first %}
-                    {% if medicion %}<p class="display-6 mb-0">{{ medicion.valor }} <small class="fs-6">{{ indicador.unidad }}</small></p><small>Última medición: {{ medicion.periodo }}</small>
+                    {% if medicion %}<p class="display-6 mb-0">{{ medicion.valor }} <small class="fs-6">{{ indicador.unidad }}</small></p><small>Última medición: {{ medicion.periodo }}</small><br><a class="btn btn-sm btn-outline-secondary mt-2" href="{% url 'produccion:indicador_medicion_update' medicion.pk %}">Editar medición</a>
                     {% else %}<p class="text-muted">Sin mediciones registradas.</p>{% endif %}
                     {% endwith %}
                 </div>

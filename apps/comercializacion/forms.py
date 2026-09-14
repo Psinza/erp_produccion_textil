@@ -1,5 +1,6 @@
 from django import forms
-from .models import InformacionComercial, ListaPrecio, ItemPrecio, CategoriaComercial
+from .models import InformacionComercial, ListaPrecio, ItemPrecio, CategoriaComercial, OrdenProduccionComercial, EncuestaSatisfaccionCliente
+from django.utils import timezone
 from apps.produccion.models import ProductoTerminado
 from decimal import Decimal
 
@@ -120,3 +121,53 @@ class PromocionForm(forms.Form):
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         label="Fecha Fin"
     )
+
+
+class OrdenProduccionComercialForm(forms.ModelForm):
+    class Meta:
+        model = OrdenProduccionComercial
+        fields = [
+            'producto', 'cliente', 'fecha', 'fecha_entrega', 'responsable',
+            'descripcion', 'genero', 'color', 'tipo_tela', 'tallas',
+            'cantidades_talla', 'cantidad_total', 'materiales', 'hoja_consumo',
+            'orden_trabajo', 'observaciones', 'tipo_solicitud', 'estado',
+        ]
+        widgets = {
+            'producto': forms.Select(attrs={'class': 'form-select'}),
+            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_entrega': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'cantidades_talla': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': '{"S": 10, "M": 20, "L": 15}'}),
+            'materiales': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': '[{"codigo": "TELA-01", "descripcion": "Tela", "unidad": "m", "cantidad": 10}]'}),
+            'hoja_consumo': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'orden_trabajo': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.initial.setdefault('fecha', timezone.localdate())
+
+    def clean_cantidades_talla(self):
+        value = self.cleaned_data['cantidades_talla']
+        if not isinstance(value, dict):
+            raise forms.ValidationError('Use un objeto JSON, por ejemplo {"M": 20, "L": 10}.')
+        return value
+
+
+class EncuestaSatisfaccionClienteForm(forms.ModelForm):
+    class Meta:
+        model = EncuestaSatisfaccionCliente
+        exclude = ['registrada_por', 'creada_en']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'comentarios': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def clean_materiales(self):
+        value = self.cleaned_data['materiales']
+        if not isinstance(value, list):
+            raise forms.ValidationError('Use una lista JSON de materiales.')
+        return value

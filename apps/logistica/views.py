@@ -90,6 +90,82 @@ def movimiento_create(request):
     })
 
 
+def _logistica_form(request, form_class, titulo, redirect_name, instance=None, usuario_field=None):
+    form = form_class(request.POST or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        objeto = form.save(commit=False)
+        if usuario_field and not getattr(objeto, f'{usuario_field}_id', None):
+            setattr(objeto, usuario_field, request.user)
+        objeto.save()
+        return redirect(redirect_name)
+    return render(request, 'logistica/operacion_form.html', {'titulo': titulo, 'form': form})
+
+
+@login_required
+def solicitud_list(request):
+    from .models import SolicitudAbastecimiento
+    return render(request, 'logistica/solicitud_list.html', {
+        'titulo': 'Solicitudes de abastecimiento',
+        'solicitudes': SolicitudAbastecimiento.objects.select_related('orden_produccion', 'almacen_destino').order_by('-creado_en'),
+    })
+
+
+@login_required
+def solicitud_create(request):
+    from .forms import SolicitudAbastecimientoForm
+    return _logistica_form(request, SolicitudAbastecimientoForm, 'Nueva solicitud de abastecimiento', 'logistica:solicitud_list', usuario_field='solicitante')
+
+
+@login_required
+def solicitud_update(request, pk):
+    from .forms import SolicitudAbastecimientoForm
+    from .models import SolicitudAbastecimiento
+    return _logistica_form(request, SolicitudAbastecimientoForm, 'Editar solicitud de abastecimiento', 'logistica:solicitud_list', get_object_or_404(SolicitudAbastecimiento, pk=pk), 'solicitante')
+
+
+@login_required
+def recepcion_create(request):
+    from .forms import RecepcionLogisticaForm
+    return _logistica_form(request, RecepcionLogisticaForm, 'Registrar recepción de materiales', 'logistica:dashboard', usuario_field='recibido_por')
+
+
+@login_required
+def despacho_create(request):
+    from .forms import DespachoLogisticoForm
+    return _logistica_form(request, DespachoLogisticoForm, 'Registrar despacho logístico', 'logistica:dashboard', usuario_field='entregado_por')
+
+
+@login_required
+def recepcion_update(request, pk):
+    from .forms import RecepcionLogisticaForm
+    from .models import RecepcionLogistica
+    return _logistica_form(
+        request, RecepcionLogisticaForm, 'Editar recepción de materiales',
+        'logistica:operaciones_list',
+        get_object_or_404(RecepcionLogistica, pk=pk), 'recibido_por',
+    )
+
+
+@login_required
+def despacho_update(request, pk):
+    from .forms import DespachoLogisticoForm
+    from .models import DespachoLogistico
+    return _logistica_form(
+        request, DespachoLogisticoForm, 'Editar despacho logístico',
+        'logistica:operaciones_list',
+        get_object_or_404(DespachoLogistico, pk=pk), 'entregado_por',
+    )
+
+
+@login_required
+def operaciones_list(request):
+    from .models import RecepcionLogistica, DespachoLogistico
+    return render(request, 'logistica/operaciones_list.html', {
+        'recepciones': RecepcionLogistica.objects.select_related('almacen', 'solicitud').order_by('-fecha'),
+        'despachos': DespachoLogistico.objects.select_related('almacen', 'solicitud').order_by('-fecha'),
+    })
+
+
 @login_required
 def repuesto_list(request):
     from .models import Almacen, ExistenciaAlmacen, MovimientoInventario, RepuestoMaquina

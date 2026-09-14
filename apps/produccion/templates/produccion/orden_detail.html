@@ -38,9 +38,29 @@
             <span><strong>1. UDP:</strong> Diseños, Uniformes e Impresión</span>
             <span class="btn btn-sm btn-outline-dark">Gestionar UDP</span>
         </a>
+        <a href="{% url 'produccion:gestionar_muestra' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>UDP - Muestra:</strong> Requisitos del cliente, confección y aprobación de muestra</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar Muestra</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_digitalizacion' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>UDP - Audaces:</strong> Molde base, escalado, hoja de medidas y tizado</span>
+            <span class="btn btn-sm btn-outline-dark">Digitalizar Molde</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_programacion' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>PCPI:</strong> Fechas, cuotas, capacidad y restricciones</span>
+            <span class="btn btn-sm btn-outline-dark">Planificar</span>
+        </a>
+        <a href="{% url 'produccion:gestionar_orden_trabajo' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>Orden de trabajo:</strong> Secuencia, cuotas y distribución a las áreas</span>
+            <span class="btn btn-sm btn-outline-dark">Gestionar OT</span>
+        </a>
         <a href="{% url 'produccion:gestionar_corte' orden.pk %}"
             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
-            <span><strong>2. Corte:</strong> Tendido de tela, corte y piezas respectivas</span>
+            <span><strong>2. Corte:</strong> Programación, mesa de corte, calidad, habilitado y carro de carga</span>
             <span class="btn btn-sm btn-outline-dark">Gestionar Corte</span>
         </a>
         <a href="{% url 'produccion:gestionar_bordado' orden.pk %}"
@@ -58,10 +78,20 @@
             <span><strong>5. Despacho:</strong> Revisión de costuras finas, planchado y empaquetado</span>
             <span class="btn btn-sm btn-outline-dark">Gestionar Despacho</span>
         </a>
+        <a href="{% url 'produccion:nota_entrega' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>Nota de entrega:</strong> Documento institucional de despacho de la orden</span>
+            <span class="btn btn-sm btn-outline-primary">Ver / Imprimir</span>
+        </a>
         <a href="{% url 'produccion:gestionar_calidad' orden.pk %}"
             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
             <span><strong>6. Calidad:</strong> Auditoría y Notificación de Control</span>
             <span class="btn btn-sm btn-success">Auditoría Calidad</span>
+        </a>
+        <a href="{% url 'calidad:auditoria_create_orden' orden.pk %}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+            <span><strong>Aseguramiento de la Calidad:</strong> Corte, costura, bordado, empaque y materia prima</span>
+            <span class="btn btn-sm btn-success">Nueva auditoría</span>
         </a>
     </div>
 </div>

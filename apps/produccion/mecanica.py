@@ -3,6 +3,8 @@ from apps.logistica.models import RepuestoMaquina
 from .models import (
     ChequeoLineaProduccion, LineaProduccion, MaquinaTextil,
     OrdenMantenimientoTextil, PlanMantenimientoTextil, SolicitudPiezaMecanica,
+    MinutaMantenimiento, TrasladoMaquina, DiagnosticoElementoMaquina,
+    ActividadPlanMantenimiento,
 )
 
 
@@ -61,8 +63,28 @@ class SolicitudPiezaForm(forms.ModelForm):
 class OrdenMantenimientoForm(forms.ModelForm):
     class Meta:
         model = OrdenMantenimientoTextil
-        fields = ['maquina', 'tipo', 'descripcion', 'fecha_programada', 'estado', 'tecnico', 'costo_estimado', 'observaciones']
+        fields = [
+            'maquina', 'tipo', 'descripcion', 'fecha_programada', 'estado',
+            'tecnico', 'costo_estimado', 'actividades_realizadas',
+            'bloqueo_seguridad_verificado', 'prueba_costura_realizada',
+            'muestra_costura_aceptada', 'garantia_trabajo',
+            'minuta_registrada', 'observaciones',
+        ]
         widgets = {'fecha_programada': forms.DateInput(attrs={'type': 'date'}), 'fecha_cierre': forms.DateInput(attrs={'type': 'date'})}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('estado') == 'completada':
+            requisitos = {
+                'bloqueo_seguridad_verificado': 'Debe verificarse el bloqueo y las condiciones de seguridad.',
+                'prueba_costura_realizada': 'Debe registrarse la prueba de costura.',
+                'muestra_costura_aceptada': 'La muestra de costura debe ser aceptada por operación.',
+                'minuta_registrada': 'Debe registrarse la minuta de la intervención.',
+            }
+            for field, message in requisitos.items():
+                if not cleaned_data.get(field):
+                    self.add_error(field, message)
+        return cleaned_data
 
 
 class ChequeoLineaForm(forms.ModelForm):
@@ -75,5 +97,50 @@ class ChequeoLineaForm(forms.ModelForm):
 class PlanMantenimientoForm(forms.ModelForm):
     class Meta:
         model = PlanMantenimientoTextil
-        fields = ['nombre', 'linea', 'fecha_inicio', 'fecha_fin', 'frecuencia_dias', 'responsable', 'activo', 'observaciones']
+        fields = [
+            'nombre', 'linea', 'fecha_inicio', 'fecha_fin', 'frecuencia_dias',
+            'periodicidad', 'estado', 'objetivo', 'alcance',
+            'actividades_programadas', 'responsable', 'activo', 'observaciones',
+        ]
         widgets = {'fecha_inicio': forms.DateInput(attrs={'type': 'date'}), 'fecha_fin': forms.DateInput(attrs={'type': 'date'})}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('fecha_inicio') and cleaned_data.get('fecha_fin'):
+            if cleaned_data['fecha_fin'] < cleaned_data['fecha_inicio']:
+                self.add_error('fecha_fin', 'La fecha final no puede ser anterior a la fecha inicial.')
+        if cleaned_data.get('estado') in {'pendiente_aprobacion', 'aprobado'} and not cleaned_data.get('actividades_programadas'):
+            self.add_error('actividades_programadas', 'Defina las actividades antes de solicitar aprobación.')
+        return cleaned_data
+
+
+class MinutaMantenimientoForm(forms.ModelForm):
+    class Meta:
+        model = MinutaMantenimiento
+        exclude = ['responsable']
+        widgets = {'fecha': forms.DateInput(attrs={'type': 'date'}), 'actividades_realizadas': forms.Textarea(attrs={'rows': 4})}
+
+
+class TrasladoMaquinaForm(forms.ModelForm):
+    class Meta:
+        model = TrasladoMaquina
+        exclude = ['solicitado_por', 'supervisor', 'aprobado_por', 'fecha_solicitud', 'fecha_ejecucion']
+        widgets = {'observaciones': forms.Textarea(attrs={'rows': 3})}
+
+
+class DiagnosticoElementoForm(forms.ModelForm):
+    class Meta:
+        model = DiagnosticoElementoMaquina
+        exclude = ['diagnosticado_por']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'resultado': forms.Textarea(attrs={'rows': 3}),
+            'observaciones': forms.Textarea(attrs={'rows': 2}),
+        }
+
+
+class ActividadPlanMantenimientoForm(forms.ModelForm):
+    class Meta:
+        model = ActividadPlanMantenimiento
+        exclude = ['plan']
+        widgets = {'checklist': forms.Textarea(attrs={'rows': 3})}

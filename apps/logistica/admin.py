@@ -1,7 +1,13 @@
 from django.contrib import admin
-from .models import Almacen, MovimientoInventario, RepuestoMaquina
+from .models import (
+    Almacen, MovimientoInventario, RepuestoMaquina,
+    SolicitudAbastecimiento, RecepcionLogistica, DespachoLogistico,
+)
 
 admin.site.register(RepuestoMaquina)
+admin.site.register(SolicitudAbastecimiento)
+admin.site.register(RecepcionLogistica)
+admin.site.register(DespachoLogistico)
 
 
 @admin.register(Almacen)

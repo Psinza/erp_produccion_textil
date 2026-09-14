@@ -1,0 +1,16 @@
+[Unit]
+Description=ERP Produccion Textil Django
+After=network.target
+
+[Service]
+Type=simple
+User=erp
+Group=erp
+WorkingDirectory=/opt/erp_produccion_textil
+EnvironmentFile=/opt/erp_produccion_textil/.env
+ExecStart=/opt/erp_produccion_textil/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

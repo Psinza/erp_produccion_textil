@@ -4,25 +4,32 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import (
-    OrdenProduccion, ProductoTerminado, DepartamentoUDP, 
+    OrdenProduccion, ProductoTerminado, CategoriaProductoTerminado, DepartamentoUDP,
     DepartamentoCorte, DepartamentoBordado, DepartamentoProduccion,
     DepartamentoDespacho, DepartamentoCalidadISO9001,
+    RegistroProduccionTurno,
+    MuestraPrenda, DigitalizacionMolde, ProgramacionProduccion, OrdenTrabajoProduccion,
     ProcesoDepartamento, IndicadorProceso, MedicionIndicador,
     Notificacion, NoConformidad,
 )
+from .forms import ProductoTerminadoForm
 from .forms import (
     OrdenProduccionForm, DepartamentoUDPForm, DepartamentoCorteForm,
     DepartamentoBordadoForm, DepartamentoProduccionForm, DepartamentoDespachoForm,
+    RegistroProduccionTurnoForm,
+    MuestraPrendaForm, DigitalizacionMoldeForm, ProgramacionProduccionForm, OrdenTrabajoProduccionForm,
     DepartamentoCalidadISOForm, ProcesoDepartamentoForm,
     MedicionIndicadorForm, NoConformidadForm,
 )
 from .mecanica import (
     ChequeoLineaForm, LineaProduccionForm, MaquinaTextilForm,
     OrdenMantenimientoForm, PlanMantenimientoForm, SolicitudPiezaForm,
+    MinutaMantenimientoForm, TrasladoMaquinaForm, DiagnosticoElementoForm,
 )
 from .models import (
     ChequeoLineaProduccion, LineaProduccion, MaquinaTextil,
     OrdenMantenimientoTextil, PlanMantenimientoTextil, SolicitudPiezaMecanica,
+    MinutaMantenimiento, TrasladoMaquina, DiagnosticoElementoMaquina,
 )
 
 
@@ -84,6 +91,47 @@ def dashboard(request):
         'ordenes_recientes': ordenes_recientes,
         'mecanica_maquinas': MaquinaTextil.objects.filter(activa=True).count(),
         'mecanica_pendientes': OrdenMantenimientoTextil.objects.filter(estado__in=['planificada', 'en_proceso']).count(),
+        'registros_turno_hoy': RegistroProduccionTurno.objects.filter(fecha=timezone.localdate()).count(),
+    })
+
+
+@login_required
+def manual_produccion(request):
+    return render(request, 'produccion/manual_produccion.html', {
+        'titulo': 'Manual operativo de Producción Textil',
+    })
+
+
+@login_required
+def registro_turno_list(request):
+    registros = RegistroProduccionTurno.objects.select_related('orden', 'linea', 'registrado_por')[:100]
+    return render(request, 'produccion/registro_turno_list.html', {'titulo': 'Control diario y bi-horario', 'registros': registros})
+
+
+@login_required
+def registro_turno_create(request):
+    form = RegistroProduccionTurnoForm(request.POST or None, initial={'fecha': timezone.localdate()})
+    if request.method == 'POST' and form.is_valid():
+        registro = form.save(commit=False)
+        registro.registrado_por = request.user
+        registro.save()
+        messages.success(request, 'Avance de producción registrado correctamente.')
+        return redirect('produccion:registro_turno_list')
+    return render(request, 'produccion/registro_turno_form.html', {'titulo': 'Registrar avance bi-horario', 'form': form})
+
+
+@login_required
+def registro_turno_update(request, pk):
+    registro = get_object_or_404(RegistroProduccionTurno, pk=pk)
+    form = RegistroProduccionTurnoForm(request.POST or None, instance=registro)
+    if request.method == 'POST' and form.is_valid():
+        registro = form.save(commit=False)
+        registro.registrado_por = request.user
+        registro.save()
+        messages.success(request, 'Avance bi-horario actualizado correctamente.')
+        return redirect('produccion:registro_turno_list')
+    return render(request, 'produccion/registro_turno_form.html', {
+        'titulo': 'Editar avance bi-horario', 'form': form, 'registro': registro,
     })
 
 
@@ -201,6 +249,47 @@ def mecanica_chequeo_create(request):
 def mecanica_plan_create(request):
     return _mecanica_form(request, PlanMantenimientoForm, 'produccion/mecanica_form.html', 'Nuevo Plan de Mantenimiento', 'produccion:mecanica_dashboard')
 
+
+@login_required
+def mecanica_minuta_create(request):
+    form = MinutaMantenimientoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        minuta = form.save(commit=False)
+        minuta.responsable = request.user
+        minuta.save()
+        form.save_m2m()
+        return redirect('produccion:mecanica_dashboard')
+    return render(request, 'produccion/mecanica_form.html', {
+        'form': form, 'titulo': 'Registrar minuta diaria de mantenimiento',
+    })
+
+
+@login_required
+def mecanica_traslado_create(request):
+    form = TrasladoMaquinaForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        traslado = form.save(commit=False)
+        traslado.solicitado_por = request.user
+        traslado.supervisor = request.user
+        traslado.save()
+        return redirect('produccion:mecanica_dashboard')
+    return render(request, 'produccion/mecanica_form.html', {
+        'form': form, 'titulo': 'Solicitar traslado de máquina',
+    })
+
+
+@login_required
+def mecanica_diagnostico_create(request):
+    form = DiagnosticoElementoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        diagnostico = form.save(commit=False)
+        diagnostico.diagnosticado_por = request.user
+        diagnostico.save()
+        return redirect('produccion:mecanica_dashboard')
+    return render(request, 'produccion/mecanica_form.html', {
+        'form': form, 'titulo': 'Registrar diagnóstico de elementos',
+    })
+
 @login_required
 def orden_list(request):
     ordenes = OrdenProduccion.objects.all().order_by('-id')
@@ -251,6 +340,107 @@ def gestionar_udp(request, pk):
         form = DepartamentoUDPForm(instance=udp)
     return render(request, 'produccion/depto_form.html', {'titulo': 'Departamento UDP (Diseños y Pronted)', 'form': form, 'orden': orden})
 
+
+@login_required
+def gestionar_muestra(request, pk):
+    orden = get_object_or_404(OrdenProduccion, pk=pk)
+    muestra = orden.muestras.order_by('-creada_en').first()
+    if request.method == 'POST':
+        form = MuestraPrendaForm(request.POST, instance=muestra)
+        if form.is_valid():
+            muestra = form.save(commit=False)
+            muestra.orden = orden
+            if muestra.estado == 'aprobada':
+                muestra.aprobada_por = request.user
+                muestra.fecha_aprobacion = timezone.now().date()
+                udp = orden.udp_list.first()
+                if udp:
+                    udp.muestra_aprobada = True
+                    udp.aprobacion_muestra_por = request.user
+                    udp.fecha_aprobacion_muestra = muestra.fecha_aprobacion
+                    udp.referencia_muestra = muestra.referencia_fisica
+                    udp.save(update_fields=['muestra_aprobada', 'aprobacion_muestra_por', 'fecha_aprobacion_muestra', 'referencia_muestra'])
+            muestra.solicitada_por = muestra.solicitada_por or request.user
+            muestra.save()
+            return redirect('produccion:orden_detail', pk=pk)
+    else:
+        form = MuestraPrendaForm(instance=muestra)
+    return render(request, 'produccion/depto_form.html', {'titulo': 'Ficha de muestra de prenda', 'form': form, 'orden': orden})
+
+
+@login_required
+def gestionar_digitalizacion(request, pk):
+    orden = get_object_or_404(OrdenProduccion, pk=pk)
+    digitalizacion = orden.digitalizaciones.order_by('-creado_en').first()
+    if request.method == 'POST':
+        form = DigitalizacionMoldeForm(request.POST, instance=digitalizacion)
+        if form.is_valid():
+            digitalizacion = form.save(commit=False)
+            digitalizacion.orden = orden
+            digitalizacion.analista = request.user
+            if digitalizacion.estado == 'validado':
+                digitalizacion.validado_por = request.user
+                udp = orden.udp_list.first()
+                if udp:
+                    udp.tizado_disponible = True
+                    udp.referencia_archivo_audaces = digitalizacion.referencia_archivo
+                    udp.version_molde_digital = digitalizacion.version
+                    udp.tallas_escaladas = digitalizacion.tallas_escaladas
+                    udp.hoja_medidas_molde = digitalizacion.hoja_medidas
+                    udp.save(update_fields=['tizado_disponible', 'referencia_archivo_audaces', 'version_molde_digital', 'tallas_escaladas', 'hoja_medidas_molde'])
+            digitalizacion.save()
+            return redirect('produccion:orden_detail', pk=pk)
+    else:
+        form = DigitalizacionMoldeForm(instance=digitalizacion)
+    return render(request, 'produccion/depto_form.html', {'titulo': 'Digitalización de molde en Audaces', 'form': form, 'orden': orden})
+
+
+@login_required
+def gestionar_programacion(request, pk):
+    orden = get_object_or_404(OrdenProduccion, pk=pk)
+    programacion = orden.programaciones.order_by('-creado_en').first()
+    if request.method == 'POST':
+        form = ProgramacionProduccionForm(request.POST, instance=programacion)
+        if form.is_valid():
+            programacion = form.save(commit=False)
+            programacion.orden = orden
+            programacion.responsable = request.user
+            if programacion.estado in ('validada', 'publicada'):
+                programacion.validada_por = request.user
+            programacion.save()
+            return redirect('produccion:orden_detail', pk=pk)
+    else:
+        form = ProgramacionProduccionForm(instance=programacion)
+    return render(request, 'produccion/depto_form.html', {'titulo': 'Planificación PCPI de fechas y cuotas', 'form': form, 'orden': orden})
+
+
+@login_required
+def gestionar_orden_trabajo(request, pk):
+    orden = get_object_or_404(OrdenProduccion, pk=pk)
+    try:
+        trabajo = orden.orden_trabajo
+    except OrdenTrabajoProduccion.DoesNotExist:
+        trabajo = None
+    if request.method == 'POST':
+        form = OrdenTrabajoProduccionForm(request.POST, instance=trabajo)
+        if form.is_valid():
+            trabajo = form.save(commit=False)
+            trabajo.orden = orden
+            trabajo.elaborada_por = request.user
+            trabajo.numero = trabajo.numero or f'OT-{orden.lote_numero}'[:30]
+            if trabajo.estado in ('aprobada', 'distribuida'):
+                if not trabajo.hoja_consumo_disponible or not trabajo.solicitud_materiales_disponible:
+                    form.add_error(None, 'La orden de trabajo requiere hoja de consumo y solicitud de materiales disponibles.')
+                else:
+                    trabajo.aprobada_por = request.user
+                    trabajo.fecha_aprobacion = timezone.now().date()
+            if not form.errors:
+                trabajo.save()
+                return redirect('produccion:orden_detail', pk=pk)
+    else:
+        form = OrdenTrabajoProduccionForm(instance=trabajo)
+    return render(request, 'produccion/depto_form.html', {'titulo': 'Orden de trabajo de producción', 'form': form, 'orden': orden})
+
 @login_required
 def gestionar_corte(request, pk):
     orden = get_object_or_404(OrdenProduccion, pk=pk)
@@ -260,16 +450,23 @@ def gestionar_corte(request, pk):
         if form.is_valid():
             corte_obj = form.save()
             orden.piezas_realizadas = corte_obj.piezas_por_lote
-            orden.piezas_rechazadas += corte_obj.piezas_defectuosas_corte
-            if corte_obj.corte_habilitado:
-                orden.estado = 'en_bordado'
+            orden.piezas_rechazadas = corte_obj.piezas_defectuosas_corte
+            if corte_obj.puede_enviar_a_confeccion() and corte_obj.corte_habilitado:
+                corte_obj.estado = 'enviado'
+                corte_obj.save(update_fields=['estado'])
+                orden.estado = 'en_produccion'
                 orden.save()
                 _registrar_rechazo(orden, corte_obj.piezas_defectuosas_corte, 'corte')
-                _notificar(orden, 'Corte habilitado y enviado a Bordados.')
+                _notificar(orden, 'Corte aprobado en mesa post corte y enviado al carro de carga para confección.')
                 return redirect('produccion:orden_detail', pk=pk)
     else:
         form = DepartamentoCorteForm(instance=corte)
-    return render(request, 'produccion/depto_form.html', {'titulo': 'Departamento de Corte', 'form': form, 'orden': orden})
+    return render(request, 'produccion/corte_form.html', {
+        'titulo': 'Ruta y control del Departamento de Corte',
+        'form': form,
+        'orden': orden,
+        'corte': corte,
+    })
 
 @login_required
 def gestionar_bordado(request, pk):
@@ -330,6 +527,32 @@ def gestionar_despacho(request, pk):
         form = DepartamentoDespachoForm(instance=desp)
     return render(request, 'produccion/depto_form.html', {'titulo': 'Departamento de Despacho (Planchado y Empaque)', 'form': form, 'orden': orden})
 
+
+@login_required
+def nota_entrega(request, pk):
+    """Renderiza la nota institucional de entrega de una orden de producción."""
+    orden = get_object_or_404(
+        OrdenProduccion.objects.select_related(
+            'producto', 'pedido_origen__cliente', 'responsable'
+        ).prefetch_related('udp_list'),
+        pk=pk,
+    )
+    despacho = getattr(orden, 'despacho', None)
+    udp = orden.udp_list.order_by('-fecha_registro').first()
+    cantidad_entregada = (
+        despacho.piezas_empaquetadas
+        if despacho and despacho.piezas_empaquetadas
+        else orden.piezas_producidas_ok or orden.cantidad_a_producir
+    )
+    return render(request, 'produccion/nota_entrega.html', {
+        'orden': orden,
+        'despacho': despacho,
+        'udp': udp,
+        'cantidad_entregada': cantidad_entregada,
+        'fecha_entrega': timezone.localdate(),
+    })
+
+
 @login_required
 def gestionar_calidad(request, pk):
     orden = get_object_or_404(OrdenProduccion, pk=pk)
@@ -355,8 +578,52 @@ def gestionar_calidad(request, pk):
 
 @login_required
 def producto_terminado_list(request):
-    productos = ProductoTerminado.objects.all()
-    return render(request, 'produccion/producto_terminado_list.html', {'titulo': 'Catálogo de Prendas y Productos', 'productos': productos})
+    productos = ProductoTerminado.objects.select_related('categoria').all()
+    q = request.GET.get('q', '').strip()
+    categoria = request.GET.get('categoria', '')
+    alerta = request.GET.get('alerta', '')
+    if q:
+        productos = productos.filter(nombre__icontains=q)
+    if categoria.isdigit():
+        productos = productos.filter(categoria_id=int(categoria))
+    if alerta:
+        productos = productos.filter(stock_actual__lte=0)
+    return render(request, 'produccion/producto_terminado_list.html', {
+        'titulo': 'Catálogo de Prendas y Productos',
+        'productos': productos,
+        'categorias': CategoriaProductoTerminado.objects.order_by('nombre'),
+        'q': q,
+        'cat': categoria,
+        'alerta': alerta,
+    })
+
+
+@login_required
+def producto_terminado_create(request):
+    form = ProductoTerminadoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        producto = form.save()
+        messages.success(request, f'Producto "{producto.nombre}" creado correctamente.')
+        return redirect('produccion:producto_terminado_list')
+    return render(request, 'produccion/producto_terminado_form.html', {
+        'titulo': 'Nuevo Producto Terminado',
+        'form': form,
+    })
+
+
+@login_required
+def producto_terminado_edit(request, pk):
+    producto = get_object_or_404(ProductoTerminado, pk=pk)
+    form = ProductoTerminadoForm(request.POST or None, instance=producto)
+    if request.method == 'POST' and form.is_valid():
+        producto = form.save()
+        messages.success(request, f'Producto "{producto.nombre}" actualizado correctamente.')
+        return redirect('produccion:producto_terminado_list')
+    return render(request, 'produccion/producto_terminado_form.html', {
+        'titulo': f'Editar producto: {producto.nombre}',
+        'form': form,
+        'producto': producto,
+    })
 
 
 @login_required
@@ -396,6 +663,21 @@ def indicador_medicion_create(request):
 
 
 @login_required
+def indicador_medicion_update(request, pk):
+    medicion = get_object_or_404(MedicionIndicador, pk=pk)
+    form = MedicionIndicadorForm(request.POST or None, instance=medicion)
+    if request.method == 'POST' and form.is_valid():
+        medicion = form.save(commit=False)
+        medicion.registrado_por = request.user
+        medicion.save()
+        messages.success(request, 'Medición actualizada correctamente.')
+        return redirect('produccion:indicador_dashboard')
+    return render(request, 'produccion/indicador_medicion_form.html', {
+        'form': form, 'titulo': 'Editar medición', 'medicion': medicion,
+    })
+
+
+@login_required
 def notificacion_list(request):
     notificaciones = Notificacion.objects.filter(destinatario=request.user)
     notificaciones.filter(leida=False).update(leida=True)
@@ -415,6 +697,7 @@ def no_conformidad_create(request, pk=None):
     if request.method == 'POST' and form.is_valid():
         no_conformidad = form.save(commit=False)
         no_conformidad.responsable = no_conformidad.responsable or request.user
+        no_conformidad.detectada_por = no_conformidad.detectada_por or request.user
         no_conformidad.save()
         _notificar(no_conformidad.orden, 'Se registró una no conformidad para revisión.', 'calidad')
         return redirect('produccion:no_conformidad_list')

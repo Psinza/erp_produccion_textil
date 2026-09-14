@@ -1,5 +1,8 @@
 from django import forms
-from .models import MovimientoInventario, Almacen, RepuestoMaquina
+from .models import (
+    MovimientoInventario, Almacen, RepuestoMaquina,
+    SolicitudAbastecimiento, RecepcionLogistica, DespachoLogistico,
+)
 from apps.produccion.models import MateriaPrima, ProductoTerminado
 
 CTR = {"class": "form-control"}
@@ -82,3 +85,28 @@ class RepuestoMaquinaForm(forms.ModelForm):
             'costo_unitario': forms.NumberInput(attrs=NUM),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+
+class SolicitudAbastecimientoForm(forms.ModelForm):
+    class Meta:
+        model = SolicitudAbastecimiento
+        exclude = ['solicitante', 'creado_en']
+        widgets = {
+            'fecha_requerida': forms.DateInput(attrs=DATE),
+            'detalle_materiales': forms.Textarea(attrs=TXT),
+            'observaciones': forms.Textarea(attrs=TXT),
+        }
+
+
+class RecepcionLogisticaForm(forms.ModelForm):
+    class Meta:
+        model = RecepcionLogistica
+        exclude = ['recibido_por']
+        widgets = {'observaciones': forms.Textarea(attrs=TXT), 'fecha': forms.DateInput(attrs=DATE)}
+
+
+class DespachoLogisticoForm(forms.ModelForm):
+    class Meta:
+        model = DespachoLogistico
+        exclude = ['entregado_por']
+        widgets = {'detalle_materiales': forms.Textarea(attrs=TXT), 'observaciones': forms.Textarea(attrs=TXT), 'fecha': forms.DateInput(attrs=DATE)}
