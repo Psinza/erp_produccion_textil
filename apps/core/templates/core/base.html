@@ -28,9 +28,10 @@
 
     /* ── SIDEBAR ── */
     #sidebar {
-      width: 250px; min-height: 100vh; background: var(--erp-sidebar);
+      width: 250px; height: 100vh; height: 100dvh; min-height: 100vh;
+      background: var(--erp-sidebar);
       display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100;
-      transition: width .25s ease;
+      transition: width .25s ease, transform .25s ease;
     }
     #sidebar-toggle {
       position: absolute; top: 72px; right: -15px; z-index: 2;
@@ -67,7 +68,17 @@
 
     .sidebar-section { padding: 18px 12px 4px; font-size: 10px; font-weight: 600; color: var(--erp-muted); letter-spacing: 1.5px; text-transform: uppercase; }
 
-    .sidebar-nav { flex: 1; overflow-y: auto; padding-bottom: 16px; }
+    .sidebar-nav {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.24) transparent;
+      padding-bottom: 16px;
+    }
     .sidebar-nav::-webkit-scrollbar { width: 3px; }
     .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
     .sidebar-nav::-webkit-scrollbar-thumb { background: var(--erp-border); border-radius: 2px; }
@@ -110,6 +121,8 @@
       display: flex; align-items: center; padding: 0 24px; gap: 16px;
       position: sticky; top: 0; z-index: 50;
     }
+    #mobile-menu-toggle { display: none; }
+    #sidebar-overlay { display: none; }
     .topbar-title { font-family: var(--font-head); font-size: 16px; font-weight: 600; color: #1a2332; }
     .topbar-breadcrumb { font-size: 12px; color: #8899aa; }
     .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
@@ -194,8 +207,25 @@
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
-      #sidebar { transform: translateX(-100%); }
+      body { display: block; }
+      #sidebar {
+        width: min(86vw, 320px);
+        transform: translateX(-105%);
+        box-shadow: 8px 0 24px rgba(0,0,0,.2);
+      }
       #sidebar.open { transform: translateX(0); }
+      #sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(15, 23, 42, .48);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+      }
+      body.sidebar-open { overflow: hidden; }
+      body.sidebar-open #sidebar-overlay { opacity: 1; pointer-events: auto; }
       #sidebar.collapsed { width: 250px; }
       #sidebar.collapsed .sidebar-brand { padding-left: 20px; padding-right: 20px; }
       #sidebar.collapsed .brand-name { font-size: 15px; }
@@ -208,6 +238,34 @@
       body.sidebar-collapsed #main { margin-left: 0; }
       #sidebar-toggle { top: 64px; right: -14px; }
       #main { margin-left: 0; }
+      #topbar { height: auto; min-height: 56px; padding: 10px 14px; gap: 10px; }
+      #mobile-menu-toggle {
+        display: inline-flex;
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--erp-primary);
+        cursor: pointer;
+      }
+      .topbar-title { font-size: 14px; }
+      .topbar-breadcrumb { font-size: 11px; }
+      .topbar-right { gap: 5px; }
+      .topbar-right .topbar-btn:first-child { display: none; }
+      #content { padding: 14px; overflow-x: hidden; }
+      .erp-card-body { padding: 14px; }
+      .stat-card { padding: 14px; gap: 10px; }
+      .stat-value { font-size: 23px; }
+      .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    }
+
+    @media (min-width: 769px) and (max-width: 1100px) {
+      #content { padding: 18px; }
+      .stat-card { padding: 16px; gap: 12px; }
     }
   </style>
   {% block extra_css %}{% endblock %}
@@ -225,7 +283,7 @@
     <div class="brand-sub">Producción y confección textil</div>
   </div>
 
-  <div class="sidebar-nav">
+  <div class="sidebar-nav" role="navigation" aria-label="Módulos del ERP">
     <div class="sidebar-section">Principal</div>
     <div class="nav-item">
       <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'core' %}active{% endif %}">
@@ -292,10 +350,14 @@
     </div>
   </div>
 </nav>
+<div id="sidebar-overlay" aria-hidden="true"></div>
 
 <!-- ══ MAIN ══ -->
 <div id="main">
   <div id="topbar">
+    <button id="mobile-menu-toggle" type="button" aria-label="Abrir menú de módulos" aria-expanded="false">
+      <i class="bi bi-list"></i>
+    </button>
     <div>
       <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
       <div class="topbar-breadcrumb">{% block breadcrumb %}Inicio{% endblock %}</div>
@@ -335,6 +397,8 @@
   (() => {
     const sidebar = document.getElementById('sidebar');
     const toggle = document.getElementById('sidebar-toggle');
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
     if (!sidebar || !toggle) return;
     sidebar.querySelectorAll('.nav-link').forEach((link) => {
       const label = link.textContent.trim().replace(/\s+/g, ' ');
@@ -348,11 +412,36 @@
       toggle.title = 'Expandir menú';
     }
     toggle.addEventListener('click', () => {
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        sidebar.classList.remove('open');
+        document.body.classList.remove('sidebar-open');
+        if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
+        return;
+      }
       const isCollapsed = sidebar.classList.toggle('collapsed');
       document.body.classList.toggle('sidebar-collapsed', isCollapsed);
       localStorage.setItem('erp-sidebar-collapsed', isCollapsed);
       toggle.setAttribute('aria-expanded', String(!isCollapsed));
       toggle.title = isCollapsed ? 'Expandir menú' : 'Contraer menú';
+    });
+    const closeMobileSidebar = () => {
+      sidebar.classList.remove('open');
+      document.body.classList.remove('sidebar-open');
+      if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
+    };
+    if (mobileToggle) {
+      mobileToggle.addEventListener('click', () => {
+        const isOpen = sidebar.classList.toggle('open');
+        document.body.classList.toggle('sidebar-open', isOpen);
+        mobileToggle.setAttribute('aria-expanded', String(isOpen));
+      });
+    }
+    if (overlay) overlay.addEventListener('click', closeMobileSidebar);
+    sidebar.querySelectorAll('.nav-link').forEach((link) => {
+      link.addEventListener('click', closeMobileSidebar);
+    });
+    window.addEventListener('resize', () => {
+      if (!window.matchMedia('(max-width: 768px)').matches) closeMobileSidebar();
     });
   })();
 </script>

@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils.crypto import get_random_string
 
 from apps.core.models import Area, Usuario
 
@@ -20,6 +21,17 @@ MODULES = {
     'activos_fijos': ('ACTIVOS', 'Activos Fijos'),
     'calidad': ('CALIDAD', 'Calidad'),
     'pcpi': ('PCPI', 'PCPI'),
+    'seguridad': ('SEGURIDAD', 'Seguridad Integral e Industrial'),
+    'servicios_generales': ('SERVICIOS_GENERALES', 'Servicios Generales'),
+    'contrataciones_publicas': ('CONTRATACIONES_PUBLICAS', 'Contrataciones Públicas'),
+    'planificacion_presupuesto': ('PLANIFICACION', 'Planificación y Presupuesto'),
+    'tecnologia_informacion': ('TECNOLOGIA', 'Tecnología de la Información'),
+    'oac': ('OAC', 'Oficina de Atención a la Ciudadanía'),
+    'servicios_medicos': ('SERVICIOS_MEDICOS', 'Servicios Médicos'),
+    'auditoria_interna': ('AUDITORIA_INTERNA', 'Auditoría Interna'),
+    'consultoria_juridica': ('CONSULTORIA_JURIDICA', 'Consultoría Jurídica'),
+    'gerencia_calidad': ('CALIDAD', 'Gerencia de Calidad'),
+    'gerencia': ('GERENCIA', 'Gerencia'),
 }
 
 PRODUCTION_SCOPES = {
@@ -50,6 +62,17 @@ USERS = {
     'rrhh': ('rrhh', 'rrhh'),
     'activos_fijos': ('activos_fijos', 'activos_fijos'),
     'calidad': ('calidad', 'calidad'),
+    'seguridad': ('seguridad', 'seguridad'),
+    'servicios_generales': ('servicios_generales', 'servicios_generales'),
+    'contrataciones_publicas': ('contrataciones_publicas', 'contrataciones_publicas'),
+    'planificacion_presupuesto': ('planificacion_presupuesto', 'planificacion_presupuesto'),
+    'tecnologia_informacion': ('tecnologia_informacion', 'tecnologia_informacion'),
+    'oac': ('oac', 'oac'),
+    'servicios_medicos': ('servicios_medicos', 'servicios_medicos'),
+    'auditoria_interna': ('auditoria_interna', 'auditoria_interna'),
+    'consultoria_juridica': ('consultoria_juridica', 'consultoria_juridica'),
+    'gerencia_calidad': ('gerencia_calidad', 'gerencia_calidad'),
+    'gerencia': ('gerencia_produccion', 'gerencia'),
 }
 
 
@@ -113,8 +136,14 @@ class Command(BaseCommand):
             user.area = area_map[MODULES[module][0]]
             user.is_staff = False
             user.is_superuser = False
+            initial_password = None
             if password_mode == 'username' or created:
-                user.set_password(username)
+                initial_password = (
+                    username
+                    if password_mode == 'username'
+                    else get_random_string(16)
+                )
+                user.set_password(initial_password)
             user.groups.set([module_groups[module]])
             if key in PRODUCTION_SCOPES:
                 scope_group = Group.objects.get(
@@ -124,13 +153,21 @@ class Command(BaseCommand):
             if key == 'pool':
                 user.groups.add(module_groups['calidad'])
             user.save()
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f'Usuario {"creado" if created else "actualizado"}: '
-                    f'{username} / clave inicial: {username}'
-                )
+            status = 'creado' if created else 'actualizado'
+            password_note = (
+                f' / clave temporal: {initial_password}'
+                if initial_password
+                else ' / clave conservada'
             )
+            self.stdout.write(self.style.SUCCESS(
+                f'Usuario {status}: {username}{password_note}'
+            ))
 
-        self.stdout.write(self.style.WARNING(
-            'Cambie las claves iniciales iguales al usuario antes de operar en producción.'
-        ))
+        if password_mode == 'username':
+            self.stdout.write(self.style.WARNING(
+                'Cambie las claves iniciales iguales al usuario antes de operar en producción.'
+            ))
+        else:
+            self.stdout.write(self.style.WARNING(
+                'Guarde las claves temporales mostradas y cámbielas después del primer acceso.'
+            ))
