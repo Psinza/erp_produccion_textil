@@ -15,8 +15,8 @@
         {% for registro in registros %}
           <tr>
             <td class="fw-semibold">{{ registro.numero }}</td>
-            <td>{{ registro.cliente|default:registro.beneficiario|default:registro.solicitud|default:registro.asunto|default:"—" }}</td>
-            <td>{{ registro.fecha_recepcion|default:registro.fecha_solicitud|default:registro.fecha|date:"d/m/Y" }}</td>
+            <td>{% firstof registro.cliente registro.beneficiario registro.solicitud registro.asunto "—" %}</td>
+            <td>{% if registro.fecha_recepcion %}{{ registro.fecha_recepcion|date:"d/m/Y" }}{% elif registro.fecha_solicitud %}{{ registro.fecha_solicitud|date:"d/m/Y" }}{% elif registro.fecha %}{{ registro.fecha|date:"d/m/Y" }}{% endif %}</td>
             <td><span class="badge bg-light text-dark border">{{ registro.get_estado_display }}</span></td>
             <td><a class="btn-erp btn-erp-outline" href="{% url edit_name registro.pk %}">Editar</a></td>
           </tr>

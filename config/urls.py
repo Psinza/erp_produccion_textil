@@ -38,6 +38,8 @@ urlpatterns = [
     path('tesoreria/', include('apps.tesoreria.urls', namespace='tesoreria')),
     path('inventarios/', include('apps.inventarios.urls', namespace='inventarios')),
     path('gerencia/', include('apps.gerencia.urls', namespace='gerencia')),
+    path('seguridad/', include('apps.seguridad.urls', namespace='seguridad')),
+    path('servicios-generales/', include('apps.servicios_generales.urls', namespace='servicios_generales')),
 ]
 
 if settings.DEBUG:

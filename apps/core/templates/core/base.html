@@ -240,6 +240,8 @@
     {% if 'ventas' in allowed_modules %}<div class="nav-item"><a href="{% url 'ventas:dashboard' %}" class="nav-link"><i class="bi bi-graph-up-arrow"></i><span>Ventas</span></a></div>{% endif %}
     {% if 'comercializacion' in allowed_modules %}<div class="nav-item"><a href="{% url 'comercializacion:dashboard' %}" class="nav-link"><i class="bi bi-megaphone"></i><span>Comercialización</span></a></div>{% endif %}
     {% if 'transportes' in allowed_modules %}<div class="nav-item"><a href="{% url 'transportes:dashboard' %}" class="nav-link"><i class="bi bi-truck"></i><span>Transportes</span></a></div>{% endif %}
+    {% if 'seguridad' in allowed_modules %}<div class="nav-item"><a href="{% url 'seguridad:dashboard' %}" class="nav-link"><i class="bi bi-shield-check"></i><span>Seguridad integral</span></a></div>{% endif %}
+    {% if 'servicios_generales' in allowed_modules %}<div class="nav-item"><a href="{% url 'servicios_generales:dashboard' %}" class="nav-link"><i class="bi bi-tools"></i><span>Servicios generales</span></a></div>{% endif %}
 
     <div class="sidebar-section">Finanzas</div>
     {% if 'tesoreria' in allowed_modules %}<div class="nav-item"><a href="{% url 'tesoreria:dashboard' %}" class="nav-link"><i class="bi bi-bank"></i><span>Tesorería</span></a></div>{% endif %}

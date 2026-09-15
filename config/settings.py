@@ -73,6 +73,8 @@ INSTALLED_APPS = [
     'apps.administracion',
     'apps.rrhh',
     'apps.gerencia',
+    'apps.seguridad',
+    'apps.servicios_generales',
 ]
 
 MIDDLEWARE = [

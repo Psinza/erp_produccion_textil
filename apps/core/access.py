@@ -18,6 +18,8 @@ MODULE_AREA_CODES = {
     'activos_fijos': {'ACTIVOS'},
     'gerencia': {'GERENCIA'},
     'inventarios': {'LOGISTICA'},
+    'seguridad': {'SEGURIDAD', 'SEGURIDAD_INDUSTRIAL', 'SST'},
+    'servicios_generales': {'SERVICIOS_GENERALES', 'SERVICIOS', 'MANTENIMIENTO'},
 }
 
 MODULE_GROUP_PREFIX = 'erp:module:'
