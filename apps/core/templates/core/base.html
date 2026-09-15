@@ -242,6 +242,8 @@
     {% if 'transportes' in allowed_modules %}<div class="nav-item"><a href="{% url 'transportes:dashboard' %}" class="nav-link"><i class="bi bi-truck"></i><span>Transportes</span></a></div>{% endif %}
     {% if 'seguridad' in allowed_modules %}<div class="nav-item"><a href="{% url 'seguridad:dashboard' %}" class="nav-link"><i class="bi bi-shield-check"></i><span>Seguridad integral</span></a></div>{% endif %}
     {% if 'servicios_generales' in allowed_modules %}<div class="nav-item"><a href="{% url 'servicios_generales:dashboard' %}" class="nav-link"><i class="bi bi-tools"></i><span>Servicios generales</span></a></div>{% endif %}
+    {% if 'contrataciones_publicas' in allowed_modules %}<div class="nav-item"><a href="{% url 'contrataciones_publicas:dashboard' %}" class="nav-link"><i class="bi bi-file-earmark-check"></i><span>Contrataciones públicas</span></a></div>{% endif %}
+    {% if 'planificacion_presupuesto' in allowed_modules %}<div class="nav-item"><a href="{% url 'planificacion_presupuesto:dashboard' %}" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Planificación y presupuesto</span></a></div>{% endif %}
 
     <div class="sidebar-section">Finanzas</div>
     {% if 'tesoreria' in allowed_modules %}<div class="nav-item"><a href="{% url 'tesoreria:dashboard' %}" class="nav-link"><i class="bi bi-bank"></i><span>Tesorería</span></a></div>{% endif %}

@@ -20,6 +20,8 @@ MODULE_AREA_CODES = {
     'inventarios': {'LOGISTICA'},
     'seguridad': {'SEGURIDAD', 'SEGURIDAD_INDUSTRIAL', 'SST'},
     'servicios_generales': {'SERVICIOS_GENERALES', 'SERVICIOS', 'MANTENIMIENTO'},
+    'contrataciones_publicas': {'CONTRATACIONES_PUBLICAS', 'CONTRATACIONES', 'COMPRAS'},
+    'planificacion_presupuesto': {'PLANIFICACION', 'PRESUPUESTO', 'FINANZAS', 'GERENCIA'},
 }
 
 MODULE_GROUP_PREFIX = 'erp:module:'

@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}Contrataciones públicas{% endblock %}
+{% block page_title %}Contrataciones públicas{% endblock %}
+{% block breadcrumb %}Contrataciones públicas / Panel{% endblock %}
+{% block content %}
+<h1 class="h4 mb-1">Contrataciones públicas</h1><p class="text-muted mb-3">Planificación, evaluación, adjudicación y seguimiento contractual.</p>
+<div class="row g-3 mb-4">
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ procesos }}</div><div class="stat-label">Procesos abiertos</div></div></div></div>
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ ofertas }}</div><div class="stat-label">Ofertas por evaluar</div></div></div></div>
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ contratos }}</div><div class="stat-label">Contratos vigentes</div></div></div></div>
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ proveedores }}</div><div class="stat-label">Proveedores activos</div></div></div></div>
+</div>
+<div class="erp-card"><div class="erp-card-body"><div class="row g-2">
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'contrataciones_publicas:resource_list' 'proveedores' %}">Registro de proveedores</a></div>
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'contrataciones_publicas:resource_list' 'procesos' %}">Procesos de contratación</a></div>
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'contrataciones_publicas:resource_list' 'ofertas' %}">Ofertas recibidas</a></div>
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'contrataciones_publicas:resource_list' 'evaluaciones' %}">Evaluaciones</a></div>
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'contrataciones_publicas:resource_list' 'contratos' %}">Contratos</a></div>
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'contrataciones_publicas:resource_list' 'normas' %}">Normativa</a></div>
+</div></div></div>
+{% endblock %}
