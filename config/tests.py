@@ -9,10 +9,10 @@ class ActivoFijoTest(TestCase):
             nombre="Mezcladora Industrial 500L",
             fecha_adquisicion=date.today(),
             valor_compra=5000.00,
-            vida_util_meses=60
+            vida_util_anios=5
         )
 
     def test_creacion_activo(self):
         """Verifica que el activo se guarde correctamente"""
         self.assertEqual(self.activo.codigo, "MAQ-001")
-        self.assertEqual(self.activo.estado, "operativo")
+        self.assertEqual(self.activo.estado, "Operativo")

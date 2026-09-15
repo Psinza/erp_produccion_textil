@@ -10,20 +10,22 @@ except ImportError:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Clave secreta (usa variable de entorno o fallback para desarrollo)
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-erp-produccion-textil-sustituir-en-produccion')
-)
+SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', ''))
 
 # Modo depuración
-DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', 'True')).strip().lower() in ('true', '1', 't', 'yes')
+DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', 'False')).strip().lower() in ('true', '1', 't', 'yes')
+DEPLOYMENT_ENV = os.environ.get('DEPLOYMENT_ENV', 'development').strip().lower()
+if DEPLOYMENT_ENV == 'production' and (
+    not SECRET_KEY or SECRET_KEY.startswith('django-insecure-')
+):
+    raise RuntimeError('En producción configure SECRET_KEY con un valor seguro.')
 
 # Hosts permitidos
 _env_hosts = os.environ.get('ALLOWED_HOSTS', os.environ.get('DJANGO_ALLOWED_HOSTS', ''))
 if _env_hosts:
     ALLOWED_HOSTS = [h.strip() for h in _env_hosts.replace(' ', ',').split(',') if h.strip()]
 else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.onrender.com', '.cloudshell.dev', '*']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Orígenes confiables CSRF
 _env_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
@@ -37,10 +39,18 @@ else:
         'http://127.0.0.1:8000',
     ]
 
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 'yes')
-SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() in ('true', '1', 'yes')
-CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() in ('true', '1', 'yes')
-SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False' if DEBUG else 'True').lower() in ('true', '1', 'yes')
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False' if DEBUG else 'True').lower() in ('true', '1', 'yes')
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False' if DEBUG else 'True').lower() in ('true', '1', 'yes')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0' if DEBUG else '31536000'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DATA_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('FILE_UPLOAD_MAX_MEMORY_SIZE', str(5 * 1024 * 1024)))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -93,6 +103,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'apps.core.access.GerenciaAccessMiddleware',
+    'apps.core.security.SensitiveDataHeadersMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -153,6 +164,7 @@ USE_TZ = True
 
 # Modelo de Usuario Personalizado
 AUTH_USER_MODEL = 'core.Usuario'
+TEST_RUNNER = 'config.test_runner.ProjectDiscoverRunner'
 
 # Archivos estáticos (WhiteNoise para producción)
 STATIC_URL = '/static/'
