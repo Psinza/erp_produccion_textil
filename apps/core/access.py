@@ -23,6 +23,11 @@ MODULE_AREA_CODES = {
     'contrataciones_publicas': {'CONTRATACIONES_PUBLICAS', 'CONTRATACIONES', 'COMPRAS'},
     'planificacion_presupuesto': {'PLANIFICACION', 'PRESUPUESTO', 'FINANZAS', 'GERENCIA'},
     'tecnologia_informacion': {'TECNOLOGIA', 'TECNOLOGIA_INFORMACION', 'SISTEMAS', 'TI', 'GERENCIA'},
+    'oac': {'OAC', 'ATENCION_CIUDADANIA', 'GERENCIA'},
+    'servicios_medicos': {'SERVICIOS_MEDICOS', 'SALUD_OCUPACIONAL', 'MEDICINA', 'TALENTO_HUMANO', 'GERENCIA'},
+    'auditoria_interna': {'AUDITORIA', 'AUDITORIA_INTERNA', 'CONTROL_INTERNO', 'GERENCIA'},
+    'consultoria_juridica': {'JURIDICA', 'CONSULTORIA_JURIDICA', 'LEGAL', 'GERENCIA'},
+    'gerencia_calidad': {'CALIDAD', 'GESTION_CALIDAD', 'SISTEMA_GESTION', 'GERENCIA'},
 }
 
 MODULE_GROUP_PREFIX = 'erp:module:'

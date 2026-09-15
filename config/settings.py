@@ -78,6 +78,11 @@ INSTALLED_APPS = [
     'apps.contrataciones_publicas',
     'apps.planificacion_presupuesto',
     'apps.tecnologia_informacion.apps.TecnologiaInformacionConfig',
+    'apps.oac.apps.OacConfig',
+    'apps.servicios_medicos.apps.ServiciosMedicosConfig',
+    'apps.auditoria_interna.apps.AuditoriaInternaConfig',
+    'apps.consultoria_juridica.apps.ConsultoriaJuridicaConfig',
+    'apps.gerencia_calidad.apps.GerenciaCalidadConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}Oficina de Atención a la Ciudadanía{% endblock %}
+{% block page_title %}Oficina de Atención a la Ciudadanía{% endblock %}
+{% block breadcrumb %}OAC / Panel{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><div><h1 class="h4 mb-1">Oficina de Atención a la Ciudadanía</h1><p class="text-muted mb-0">Atención, donaciones, citas y jornadas médicas.</p></div><a class="btn-erp btn-erp-primary" href="{% url 'oac:resource_create' 'citas' %}">Nueva cita</a></div>
+<div class="row g-3 mb-4">
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ donaciones_pendientes }}</div><div class="stat-label">Donaciones pendientes</div></div></div></div>
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ citas_hoy }}</div><div class="stat-label">Citas de hoy</div></div></div></div>
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ medicamentos_abiertos }}</div><div class="stat-label">Búsquedas abiertas</div></div></div></div>
+<div class="col-md-3"><div class="stat-card"><div><div class="stat-value">{{ ejecutado|floatformat:2 }}</div><div class="stat-label">Presupuesto ejecutado</div></div></div></div>
+</div>
+<div class="erp-card"><div class="erp-card-header"><span class="erp-card-title">Gestión OAC</span></div><div class="erp-card-body"><div class="row g-2">
+<div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'oac:resource_list' 'donaciones' %}">Donaciones</a></div><div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'oac:resource_list' 'citas' %}">Gestor de citas</a></div><div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'oac:resource_list' 'busqueda-medicamentos' %}">Búsqueda de medicamentos</a></div><div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'oac:resource_list' 'jornadas-medicas' %}">Jornadas médicas</a></div><div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'oac:resource_list' 'presupuestos' %}">Presupuesto OAC</a></div><div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'oac:resource_list' 'personal' %}">Personal OAC</a></div>
+</div></div></div>
+{% endblock %}

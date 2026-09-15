@@ -245,6 +245,11 @@
     {% if 'contrataciones_publicas' in allowed_modules %}<div class="nav-item"><a href="{% url 'contrataciones_publicas:dashboard' %}" class="nav-link"><i class="bi bi-file-earmark-check"></i><span>Contrataciones públicas</span></a></div>{% endif %}
     {% if 'planificacion_presupuesto' in allowed_modules %}<div class="nav-item"><a href="{% url 'planificacion_presupuesto:dashboard' %}" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Planificación y presupuesto</span></a></div>{% endif %}
     {% if 'tecnologia_informacion' in allowed_modules %}<div class="nav-item"><a href="{% url 'tecnologia_informacion:dashboard' %}" class="nav-link"><i class="bi bi-pc-display"></i><span>Tecnología de la información</span></a></div>{% endif %}
+    {% if 'oac' in allowed_modules %}<div class="nav-item"><a href="{% url 'oac:dashboard' %}" class="nav-link"><i class="bi bi-person-vcard"></i><span>Atención a la ciudadanía</span></a></div>{% endif %}
+    {% if 'servicios_medicos' in allowed_modules %}<div class="nav-item"><a href="{% url 'servicios_medicos:dashboard' %}" class="nav-link"><i class="bi bi-heart-pulse"></i><span>Servicios médicos</span></a></div>{% endif %}
+    {% if 'auditoria_interna' in allowed_modules %}<div class="nav-item"><a href="{% url 'auditoria_interna:dashboard' %}" class="nav-link"><i class="bi bi-search"></i><span>Auditoría interna</span></a></div>{% endif %}
+    {% if 'consultoria_juridica' in allowed_modules %}<div class="nav-item"><a href="{% url 'consultoria_juridica:dashboard' %}" class="nav-link"><i class="bi bi-briefcase"></i><span>Consultoría jurídica</span></a></div>{% endif %}
+    {% if 'gerencia_calidad' in allowed_modules %}<div class="nav-item"><a href="{% url 'gerencia_calidad:dashboard' %}" class="nav-link"><i class="bi bi-patch-check"></i><span>Gerencia de calidad</span></a></div>{% endif %}
 
     <div class="sidebar-section">Finanzas</div>
     {% if 'tesoreria' in allowed_modules %}<div class="nav-item"><a href="{% url 'tesoreria:dashboard' %}" class="nav-link"><i class="bi bi-bank"></i><span>Tesorería</span></a></div>{% endif %}

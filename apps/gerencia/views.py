@@ -16,6 +16,15 @@ def dashboard(request):
     from apps.rrhh.models import Empleado, Nomina
     from apps.transportes.models import Despacho
     from apps.ventas.models import Pedido
+    from apps.oac.models import CitaCiudadana, Donacion, JornadaMedica, PresupuestoOAC
+    from apps.servicios_medicos.models import AfectacionPersonal, PresupuestoMedico, ReposoMedico, ResultadoIngreso
+    from apps.auditoria_interna.models import AccionCorrectiva, HallazgoAuditoria, PlanAuditoria
+    from apps.consultoria_juridica.models import CasoJuridico, ContratoJuridico
+    from apps.gerencia_calidad.models import AuditoriaCalidadISO, NoConformidad, ProcesoCalidad
+    from apps.tecnologia_informacion.models import (
+        AsignacionDiaria, EquipoTI, MonitoreoRed, PersonalTI, PlanModernizacion,
+        ServicioTI, TicketTI,
+    )
 
     hoy = timezone.localdate()
     inicio = hoy.replace(day=1)
@@ -71,5 +80,38 @@ def dashboard(request):
         'reparaciones_pendientes': OrdenMantenimientoTextil.objects.exclude(estado__in=['completada', 'cancelada']).count(),
         'pedidos_pendientes': Pedido.objects.exclude(estado__in=['entregado', 'cancelado']).count(),
         'compras_dias': compras_dias,
+        'oac_donaciones_pendientes': Donacion.objects.filter(estado__in=['solicitada', 'aprobada']).count(),
+        'oac_citas_hoy': CitaCiudadana.objects.filter(fecha_cita__date=hoy).exclude(estado='cancelada').count(),
+        'oac_jornadas_proximas': JornadaMedica.objects.filter(fecha__gte=hoy).exclude(estado='cancelada').count(),
+        'oac_presupuesto_ejecutado': sum((item.monto_ejecutado for item in PresupuestoOAC.objects.all()), Decimal('0')),
+        'medico_ingresos_pendientes': ResultadoIngreso.objects.filter(estado='pendiente').count(),
+        'medico_reposos_abiertos': ReposoMedico.objects.filter(estado__in=['solicitado', 'validado']).count(),
+        'medico_afectaciones_abiertas': AfectacionPersonal.objects.exclude(estado='cerrada').count(),
+        'medico_presupuesto_ejecutado': sum((item.monto_ejecutado for item in PresupuestoMedico.objects.all()), Decimal('0')),
+        'auditoria_hallazgos_abiertos': HallazgoAuditoria.objects.exclude(estado='cerrado').count(),
+        'auditoria_acciones_vencidas': AccionCorrectiva.objects.filter(verificada=False, fecha_compromiso__lt=hoy).count(),
+        'auditoria_planes_activos': PlanAuditoria.objects.filter(estado__in=['aprobado', 'en_ejecucion']).count(),
+        'juridico_casos_abiertos': CasoJuridico.objects.exclude(estado__in=['cerrado', 'archivado']).count(),
+        'juridico_contratos_vigentes': ContratoJuridico.objects.filter(estado='vigente').count(),
+        'calidad_no_conformidades_abiertas': NoConformidad.objects.exclude(estado='cerrada').count(),
+        'calidad_auditorias_activas': AuditoriaCalidadISO.objects.exclude(estado='cerrada').count(),
+        'calidad_procesos_activos': ProcesoCalidad.objects.filter(activo=True).count(),
+        'ti_personal_activo': PersonalTI.objects.filter(estado='activo').count(),
+        'ti_tickets_abiertos': TicketTI.objects.exclude(
+            estado__in=['resuelto', 'cerrado', 'cancelado']
+        ).count(),
+        'ti_tickets_criticos': TicketTI.objects.filter(
+            prioridad='critica'
+        ).exclude(estado__in=['resuelto', 'cerrado', 'cancelado']).count(),
+        'ti_alertas_red': MonitoreoRed.objects.exclude(estado='operativo').count(),
+        'ti_equipos_mantenimiento': EquipoTI.objects.filter(estado='mantenimiento').count(),
+        'ti_servicios_activos': ServicioTI.objects.filter(estado='activo').count(),
+        'ti_servicios_apagados': ServicioTI.objects.filter(estado='apagado').count(),
+        'ti_asignaciones_pendientes': AsignacionDiaria.objects.filter(
+            fecha=hoy
+        ).exclude(estado='completada').count(),
+        'ti_modernizaciones_activas': PlanModernizacion.objects.filter(
+            estado__in=['aprobado', 'en_ejecucion']
+        ).count(),
     }
     return render(request, 'gerencia/dashboard.html', context)

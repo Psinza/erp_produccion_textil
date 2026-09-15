@@ -43,6 +43,11 @@ urlpatterns = [
     path('contrataciones-publicas/', include('apps.contrataciones_publicas.urls', namespace='contrataciones_publicas')),
     path('planificacion-presupuesto/', include('apps.planificacion_presupuesto.urls', namespace='planificacion_presupuesto')),
     path('tecnologia-informacion/', include('apps.tecnologia_informacion.urls', namespace='tecnologia_informacion')),
+    path('oac/', include('apps.oac.urls', namespace='oac')),
+    path('servicios-medicos/', include('apps.servicios_medicos.urls', namespace='servicios_medicos')),
+    path('auditoria-interna/', include('apps.auditoria_interna.urls', namespace='auditoria_interna')),
+    path('consultoria-juridica/', include('apps.consultoria_juridica.urls', namespace='consultoria_juridica')),
+    path('gerencia-calidad/', include('apps.gerencia_calidad.urls', namespace='gerencia_calidad')),
 ]
 
 if settings.DEBUG:

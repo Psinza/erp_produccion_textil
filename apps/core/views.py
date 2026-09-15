@@ -24,6 +24,12 @@ def dashboard_principal(request):
         {'nombre': 'Logística', 'icono': 'bi-box-seam', 'url': 'logistica:dashboard', 'color': 'secondary', 'desc': 'Inventario y Almacén', 'cat': 'Operaciones'},
         {'nombre': 'Mantenimiento', 'icono': 'bi-tools', 'url': 'core:mantenimiento', 'color': 'dark', 'desc': 'Configuración de Empresa', 'cat': 'Configuración'},
         {'nombre': 'Gerencia', 'icono': 'bi-bar-chart-line', 'url': 'gerencia:dashboard', 'color': 'primary', 'desc': 'Indicadores integrales y resultados', 'cat': 'Dirección'},
+        {'nombre': 'Atención a la ciudadanía', 'icono': 'bi-person-vcard', 'url': 'oac:dashboard', 'color': 'info', 'desc': 'Donaciones, citas y jornadas médicas', 'cat': 'Administración'},
+        {'nombre': 'Servicios médicos', 'icono': 'bi-heart-pulse', 'url': 'servicios_medicos:dashboard', 'color': 'danger', 'desc': 'Salud ocupacional y seguimiento del personal', 'cat': 'Administración'},
+        {'nombre': 'Tecnología de la información', 'icono': 'bi-pc-display', 'url': 'tecnologia_informacion:dashboard', 'color': 'info', 'desc': 'Soporte, infraestructura y servicios tecnológicos', 'cat': 'Administración'},
+        {'nombre': 'Auditoría interna', 'icono': 'bi-search', 'url': 'auditoria_interna:dashboard', 'color': 'warning', 'desc': 'Control interno, hallazgos y acciones correctivas', 'cat': 'Dirección'},
+        {'nombre': 'Consultoría jurídica', 'icono': 'bi-briefcase', 'url': 'consultoria_juridica:dashboard', 'color': 'info', 'desc': 'Casos, contratos y normativa legal', 'cat': 'Dirección'},
+        {'nombre': 'Gerencia de calidad', 'icono': 'bi-patch-check', 'url': 'gerencia_calidad:dashboard', 'color': 'success', 'desc': 'ISO 9001:2015, procesos y mejora continua', 'cat': 'Dirección'},
     ]
 
     modulos_raw = [
