@@ -1,0 +1,5 @@
+{% extends "core/base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}Tecnología de la información / {{ titulo }}{% endblock %}
+{% block content %}<div class="erp-card"><div class="erp-card-body"><form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn-erp btn-erp-primary" type="submit">Guardar</button></form></div></div>{% endblock %}

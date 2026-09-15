@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'apps.servicios_generales',
     'apps.contrataciones_publicas',
     'apps.planificacion_presupuesto',
+    'apps.tecnologia_informacion.apps.TecnologiaInformacionConfig',
 ]
 
 MIDDLEWARE = [

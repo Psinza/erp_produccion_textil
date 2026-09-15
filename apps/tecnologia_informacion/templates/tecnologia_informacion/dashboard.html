@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% block title %}Tecnología de la información{% endblock %}
+{% block page_title %}Tecnología de la información{% endblock %}
+{% block breadcrumb %}Tecnología de la información / Panel{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h1 class="h4 mb-1">Gerencia de tecnología de la información</h1><p class="text-muted mb-0">Soporte, infraestructura, activos, servicios y modernización tecnológica.</p></div>
+  <a class="btn-erp btn-erp-primary" href="{% url 'tecnologia_informacion:resource_create' 'tickets' %}">Nuevo ticket</a>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-4 col-xl-2"><div class="stat-card"><div><div class="stat-value">{{ personal }}</div><div class="stat-label">Personal activo</div></div></div></div>
+  <div class="col-md-4 col-xl-2"><div class="stat-card"><div><div class="stat-value">{{ tickets_abiertos }}</div><div class="stat-label">Tickets abiertos</div></div></div></div>
+  <div class="col-md-4 col-xl-2"><div class="stat-card"><div><div class="stat-value">{{ tickets_criticos }}</div><div class="stat-label">Tickets críticos</div></div></div></div>
+  <div class="col-md-4 col-xl-2"><div class="stat-card"><div><div class="stat-value">{{ red_alertas }}</div><div class="stat-label">Alertas de red</div></div></div></div>
+  <div class="col-md-4 col-xl-2"><div class="stat-card"><div><div class="stat-value">{{ servicios_activos }}</div><div class="stat-label">Servicios activos</div></div></div></div>
+  <div class="col-md-4 col-xl-2"><div class="stat-card"><div><div class="stat-value">{{ servicios_apagados }}</div><div class="stat-label">Servicios apagados</div></div></div></div>
+</div>
+<div class="erp-card"><div class="erp-card-header"><span class="erp-card-title">Gestión de tecnología</span></div><div class="erp-card-body"><div class="row g-2">
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'tickets' %}">Gestor de tickets</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'monitoreos' %}">Monitoreo de red</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'asignaciones' %}">Asignaciones diarias</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'equipos' %}">Inventario de equipos</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'mantenimientos' %}">Mantenimiento de equipos</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'planes-trabajo' %}">Planes de trabajo</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'solicitudes-equipos' %}">Solicitudes de equipos</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'recepciones' %}">Recepción de equipos</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'indicadores' %}">Indicadores de gestión</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'servicios' %}">Servicios activos y apagados</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'modernizacion' %}">Plan de modernización</a></div>
+  <div class="col-md-4"><a class="btn btn-outline-secondary w-100 text-start" href="{% url 'tecnologia_informacion:resource_list' 'personal' %}">Personal de la gerencia</a></div>
+</div></div></div>
+{% endblock %}

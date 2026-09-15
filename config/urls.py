@@ -42,6 +42,7 @@ urlpatterns = [
     path('servicios-generales/', include('apps.servicios_generales.urls', namespace='servicios_generales')),
     path('contrataciones-publicas/', include('apps.contrataciones_publicas.urls', namespace='contrataciones_publicas')),
     path('planificacion-presupuesto/', include('apps.planificacion_presupuesto.urls', namespace='planificacion_presupuesto')),
+    path('tecnologia-informacion/', include('apps.tecnologia_informacion.urls', namespace='tecnologia_informacion')),
 ]
 
 if settings.DEBUG:
