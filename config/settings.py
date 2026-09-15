@@ -10,9 +10,11 @@ try:
 except ImportError:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Modo depuración
-DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', 'False')).strip().lower() in ('true', '1', 't', 'yes')
 DEPLOYMENT_ENV = os.environ.get('DEPLOYMENT_ENV', 'development').strip().lower()
+# En desarrollo local, runserver sirve HTTP y no debe redirigir a TLS. En
+# producción los valores deben declararse explícitamente en el entorno.
+debug_default = 'False' if DEPLOYMENT_ENV == 'production' else 'True'
+DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', debug_default)).strip().lower() in ('true', '1', 't', 'yes')
 # En desarrollo se genera una clave efímera; producción siempre exige una
 # variable persistente para no invalidar sesiones en cada reinicio.
 SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', ''))

@@ -342,6 +342,44 @@ ISO, seguridad informática o auditoría financiera.
 
 ## Diapositiva 16 — Mensaje para redes sociales
 
+### Opción 1 — Enfoque integral y productividad
+
+**Título:** Del hilo a la entrega: el ERP diseñado para escalar tu fábrica textil.
+
+Unificar la cadena de producción textil no tiene por qué ser un caos. ERP Textil
+Venezuela conecta las áreas de la empresa en tiempo real:
+
+- **Operaciones y logística:** inventario, compras, insumos y flota de transporte.
+- **Planta y producción:** órdenes de manufactura y control de calidad con enfoque
+  de procesos alineado a ISO 9001:2015.
+- **Administración y finanzas:** tesorería, RRHH, salud ocupacional y facturación
+  fiscal.
+- **Dirección estratégica:** indicadores gerenciales y trazabilidad mediante
+  registro de auditoría.
+
+Optimiza tus costos operativos y toma el control de tu fábrica.
+
+**Llamado a la acción:** Agenda una demo personalizada hoy.
+
+### Opción 2 — Enfoque dolor / solución
+
+**Título:** ¿Cuellos de botella en producción, inventarios descuadrados o falta de
+trazabilidad?
+
+Centraliza la gestión de tu empresa textil con un ecosistema modular:
+
+- **Trazabilidad total:** registro de auditoría para conocer qué ocurre y quién
+  ejecuta cada acción.
+- **Salud y personal:** RRHH, servicios médicos ocupacionales y gestión de
+  jornadas.
+- **Control legal y de calidad:** consultoría jurídica, auditoría interna y
+  estandarización de procesos basada en ISO 9001:2015.
+
+Transformamos la complejidad de la manufactura en procesos controlables,
+medibles y orientados a la rentabilidad.
+
+**Llamado a la acción:** Solicita más información y moderniza tu planta.
+
 ### Versión institucional
 
 > Presentamos ERP Textil Venezuela, una plataforma integral para conectar
@@ -364,6 +402,28 @@ ISO, seguridad informática o auditoría financiera.
 - “Del registro manual a la gestión trazable.”
 - “Indicadores para decidir. Módulos para operar.”
 - “Un ERP diseñado para nuestra realidad.”
+
+### Mensajes por perfil de cliente
+
+| Perfil | Dolor principal | Módulos a destacar | Propuesta de valor |
+|---|---|---|---|
+| Gerente de planta / producción | Retrasos en órdenes y falta de insumos | Producción, Compras, Logística y Mantenimiento | Insumos disponibles, flujo de manufactura trazable y menos interrupciones |
+| Director general / CEO | Falta de visibilidad y riesgos normativos | Gerencia, Auditoría Interna, Gerencia de Calidad y Consultoría Jurídica | Reportes ejecutivos, control de auditoría y procesos alineados a ISO 9001:2015 |
+| Jefe de Recursos Humanos | Ausentismo y poca integración de salud ocupacional | RRHH, Servicios Médicos y Atención a la Ciudadanía | Información laboral y seguimiento ocupacional centralizados, con acceso controlado |
+
+### Recomendaciones de publicación
+
+- Usar la **Opción 1** para LinkedIn, presentaciones institucionales y campañas
+  de posicionamiento.
+- Usar la **Opción 2** para campañas B2B orientadas a formularios o solicitudes
+  de demo.
+- Segmentar los anuncios por cargo y mostrar únicamente funcionalidades
+  disponibles en el entorno demostrado.
+- Sustituir “en tiempo real” por “actualizado en el sistema” cuando el flujo
+  dependa de una carga manual o de una integración aún no habilitada.
+- No afirmar certificación ISO, cumplimiento legal automático ni resultados
+  financieros garantizados: el ERP aporta controles y trazabilidad, pero la
+  certificación y la validación normativa requieren responsables competentes.
 
 ---
 
@@ -416,6 +476,6 @@ listo para exposición pública sin completar esas condiciones.**
 | Modelos registrados | 216 modelos Django |
 | Migraciones encontradas | 92 |
 | Estado de `manage.py check` | Correcto |
-| Pruebas automatizadas | Parciales; suite completa requiere corrección de descubrimiento |
+| Pruebas automatizadas | Suite ejecutable con pruebas de módulos y flujos principales; falta ampliar cobertura CRUD y permisos |
 | Uso recomendado actual | Demo y piloto interno |
 | Condición para producción pública | Hardening, pruebas, respaldos y HTTPS |
