@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 
 # Cargar variables de entorno desde .env si existe
@@ -9,12 +10,14 @@ try:
 except ImportError:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Clave secreta (usa variable de entorno o fallback para desarrollo)
-SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', ''))
-
 # Modo depuración
 DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', 'False')).strip().lower() in ('true', '1', 't', 'yes')
 DEPLOYMENT_ENV = os.environ.get('DEPLOYMENT_ENV', 'development').strip().lower()
+# En desarrollo se genera una clave efímera; producción siempre exige una
+# variable persistente para no invalidar sesiones en cada reinicio.
+SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', ''))
+if not SECRET_KEY and DEPLOYMENT_ENV != 'production':
+    SECRET_KEY = secrets.token_urlsafe(64)
 if DEPLOYMENT_ENV == 'production' and (
     not SECRET_KEY or SECRET_KEY.startswith('django-insecure-')
 ):

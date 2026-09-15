@@ -1,0 +1,30 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name erp.example.local;
+
+    client_max_body_size 10M;
+
+    location /static/ {
+        alias /opt/erp_produccion_textil/staticfiles/;
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location /media/ {
+        alias /opt/erp_produccion_textil/media/;
+        add_header X-Content-Type-Options nosniff;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+}
+
+# En un dominio real, ejecutar:
+# certbot --nginx -d erp.example.ve

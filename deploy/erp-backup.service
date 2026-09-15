@@ -1,0 +1,11 @@
+[Unit]
+Description=Respaldo de la base de datos ERP
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=erp
+Group=erp
+WorkingDirectory=/opt/erp_produccion_textil
+EnvironmentFile=/opt/erp_produccion_textil/.env
+ExecStart=/opt/erp_produccion_textil/.venv/bin/python manage.py backup_db --output-dir=/var/backups/erp
